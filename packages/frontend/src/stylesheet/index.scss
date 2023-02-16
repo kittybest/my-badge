@@ -1,0 +1,14 @@
+body {
+    /* font-family: sans-serif, helvetica; */
+    font-family: 'Azeret Mono';
+    font-weight: 200;
+  }
+
+/* layout */
+@import './header.scss';
+
+/* pages */
+@import './dashboard.scss';
+@import './start.scss';
+
+/* components */
