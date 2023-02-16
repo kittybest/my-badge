@@ -6,9 +6,11 @@ body {
 
 /* layout */
 @import './header.scss';
+@import './footer.scss';
 
 /* pages */
 @import './dashboard.scss';
 @import './start.scss';
+@import './home.scss';
 
 /* components */
