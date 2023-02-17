@@ -1,5 +1,6 @@
 import React from 'react'
 import { observer } from 'mobx-react-lite'
+import { Link } from 'react-router-dom' 
 
 import { Button, Container, Segment, Card } from 'semantic-ui-react'
 
@@ -25,7 +26,7 @@ export default observer(() => {
         <>
             <div className="banner" style={{backgroundImage: `url(${require("../../public/banner.jpg")})`}}>
                 <Button className="join-button" color="orange" size="massive">
-                    Join Us!
+                    <Link to="/join">Join Us!</Link>
                 </Button>
             </div>
             <Container>

@@ -5,7 +5,9 @@ import 'semantic-ui-css/semantic.min.css'
 
 import Layout from './layout/Layout'
 import Home from './pages/Home'
+import Join from './pages/Join'
 import Start from './pages/Start'
+import Help from './pages/Help'
 import Dashboard from './pages/Dashboard'
 import './stylesheet/index.scss'
 
@@ -15,6 +17,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
+          <Route path="join" element={<Join />} />
+          <Route path="help" element={<Help />} />
           <Route path="start" element={<Start />} />
           <Route path="dashboard" element={<Dashboard />} />
         </Route>

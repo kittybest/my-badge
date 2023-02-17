@@ -1,4 +1,5 @@
-import React from "react"
+import React from 'react'
+import { Link } from 'react-router-dom'
 
 import { Header, Button, Segment } from 'semantic-ui-react'
 
@@ -8,7 +9,7 @@ export default () => {
             <Header floated="right"> 
                 <Button color="orange" size="large">Join</Button>
             </Header>
-            <Header as="h2" icon="certificate" content="My Badge" floated="left" />
+            <Link to="/"><Header as="h2" icon="certificate" content="My Badge" floated="left" /></Link>
         </Segment>
     )
 }

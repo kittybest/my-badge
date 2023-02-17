@@ -1,0 +1,12 @@
+.join-container {
+    height: 75vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+}
+
+svg + span {
+    margin-left: 8px;
+}

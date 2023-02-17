@@ -15,6 +15,9 @@
   },
   "dependencies": {
     "@cloudflare/kv-asset-handler": "^0.2.0",
+    "@fortawesome/fontawesome-svg-core": "^6.3.0",
+    "@fortawesome/free-brands-svg-icons": "^6.3.0",
+    "@fortawesome/react-fontawesome": "^0.2.0",
     "@unirep/circuits": "2.0.0-alpha-1",
     "@unirep/core": "2.0.0-alpha-2",
     "ethers": "^5.7.2",
