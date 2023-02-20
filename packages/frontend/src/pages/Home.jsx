@@ -25,9 +25,9 @@ export default observer(() => {
     return (
         <>
             <div className="banner" style={{backgroundImage: `url(${require("../../public/banner.jpg")})`}}>
-                <Button className="join-button" color="orange" size="massive">
-                    <Link to="/join">Join Us!</Link>
-                </Button>
+                <Link to="/join">
+                    <Button className="join-button" color="orange" size="massive">Join Us!</Button>
+                </Link>
             </div>
             <Container>
                 <Segment.Group horizontal>
