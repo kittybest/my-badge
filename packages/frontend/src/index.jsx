@@ -8,6 +8,7 @@ import Home from './pages/Home'
 import Join from './pages/Join'
 import Start from './pages/Start'
 import Help from './pages/Help'
+import User from './pages/User'
 import Dashboard from './pages/Dashboard'
 import './stylesheet/index.scss'
 
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="join" element={<Join />} />
           <Route path="help" element={<Help />} />
           <Route path="start" element={<Start />} />
+          <Route path="user" element={<User />} />
           <Route path="dashboard" element={<Dashboard />} />
         </Route>
       </Routes>
