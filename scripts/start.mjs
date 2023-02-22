@@ -2,7 +2,7 @@ import { spawn, exec } from 'child_process';
 import fetch from 'node-fetch';
 console.log('Starting a hardhat node...');
 const providerURL = `http://localhost:8545`;
-const serverURL = `http://localhost:8000`;
+const serverURL = `http://localhost:3001`;
 const frontendURL = `http://localhost:3000`;
 
 const hardhat = spawn('yarn contracts hardhat node', { shell: true });
