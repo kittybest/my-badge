@@ -16,7 +16,7 @@ export default ({app, db, synchronizer}) => {
             console.log('github auth error:', e)
             res.status(500).json({
                 message: 'Uncaught error',
-                info: err.toString(),
+                info: e.toString(),
             })
         }
     })
@@ -27,7 +27,7 @@ export default ({app, db, synchronizer}) => {
             console.log('github callback error:', e)
             res.status(500).json({
                 message: 'Uncaught error',
-                info: err.toString(),
+                info: e.toString(),
             })
         }
     })
@@ -38,7 +38,7 @@ export default ({app, db, synchronizer}) => {
             console.log('twitter auth error:', e)
             res.status(500).json({
                 message: 'Uncaught error',
-                info: err.toString(),
+                info: e.toString(),
             })
         }
         
@@ -50,7 +50,7 @@ export default ({app, db, synchronizer}) => {
             console.log('twitter callback error:', e)
             res.status(500).json({
                 message: 'Uncaught error',
-                info: err.toString(),
+                info: e.toString(),
             })
         } 
     })

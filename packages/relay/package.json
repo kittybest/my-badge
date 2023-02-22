@@ -18,7 +18,8 @@
     "crypto": "^1.0.1",
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "nanoid": "^4.0.1"
   },
   "main": "index.js"
 }
