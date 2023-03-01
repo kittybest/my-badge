@@ -1,10 +1,13 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { observer } from 'mobx-react-lite'
 import { Link } from 'react-router-dom' 
-
 import { Button, Container, Segment, Card } from 'semantic-ui-react'
 
+import User from '../contexts/User'
+
 export default observer(() => {
+
+    const user = useContext(User)
 
     const repData = {
         twitter: ['elon musk', 'donald trump', 'kittybest'],
@@ -16,7 +19,7 @@ export default observer(() => {
         return (
             <Card.Group style={{marginTop: '24px'}}>
                 {
-                    data.map(name =>  <Card fluid header={name} />)
+                    data.map(name =>  <Card fluid header={name} key={name} />)
                 }
             </Card.Group>
         )
@@ -25,9 +28,12 @@ export default observer(() => {
     return (
         <>
             <div className="banner" style={{backgroundImage: `url(${require("../../public/banner.jpg")})`}}>
-                <Link to="/join">
-                    <Button className="join-button" color="orange" size="massive">Join Us!</Button>
-                </Link>
+                {
+                    !user.hasSignedUp && 
+                        <Link to="/join">
+                            <Button className="join-button" color="orange" size="massive">Join Us!</Button>
+                        </Link>
+                } 
             </div>
             <Container>
                 <Segment.Group horizontal>

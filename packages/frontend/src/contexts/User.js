@@ -6,6 +6,7 @@ import { MemoryConnector } from 'anondb/web'
 import { constructSchema } from 'anondb/types'
 import { provider, UNIREP_ADDRESS, APP_ADDRESS, SERVER } from '../config'
 import prover from './prover'
+import Wait from '../utils/wait'
 import poseidon from 'poseidon-lite'
 
 class User {
@@ -56,6 +57,8 @@ class User {
     this.userState = userState
     await this.loadReputation()
     this.latestTransitionedEpoch = await this.userState.latestTransitionedEpoch()
+    console.log(this.hasSignedUp)
+    console.log(userState.hasSignedUp())
   }
 
   // TODO: make this non-async
@@ -74,10 +77,12 @@ class User {
   }
 
   async signup(platform, access_token) {
-    if (!this.userState) {
-      console.error('userState is undefined')
-      return
+    for (var i = 0; i < 10; i ++) {
+      if (this.userState) break
+      await Wait(1000)
     }
+    
+    if (!this.userState) throw new Error('userState is undefined')
 
     localStorage.setItem(`${platform}_access_token`, access_token)
     const signupProof = await this.userState.genUserSignUpProof()
@@ -94,8 +99,8 @@ class User {
     await provider.waitForTransaction(data.hash)
     await this.userState.waitForSync()
     this.hasSignedUp = await this.userState.hasSignedUp()
-    console.log(hasSignedUp)
     this.latestTransitionedEpoch = this.userState.calcCurrentEpoch()
+    console.log(this.hasSignedUp)
   }
 
   async requestReputation(posRep, negRep, graffitiPreImage, epkNonce) {
