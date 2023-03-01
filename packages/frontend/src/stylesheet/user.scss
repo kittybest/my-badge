@@ -1,37 +1,38 @@
 .user-header {
-    background-color: #ED6167;
-    padding: 32px;
-    color: white;
+  background-color: #ed6167;
+  padding: 32px;
+  color: white;
 }
 
 .user-header span {
-    margin-right: 16px;
+  margin-right: 16px;
 }
 
 .info-container {
-    margin: 16px 0px;
+  margin: 16px 0px;
 }
 
 .identity-container {
-    display: inline-block;
+  display: inline-block;
+  word-break: break-all;
 }
 
 .user-body {
-    margin-top: 16px;
-    padding: 32px;
+  margin-top: 16px;
+  padding: 32px;
 }
 
 .user-body svg {
-    margin-right: 8px;
-    font-size: 32px;
+  margin-right: 8px;
+  font-size: 32px;
 }
 
 .connected {
-    color: green;
-    font-size: 12px;
+  color: green;
+  font-size: 12px;
 }
 
 .unconnected {
-    color: red;
-    font-size: 12px;
+  color: red;
+  font-size: 12px;
 }

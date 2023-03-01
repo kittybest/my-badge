@@ -12,10 +12,14 @@
     "contracts": "yarn workspace @unirep-app/contracts run",
     "frontend": "yarn workspace @unirep-app/frontend run",
     "relay": "yarn workspace @unirep-app/relay run",
-    "start": "node scripts/start.mjs"
+    "start": "node scripts/start.mjs",
+    "lint": "npx prettier --write ."
   },
   "devDependencies": {
     "lerna": "^6.0.1",
     "node-fetch": "^3.3.0"
+  },
+  "dependencies": {
+    "prettier": "^2.8.4"
   }
 }

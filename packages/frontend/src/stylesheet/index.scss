@@ -1,7 +1,7 @@
 body {
-    /* font-family: sans-serif, helvetica; */
-    font-family: 'Azeret Mono';
-    font-weight: 200;
+  /* font-family: sans-serif, helvetica; */
+  font-family: "Azeret Mono";
+  font-weight: 200;
 }
 
 .button > a {
@@ -9,14 +9,14 @@ body {
 }
 
 /* layout */
-@import './header.scss';
-@import './footer.scss';
+@import "./header.scss";
+@import "./footer.scss";
 
 /* pages */
-@import './dashboard.scss';
-@import './start.scss';
-@import './home.scss';
-@import './join.scss';
-@import './user.scss';
+@import "./dashboard.scss";
+@import "./start.scss";
+@import "./home.scss";
+@import "./join.scss";
+@import "./user.scss";
 
 /* components */
