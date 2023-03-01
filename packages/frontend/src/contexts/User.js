@@ -10,6 +10,8 @@ import poseidon from 'poseidon-lite'
 
 class User {
 
+  userState
+  id
   currentEpoch
   latestTransitionedEpoch
   hasSignedUp = false
@@ -37,6 +39,7 @@ class User {
     if (!id) {
       localStorage.setItem('id', identity.serializeIdentity())
     }
+    this.id = identity.serializeIdentity()
 
     const db = new MemoryConnector(constructSchema(schema))
     const userState = new UserState({

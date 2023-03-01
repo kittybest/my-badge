@@ -1,14 +1,18 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { observer } from 'mobx-react-lite'
 import { Container, Button, Image, Grid, Segment } from 'semantic-ui-react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTwitter, faGithub } from '@fortawesome/free-brands-svg-icons'
 
+import User from '../contexts/User'
+
 export default observer(() => {
     const [isIdentityRevealed, setIdentityRevealed] = useState(false)
     const [isCopied, setIsCopied] = useState(false)
+    const user = useContext(User)
 
     const copyIdentity = () => {
+        navigator.clipboard.writeText(user.id)
         setIsCopied(true)
     }
 
@@ -26,9 +30,9 @@ export default observer(() => {
                                 {
                                     isIdentityRevealed ? 
                                         <div className="identity-container">
-                                            <span>identity</span>
-                                            <Button color="grey" inverted basic floated onClick={copyIdentity}>{isCopied? 'Copied!' : 'Copy'}</Button>
-                                            <Button color="grey" inverted basic floated onClick={() => setIdentityRevealed(false)}>Hide</Button>
+                                            <span>{user.id}</span>
+                                            <Button color="grey" inverted basic onClick={copyIdentity}>{isCopied? 'Copied!' : 'Copy'}</Button>
+                                            <Button color="grey" inverted basic onClick={() => setIdentityRevealed(false)}>Hide</Button>
                                         </div> : 
                                         <Button color="grey" inverted basic onClick={() => setIdentityRevealed(true)}>Reveal</Button>
                                 }
