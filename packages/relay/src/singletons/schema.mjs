@@ -1,66 +1,64 @@
-import { schema } from '@unirep/core'
-import { nanoid } from 'nanoid'
+import { schema } from "@unirep/core";
+import { nanoid } from "nanoid";
 
 const _schema = [
   {
-    name: 'OAuthState',
+    name: "OAuthState",
     rows: [
-        {
-            name: 'createdAt',
-            type: 'Int',
-            default: () => +new Date(),
-        },
-        ['type', 'String'],
-        ['redirectDestination', 'String'],
-        ['data', 'String', { optional: true }],
+      {
+        name: "createdAt",
+        type: "Int",
+        default: () => +new Date(),
+      },
+      ["type", "String"],
+      ["redirectDestination", "String"],
+      ["data", "String", { optional: true }],
     ],
   },
   {
-      name: 'SignupCode',
-      rows: [
-          ['signupId', 'String'],
-          ['usedAt', 'Int', { optional: true }],
-          {
-              name: 'createdAt',
-              type: 'Int',
-              default: () => +new Date(),
-          },
-      ],
-  },
-  {
-    name: 'AccountTransaction',
-    primaryKey: 'signedData',
+    name: "SignupCode",
     rows: [
-      ['signedData', 'String'],
-      ['address', 'String'],
-      ['nonce', 'Int']
-    ]
-  },
-  {
-    name: 'AccountNonce',
-    primaryKey: 'address',
-    rows: [
-      ['address', 'String'],
-      ['nonce', 'Int'],
+      ["signupId", "String"],
+      ["usedAt", "Int", { optional: true }],
+      {
+        name: "createdAt",
+        type: "Int",
+        default: () => +new Date(),
+      },
     ],
-  }
-]
+  },
+  {
+    name: "AccountTransaction",
+    primaryKey: "signedData",
+    rows: [
+      ["signedData", "String"],
+      ["address", "String"],
+      ["nonce", "Int"],
+    ],
+  },
+  {
+    name: "AccountNonce",
+    primaryKey: "address",
+    rows: [
+      ["address", "String"],
+      ["nonce", "Int"],
+    ],
+  },
+];
 
 // export default [...schema, ..._schema]
 
 export default _schema
-    .map(
-        (obj) =>
-            ({
-                ...obj,
-                primaryKey: obj.primaryKey || '_id',
-                rows: [
-                    ...obj.rows,
-                    {
-                        name: '_id',
-                        type: 'String',
-                        default: () => nanoid(),
-                    },
-                ],
-            })
-    ).concat(schema)
+  .map((obj) => ({
+    ...obj,
+    primaryKey: obj.primaryKey || "_id",
+    rows: [
+      ...obj.rows,
+      {
+        name: "_id",
+        type: "String",
+        default: () => nanoid(),
+      },
+    ],
+  }))
+  .concat(schema);

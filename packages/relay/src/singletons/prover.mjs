@@ -1,3 +1,3 @@
-import { defaultProver } from '@unirep/circuits/provers/defaultProver.js'
+import { defaultProver } from "@unirep/circuits/provers/defaultProver.js";
 
-export default defaultProver
+export default defaultProver;
