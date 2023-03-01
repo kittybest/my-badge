@@ -1,27 +1,43 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { observer } from 'mobx-react-lite'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Button, Divider, Input } from 'semantic-ui-react'
+import { Button, Divider, Input, Loader, Message } from 'semantic-ui-react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTwitter, faGithub } from '@fortawesome/free-brands-svg-icons'
 import { SERVER } from '../config.js'
+import User from '../contexts/User'
 
 export default observer(() => {
     const navigate = useNavigate()
     const location = useLocation()
     const params = new URLSearchParams(location.search)
 
+    const user = useContext(User)
+
+    const [isLoading, setIsLoading] = useState(false)
+    const [errorMsg, setErrorMsg] = useState('')
+
+    const signup = async (platform, access_token) => {
+        setIsLoading(true)
+        try {
+            console.log('before sign up')
+            await user.signup(platform, access_token)
+            console.log('after sign up')
+            return navigate('/user')
+        } catch(e) {
+            setErrorMsg(e)
+            setIsLoading(false)
+        }
+    }
+
     useEffect(() => {
-        const signupCode = params.get('signupCode')
+        const platform = params.get('platform')
         const access_token = params.get('access_token')
         const signupError = params.get('signupError')
-        if (signupCode && access_token) {
-            console.log(signupCode, access_token)
-
-            // redirect to user page
-            return navigate('/user')
-        } else if (params.get('signupError')) {
-            console.error(signupError)
+        if (platform && access_token) {
+            signup(platform, access_token)
+        } else if (signupError) {
+            setErrorMsg(signupError)
         }
     }, [])
 
@@ -48,22 +64,31 @@ export default observer(() => {
 
 
     return (
-        <div className="join-container">
-            <Button basic color="blue" size="huge" onClick={() => join('twitter')}>
-                <FontAwesomeIcon icon={faTwitter} />
-                <span>Join with Twitter</span>
-            </Button>
-            <Button basic color="black" size="huge" onClick={() => join('github')}>
-                <FontAwesomeIcon icon={faGithub} />
-                <span>Join with Github</span>
-            </Button>
+        <>
+            {isLoading? 
+                <div className="join-container">
+                    <Loader active inline='centered' size="huge" />
+                    <Link to="/help">Any question?</Link>
+                </div> : 
+                <div className="join-container">
+                    { errorMsg.length > 0 && <Message error header="Oops!" content={errorMsg} />}
+                    <Button basic color="blue" size="huge" onClick={() => join('twitter')}>
+                        <FontAwesomeIcon icon={faTwitter} />
+                        <span>Join with Twitter</span>
+                    </Button>
+                    <Button basic color="black" size="huge" onClick={() => join('github')}>
+                        <FontAwesomeIcon icon={faGithub} />
+                        <span>Join with Github</span>
+                    </Button>
 
-            <Divider horizontal>Already has account?</Divider>
+                    <Divider horizontal>Already has account?</Divider>
 
-            <Input placeholder="Please enter your private key." size="large" />
-            <Button basic color="white" size="large">Log in</Button>
+                    <Input placeholder="Please enter your private key." size="large" />
+                    <Button basic size="large">Log in</Button>
 
-            <Link to="/help">Any question?</Link>
-        </div>
+                    <Link to="/help">Any question?</Link>
+                </div>
+            }
+        </>
     )
 })

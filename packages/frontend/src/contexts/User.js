@@ -70,7 +70,13 @@ class User {
     this.provableReputation = await this.userState.getRepByAttester()
   }
 
-  async signup(message) {
+  async signup(platform, access_token) {
+    if (!this.userState) {
+      console.error('userState is undefined')
+      return
+    }
+
+    localStorage.setItem(`${platform}_access_token`, access_token)
     const signupProof = await this.userState.genUserSignUpProof()
     const data = await fetch(`${SERVER}/api/signup`, {
       method: 'POST',
@@ -85,6 +91,7 @@ class User {
     await provider.waitForTransaction(data.hash)
     await this.userState.waitForSync()
     this.hasSignedUp = await this.userState.hasSignedUp()
+    console.log(hasSignedUp)
     this.latestTransitionedEpoch = this.userState.calcCurrentEpoch()
   }
 

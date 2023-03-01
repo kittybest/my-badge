@@ -152,6 +152,7 @@ async function completeTwitterAuth(req, res, db) {
     })
     // now go back to the frontend signup flow
     url.searchParams.append('signupCode', signupCode._id)
+    url.searchParams.append('platform', 'twitter')
     url.searchParams.append('access_token', auth.access_token)
     res.redirect(url.toString())
 }
@@ -238,6 +239,7 @@ async function completeGithubAuth(req, res, db) {
     })
     // now go back to the frontend signup flow
     _url.searchParams.append('signupCode', signupCode._id)
+    _url.searchParams.append('platform', 'github')
     _url.searchParams.append('access_token', access_token)
     res.redirect(_url.toString())
 }
