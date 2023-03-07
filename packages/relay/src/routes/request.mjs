@@ -3,13 +3,34 @@ import { EpochKeyProof } from "@unirep/circuits";
 import { APP_ADDRESS } from "../config.mjs";
 import TransactionManager from "../singletons/TransactionManager.mjs";
 import { createRequire } from "module";
+import fetch from "node-fetch";
+
 const require = createRequire(import.meta.url);
 const UnirepApp = require("@unirep-app/contracts/artifacts/contracts/UnirepApp.sol/UnirepApp.json");
+
+async function checkTwitterData(access_token) {
+  try {
+    const user = await fetch("https://api.twitter.com/2/users/me?user.fields=public_metrics", {
+      headers: {
+        authorization: `Bearer ${access_token}`,
+      },
+    }).then((r) => r.json());
+    return user.data.public_metrics.followers_count
+  } catch(e) {
+    console.log(e);
+    return 0
+  }
+  
+}
 
 export default ({ app, db, synchronizer }) => {
   app.post("/api/request", async (req, res) => {
     try {
-      const { reqData, publicSignals, proof } = req.body;
+      const { publicSignals, proof, attester, access_token } = req.body;
+      let reqData = [0, 0] // pos, neg
+      if (attester === 'twitter') { // also affect APP_ADDRESS
+        reqData[0] = await checkTwitterData(access_token)
+      }
 
       const epochKeyProof = new EpochKeyProof(
         publicSignals,
@@ -48,3 +69,5 @@ export default ({ app, db, synchronizer }) => {
     }
   });
 };
+
+

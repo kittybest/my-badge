@@ -179,6 +179,43 @@ class User {
     });
     return { ...reputationProof, valid: await reputationProof.verify() };
   }
+
+  async getInitialRep(platform) {
+    for (var i = 0; i < 10; i++) {
+      if (this.userState) break;
+      await Wait(1000);
+    }
+
+    if (!this.userState) throw new Error("userState is undefined");
+
+    const access_token = localStorage.getItem(`${platform}_access_token`)
+
+     // gen proof
+     const epochKeyProof = await this.userState.genEpochKeyProof({
+      nonce: 0,
+    });
+    console.log(epochKeyProof)
+
+    const data = await fetch(`${SERVER}/api/request`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(
+        stringifyBigInts({
+          publicSignals: epochKeyProof.publicSignals,
+          proof: epochKeyProof.proof,
+          access_token,
+          attester: platform
+        })
+      ),
+    }).then((r) => r.json());
+    await provider.waitForTransaction(data.hash);
+    await this.userState.waitForSync();
+    await this.loadReputation();
+  }
 }
+
+
 
 export default createContext(new User());
