@@ -88,6 +88,7 @@ export default observer(() => {
               </Grid.Row>
             </Grid>
           </Container>
+
           <Container fluid className="user-body">
             <Segment color="blue">
               <Grid>
@@ -97,11 +98,11 @@ export default observer(() => {
                   </Grid.Column>
                   <Grid.Column width={4}>
                     <h3>Twitter</h3>
-                    <p className="connected">connected</p>
+                    <p className={user.hasSignedUp ? 'connected' : 'unconnected'}>{user.hasSignedUp ? 'connected' : 'unconnected'}</p>
                   </Grid.Column>
                   <Grid.Column width={7} verticalAlign="middle">
                     <p>
-                      Rank <i>2</i> with rep <i>80</i>(85)
+                      <b>Rank <i>2</i> with rep <i>{Number(user.provableData[0]) - Number(user.provableData[1])}</i></b>(updated next epoch: {Number(user.data[0]) - Number(user.data[1])})
                     </p>
                   </Grid.Column>
                   <Grid.Column width={2}>
