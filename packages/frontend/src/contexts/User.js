@@ -17,18 +17,6 @@ class User {
   hasSignedUp = false;
   data = [];
   provableData = [];
-  // reputation = {
-  //   posRep: 0,
-  //   negRep: 0,
-  //   graffiti: 0,
-  //   timestamp: 0,
-  // };
-  // provableReputation = {
-  //   posRep: 0,
-  //   negRep: 0,
-  //   graffiti: 0,
-  //   timestamp: 0,
-  // };
 
   constructor() {
     makeAutoObservable(this);
@@ -83,9 +71,6 @@ class User {
   async loadReputation() {
     this.data = await this.userState.getData();
     this.provableData = await this.userState.getProvableData();
-    // const epoch = this.userState.calcCurrentEpoch();
-    // this.reputation = await this.userState.getRepByAttester(null, epoch + 1);
-    // this.provableReputation = await this.userState.getRepByAttester();
   }
 
   async signup(platform, access_token) {
@@ -130,9 +115,7 @@ class User {
     const epochKeyProof = await this.userState.genEpochKeyProof({
       nonce: epkNonce,
     });
-    // const graffiti = graffitiPreImage
-    //   ? hash1([`0x${Buffer.from(graffitiPreImage.toString()).toString("hex")}`])
-    //   : 0;
+    
     const data = await fetch(`${SERVER}/api/request`, {
       method: "POST",
       headers: {
