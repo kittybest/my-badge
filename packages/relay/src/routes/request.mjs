@@ -9,7 +9,7 @@ const UnirepApp = require("@unirep-app/contracts/artifacts/contracts/UnirepApp.s
 export default ({ app, db, synchronizer }) => {
   app.post("/api/request", async (req, res) => {
     try {
-      const { reqData, publicSignals, proof } = req.body
+      const { reqData, publicSignals, proof } = req.body;
 
       const epochKeyProof = new EpochKeyProof(
         publicSignals,
@@ -24,18 +24,18 @@ export default ({ app, db, synchronizer }) => {
       const epoch = await synchronizer.loadCurrentEpoch();
       const appContract = new ethers.Contract(APP_ADDRESS, UnirepApp.abi);
 
-      const keys = Object.keys(reqData)
-      let calldata
+      const keys = Object.keys(reqData);
+      let calldata;
       if (keys.length === 1) {
         calldata = appContract.interface.encodeFunctionData(
-          'submitAttestation',
+          "submitAttestation",
           [epochKeyProof.epochKey, epoch, keys[0], reqData[keys[0]]]
-        )
+        );
       } else if (keys.length > 1) {
         calldata = appContract.interface.encodeFunctionData(
-          'submitManyAttestations',
-          [epochKeyProof.epochKey, epoch, keys, keys.map(k => reqData[k])]
-        )
+          "submitManyAttestations",
+          [epochKeyProof.epochKey, epoch, keys, keys.map((k) => reqData[k])]
+        );
       }
 
       const hash = await TransactionManager.queueTransaction(

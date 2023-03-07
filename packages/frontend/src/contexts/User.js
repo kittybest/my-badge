@@ -52,12 +52,14 @@ class User {
       await this.userState.latestTransitionedEpoch();
   }
 
-  get fieldCount() { // what is this?
-    return this.userState?.sync.settings.fieldCount
+  get fieldCount() {
+    // what is this?
+    return this.userState?.sync.settings.fieldCount;
   }
 
-  get sumFieldCount() { // what is this??
-    return this.userState?.sync.settings.sumFieldCount
+  get sumFieldCount() {
+    // what is this??
+    return this.userState?.sync.settings.sumFieldCount;
   }
 
   epochKey(nonce) {
@@ -102,12 +104,13 @@ class User {
   async requestReputation(reqData, epkNonce) {
     // check data change availablity
     for (const key of Object.keys(reqData)) {
-      if (reqData[key] === '') {
+      if (reqData[key] === "") {
         delete reqData[key];
         continue;
       }
-      if (+key > this.sumFieldCount && +key % 2 !== this.sumFieldCount % 2) { // what is this for ?????
-        throw new Error('Cannot change timestamp field')
+      if (+key > this.sumFieldCount && +key % 2 !== this.sumFieldCount % 2) {
+        // what is this for ?????
+        throw new Error("Cannot change timestamp field");
       }
     }
 
@@ -115,7 +118,7 @@ class User {
     const epochKeyProof = await this.userState.genEpochKeyProof({
       nonce: epkNonce,
     });
-    
+
     const data = await fetch(`${SERVER}/api/request`, {
       method: "POST",
       headers: {
@@ -136,9 +139,12 @@ class User {
 
   async stateTransition() {
     // check if previous data has been sealed
-    const sealed = await this.userState.sync.isEpochSealed(await this.userState.latestTransitionedEpoch()); 
-    if (!sealed) { // how to cause this error??? where will it call sealData???
-      throw new Error('From epoch is not yet sealed');
+    const sealed = await this.userState.sync.isEpochSealed(
+      await this.userState.latestTransitionedEpoch()
+    );
+    if (!sealed) {
+      // how to cause this error??? where will it call sealData???
+      throw new Error("From epoch is not yet sealed");
     }
 
     // gen proof
