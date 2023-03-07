@@ -12,6 +12,7 @@ export default {
     const wasmUrl = new URL(`/build/${circuitName}.wasm`, SERVER);
     const wasm = await fetch(wasmUrl.toString()).then((r) => r.arrayBuffer());
     const zkeyUrl = new URL(`/build/${circuitName}.zkey`, SERVER);
+
     const zkey = await fetch(zkeyUrl.toString()).then((r) => r.arrayBuffer());
     const { proof, publicSignals } = await snarkjs.groth16.fullProve(
       inputs,
