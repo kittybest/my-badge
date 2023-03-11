@@ -10,26 +10,47 @@ const UnirepApp = require("@unirep-app/contracts/artifacts/contracts/UnirepApp.s
 
 async function checkTwitterData(access_token) {
   try {
-    const user = await fetch("https://api.twitter.com/2/users/me?user.fields=public_metrics", {
+    const user = await fetch(
+      "https://api.twitter.com/2/users/me?user.fields=public_metrics",
+      {
+        headers: {
+          authorization: `Bearer ${access_token}`,
+        },
+      }
+    ).then((r) => r.json());
+    return user.data.public_metrics.followers_count;
+  } catch (e) {
+    console.log(e);
+    return 0;
+  }
+}
+
+async function checkGithubData(access_token) {
+  console.log("github token: ", access_token);
+  try {
+    const user = await fetch("https://api.github.com/user", {
       headers: {
-        authorization: `Bearer ${access_token}`,
+        authorization: `token ${access_token}`,
       },
     }).then((r) => r.json());
-    return user.data.public_metrics.followers_count
-  } catch(e) {
+    console.log(user);
+    return user.followers;
+  } catch (e) {
     console.log(e);
-    return 0
+    return 0;
   }
-  
 }
 
 export default ({ app, db, synchronizer }) => {
   app.post("/api/request", async (req, res) => {
     try {
       const { publicSignals, proof, attester, access_token } = req.body;
-      let reqData = [0, 0] // pos, neg
-      if (attester === 'twitter') { // also affect APP_ADDRESS
-        reqData[0] = await checkTwitterData(access_token)
+      let reqData = [0, 0]; // pos, neg
+      if (attester === "twitter") {
+        // also affect APP_ADDRESS
+        reqData[0] = await checkTwitterData(access_token); // followers addition, followers subtraction
+      } else if (attester === "github") {
+        reqData[0] = await checkGithubData(access_token); // followers addition, followers subtraction, stars addition, stars subtraction
       }
 
       const epochKeyProof = new EpochKeyProof(
@@ -69,5 +90,3 @@ export default ({ app, db, synchronizer }) => {
     }
   });
 };
-
-

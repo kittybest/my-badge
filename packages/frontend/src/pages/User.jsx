@@ -88,7 +88,6 @@ export default observer(() => {
               </Grid.Row>
             </Grid>
           </Container>
-
           <Container fluid className="user-body">
             <Segment color="blue">
               <Grid>
@@ -98,15 +97,29 @@ export default observer(() => {
                   </Grid.Column>
                   <Grid.Column width={4}>
                     <h3>Twitter</h3>
-                    <p className={user.hasSignedUp ? 'connected' : 'unconnected'}>{user.hasSignedUp ? 'connected' : 'unconnected'}</p>
+                    <p
+                      className={user.hasSignedUp ? "connected" : "unconnected"}
+                    >
+                      {user.hasSignedUp ? "connected" : "unconnected"}
+                    </p>
                   </Grid.Column>
                   <Grid.Column width={7} verticalAlign="middle">
                     <p>
-                      <b>Rank <i>2</i> with rep <i>{Number(user.provableData[0]) - Number(user.provableData[1])}</i></b>(updated next epoch: {Number(user.data[0]) - Number(user.data[1])})
+                      <b>
+                        Rank <i>2</i> with rep{" "}
+                        <i>
+                          {Number(user.provableData[0]) -
+                            Number(user.provableData[1])}
+                        </i>
+                      </b>
+                      (updated next epoch:{" "}
+                      {Number(user.data[0]) - Number(user.data[1])})
                     </p>
                   </Grid.Column>
                   <Grid.Column width={2}>
-                    <Button onClick={() => user.getInitialRep('twitter')}>Update</Button>
+                    <Button onClick={() => user.getInitialRep("github")}>
+                      Update
+                    </Button>
                   </Grid.Column>
                   <Grid.Column width={2}>
                     <Button>UST</Button>

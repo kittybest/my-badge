@@ -188,13 +188,13 @@ class User {
 
     if (!this.userState) throw new Error("userState is undefined");
 
-    const access_token = localStorage.getItem(`${platform}_access_token`)
+    const access_token = localStorage.getItem(`${platform}_access_token`);
 
-     // gen proof
-     const epochKeyProof = await this.userState.genEpochKeyProof({
+    // gen proof
+    const epochKeyProof = await this.userState.genEpochKeyProof({
       nonce: 0,
     });
-    console.log(epochKeyProof)
+    console.log(epochKeyProof);
 
     const data = await fetch(`${SERVER}/api/request`, {
       method: "POST",
@@ -206,7 +206,7 @@ class User {
           publicSignals: epochKeyProof.publicSignals,
           proof: epochKeyProof.proof,
           access_token,
-          attester: platform
+          attester: platform,
         })
       ),
     }).then((r) => r.json());
@@ -215,7 +215,5 @@ class User {
     await this.loadReputation();
   }
 }
-
-
 
 export default createContext(new User());
