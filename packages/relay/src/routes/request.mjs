@@ -18,7 +18,7 @@ async function checkTwitterData(access_token) {
         },
       }
     ).then((r) => r.json());
-    return user.data.public_metrics.followers_count;
+    return [user.data.public_metrics.followers_count, 0];
   } catch (e) {
     console.log(e);
     return 0;
@@ -33,11 +33,21 @@ async function checkGithubData(access_token) {
         authorization: `token ${access_token}`,
       },
     }).then((r) => r.json());
-    console.log(user);
-    return user.followers;
+
+    const starred = await fetch("https://api.github.com/user/starred", {
+      headers: {
+        authorization: `Bearer ${access_token}`,
+      },
+    }).then((r) => r.json());
+    let stars = 0;
+    starred.map((repo) => {
+      stars += repo.stargazers_count;
+    });
+
+    return [user.followers, 0, stars, 0];
   } catch (e) {
     console.log(e);
-    return 0;
+    return [0];
   }
 }
 
@@ -45,12 +55,12 @@ export default ({ app, db, synchronizer }) => {
   app.post("/api/request", async (req, res) => {
     try {
       const { publicSignals, proof, attester, access_token } = req.body;
-      let reqData = [0, 0]; // pos, neg
+      let reqData = [0];
       if (attester === "twitter") {
         // also affect APP_ADDRESS
-        reqData[0] = await checkTwitterData(access_token); // followers addition, followers subtraction
+        reqData = await checkTwitterData(access_token); // followers addition, followers subtraction
       } else if (attester === "github") {
-        reqData[0] = await checkGithubData(access_token); // followers addition, followers subtraction, stars addition, stars subtraction
+        reqData = await checkGithubData(access_token); // followers addition, followers subtraction, stars addition, stars subtraction
       }
 
       const epochKeyProof = new EpochKeyProof(
