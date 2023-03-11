@@ -18,10 +18,10 @@ async function checkTwitterData(access_token) {
         },
       }
     ).then((r) => r.json());
-    return [user.data.public_metrics.followers_count, 0];
+    return { followers: user.data.public_metrics.followers_count };
   } catch (e) {
     console.log(e);
-    return 0;
+    return { error: e };
   }
 }
 
@@ -44,24 +44,58 @@ async function checkGithubData(access_token) {
       stars += repo.stargazers_count;
     });
 
-    return [user.followers, 0, stars, 0];
+    return { followers: user.followers, stars };
   } catch (e) {
     console.log(e);
-    return [0];
+    return { error: e };
   }
 }
 
 export default ({ app, db, synchronizer }) => {
   app.post("/api/request", async (req, res) => {
     try {
-      const { publicSignals, proof, attester, access_token } = req.body;
+      const { publicSignals, proof, attester, access_token, currentData } =
+        req.body;
+
       let reqData = [0];
       if (attester === "twitter") {
         // also affect APP_ADDRESS
-        reqData = await checkTwitterData(access_token); // followers addition, followers subtraction
+        const { followers, error } = await checkTwitterData(access_token); // followers addition, followers subtraction
+        if (error) {
+          res
+            .status(400)
+            .json({ error: "Something's wrong while getting twitter data." });
+        }
+
+        const diff = followers - (currentData[0] - currentData[1]);
+        if (diff >= 0) {
+          reqData = [diff];
+        } else {
+          reqData = [0, -diff];
+        }
       } else if (attester === "github") {
-        reqData = await checkGithubData(access_token); // followers addition, followers subtraction, stars addition, stars subtraction
+        const { followers, stars, error } = await checkGithubData(access_token); // followers addition, followers subtraction, stars addition, stars subtraction
+        if (error) {
+          res
+            .status(400)
+            .json({ error: "Something's wrong while getting github data." });
+        }
+
+        const diff1 = followers - (currentData[0] - currentData[1]);
+        if (diff1 >= 0) {
+          reqData = [diff1, 0];
+        } else {
+          reqData = [0, -diff1];
+        }
+        const diff2 = stars - (currentData[2] - currentData[3]);
+        if (diff2 >= 0) {
+          reqData.push(diff2);
+        } else {
+          reqData.push(0);
+          reqData.push(-diff2);
+        }
       }
+      console.log("reqData:", reqData);
 
       const epochKeyProof = new EpochKeyProof(
         publicSignals,

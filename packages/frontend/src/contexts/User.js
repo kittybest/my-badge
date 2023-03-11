@@ -180,7 +180,7 @@ class User {
     return { ...reputationProof, valid: await reputationProof.verify() };
   }
 
-  async getInitialRep(platform) {
+  async getRep(platform) {
     for (var i = 0; i < 10; i++) {
       if (this.userState) break;
       await Wait(1000);
@@ -190,11 +190,10 @@ class User {
 
     const access_token = localStorage.getItem(`${platform}_access_token`);
 
-    // gen proof
+    // gen epochKeyProof
     const epochKeyProof = await this.userState.genEpochKeyProof({
       nonce: 0,
     });
-    console.log(epochKeyProof);
 
     const data = await fetch(`${SERVER}/api/request`, {
       method: "POST",
@@ -207,6 +206,7 @@ class User {
           proof: epochKeyProof.proof,
           access_token,
           attester: platform,
+          currentData: this.data, // TODO: should be changed to proof
         })
       ),
     }).then((r) => r.json());

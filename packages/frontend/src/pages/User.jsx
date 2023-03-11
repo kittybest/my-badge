@@ -117,7 +117,7 @@ export default observer(() => {
                     </p>
                   </Grid.Column>
                   <Grid.Column width={2}>
-                    <Button onClick={() => user.getInitialRep("github")}>
+                    <Button onClick={() => user.getRep("twitter")}>
                       Update
                     </Button>
                   </Grid.Column>
