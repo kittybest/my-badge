@@ -23,6 +23,8 @@ export default observer(() => {
       console.log("before sign up");
       await user.signup(platform, access_token);
       console.log("after sign up");
+      await user.getRep(platform);
+      console.log("after get initial rep");
       return navigate("/user");
     } catch (e) {
       setErrorMsg(e);
