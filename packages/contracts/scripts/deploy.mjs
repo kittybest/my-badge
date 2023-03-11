@@ -29,17 +29,10 @@ console.log(
   `Unirep app 2 with epoch length ${epochLength} deployed to ${app2.address}`
 );
 
-const app3 = await App.deploy(unirep.address, epochLength);
-await app3.deployed();
-console.log(
-  `Unirep app 3 with epoch length ${epochLength} deployed to ${app3.address}`
-);
-
 const config = `module.exports = {
   UNIREP_ADDRESS: '${unirep.address}',
   TWITTER_ADDRESS: '${app1.address}',
-  GITHUB_STAR_ADDRESS: '${app2.address}',
-  GITHUB_SUB_ADDRESS: '${app3.address}',
+  GITHUB_ADDRESS: '${app2.address}',
   ETH_PROVIDER_URL: '${hardhat.network.config.url ?? ""}',
   ${
     Array.isArray(hardhat.network.config.accounts)
