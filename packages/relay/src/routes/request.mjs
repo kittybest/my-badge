@@ -109,6 +109,15 @@ export default ({ app, db, synchronizer }) => {
         proof,
         synchronizer.prover
       );
+
+      if (
+        BigInt(epochKeyProof.attesterId).toString() !==
+        BigInt(attesterId).toString()
+      ) {
+        res.status(400).json({ error: "Attester Id does not match." });
+        return;
+      }
+
       const valid = await epochKeyProof.verify();
       if (!valid) {
         res.status(400).json({ error: "Invalid proof" });
