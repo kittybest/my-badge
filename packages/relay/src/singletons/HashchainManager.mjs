@@ -34,23 +34,11 @@ class HashchainManager {
       if (data._id === "0") continue;
 
       const attesterId = BigInt(data._id);
-      const timestamp = Math.floor(+new Date() / 1000);
-      const currentEpoch = Math.max(
-        0,
-        Math.floor((timestamp - data.startTimestamp) / data.epochLength)
-      );
-      const currentEpochOnChain = Number(
+      const currentEpoch = Number(
         await synchronizer.unirepContract.attesterCurrentEpoch(attesterId)
       );
-      console.log(
-        "current epoch:",
-        currentEpoch,
-        ", current epoch on chain:",
-        currentEpochOnChain,
-        ", for attester:",
-        attesterId.toString()
-      );
-      if (currentEpoch > currentEpochOnChain) {
+
+      if (currentEpoch > this.latestSyncEpoch[data._id] + 1) {
         const calldata =
           synchronizer.unirepContract.interface.encodeFunctionData(
             "updateEpochIfNeeded",
@@ -63,6 +51,7 @@ class HashchainManager {
       }
 
       for (let j = this.latestSyncEpoch[data._id]; j < currentEpoch; j++) {
+        console.log(j);
         // check the owed keys
         if (synchronizer.provider.network.chainId === 31337) {
           // hardhat dev nodes need to have their state refreshed manually
