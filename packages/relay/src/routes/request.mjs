@@ -123,13 +123,11 @@ export default ({ app, db, synchronizer }) => {
         await unirepContract.attesterCurrentEpoch(attesterId)
       );
       if (Number(epochKeyProof.epoch) !== epoch) {
-        res
-          .status(400)
-          .json({
-            error: `Wrong epoch: should be ${epoch}, but it is ${Number(
-              epochKeyProof.epoch
-            )} in the proof.`,
-          });
+        res.status(400).json({
+          error: `Wrong epoch: should be ${epoch}, but it is ${Number(
+            epochKeyProof.epoch
+          )} in the proof.`,
+        });
         return;
       }
 

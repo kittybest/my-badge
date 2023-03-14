@@ -31,13 +31,11 @@ export default ({ app, db, synchronizer }) => {
       );
 
       if (currentEpoch !== Number(BigInt(signupProof.epoch))) {
-        res
-          .status(400)
-          .json({
-            error: `Wrong epoch: current epoch should be ${currentEpoch}, but the epoch in your proof is ${Number(
-              BigInt(signupProof.epoch)
-            )}`,
-          });
+        res.status(400).json({
+          error: `Wrong epoch: current epoch should be ${currentEpoch}, but the epoch in your proof is ${Number(
+            BigInt(signupProof.epoch)
+          )}`,
+        });
         return;
       }
       // make a transaction lil bish
