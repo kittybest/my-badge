@@ -16,6 +16,13 @@ export default ({ app, db, synchronizer }) => {
         proof,
         synchronizer.prover
       );
+      if (
+        BigInt(signupProof.attesterId).toString() !==
+        BigInt(attesterId).toString()
+      ) {
+        res.status(400).json({ error: "Attester ID does not match." });
+        return;
+      }
       const valid = await signupProof.verify();
       if (!valid) {
         res.status(400).json({ error: "Invalid proof" });
@@ -40,7 +47,6 @@ export default ({ app, db, synchronizer }) => {
       }
       // make a transaction lil bish
       const appContract = new ethers.Contract(attesterId, UnirepApp.abi);
-      // const contract =
       const calldata = appContract.interface.encodeFunctionData("userSignUp", [
         signupProof.publicSignals,
         signupProof.proof,

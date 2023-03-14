@@ -42,7 +42,15 @@ class HashchainManager {
       const currentEpochOnChain = Number(
         await synchronizer.unirepContract.attesterCurrentEpoch(attesterId)
       );
-      if (currentEpoch !== currentEpochOnChain) {
+      console.log(
+        "current epoch:",
+        currentEpoch,
+        ", current epoch on chain:",
+        currentEpochOnChain,
+        ", for attester:",
+        attesterId.toString()
+      );
+      if (currentEpoch > currentEpochOnChain) {
         const calldata =
           synchronizer.unirepContract.interface.encodeFunctionData(
             "updateEpochIfNeeded",
@@ -51,12 +59,6 @@ class HashchainManager {
         const hash = await TransactionManager.queueTransaction(
           synchronizer.unirepContract.address,
           calldata
-        );
-        console.log(
-          "attester",
-          data._id,
-          "call update epoch if needed, hash:",
-          hash
         );
       }
 

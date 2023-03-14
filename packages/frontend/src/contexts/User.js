@@ -127,7 +127,7 @@ class User {
       }),
     }).then((r) => r.json());
     if (data.error) {
-      throw new Error(data.error.toString());
+      throw new Error(JSON.stringify(data.error));
     }
 
     await provider.waitForTransaction(data.hash);
