@@ -6,11 +6,15 @@ import synchronizer from "./AppSynchronizer.mjs";
 
 class HashchainManager {
   latestSyncEpoch = {};
+  prevEpoch = {};
 
   async startDaemon() {
     const attestersData = await synchronizer._db.findMany("Attester", {});
     attestersData.map((data) => {
-      if (data._id !== "0") this.latestSyncEpoch[data._id] = 0;
+      if (data._id !== "0") {
+        this.latestSyncEpoch[data._id] = 0;
+        this.prevEpoch[data._id] = 0;
+      }
     });
 
     // return
@@ -38,7 +42,7 @@ class HashchainManager {
         await synchronizer.unirepContract.attesterCurrentEpoch(attesterId)
       );
 
-      if (currentEpoch > this.latestSyncEpoch[data._id] + 1) {
+      if (currentEpoch > this.prevEpoch[data._id]) {
         const calldata =
           synchronizer.unirepContract.interface.encodeFunctionData(
             "updateEpochIfNeeded",
@@ -48,16 +52,11 @@ class HashchainManager {
           synchronizer.unirepContract.address,
           calldata
         );
+        this.prevEpoch[data._id] = currentEpoch;
       }
 
       for (let j = this.latestSyncEpoch[data._id]; j < currentEpoch; j++) {
-        console.log(j);
         // check the owed keys
-        if (synchronizer.provider.network.chainId === 31337) {
-          // hardhat dev nodes need to have their state refreshed manually
-          // for view only functions
-          await synchronizer.provider.send("evm_mine", []);
-        }
         const isSealed = await synchronizer.unirepContract.attesterEpochSealed(
           attesterId,
           j
@@ -70,6 +69,12 @@ class HashchainManager {
         } else {
           this.latestSyncEpoch[data._id] = j;
         }
+      }
+
+      if (synchronizer.provider.network.chainId === 31337) {
+        // hardhat dev nodes need to have their state refreshed manually
+        // for view only functions
+        await synchronizer.provider.send("evm_mine", []);
       }
     }
   }
