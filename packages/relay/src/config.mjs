@@ -9,6 +9,9 @@ export const ETH_PROVIDER_URL =
   process.env.ETH_PROVIDER_URL ?? _config.ETH_PROVIDER_URL;
 export const PRIVATE_KEY = process.env.PRIVATE_KEY ?? _config.PRIVATE_KEY;
 
+export const TWITTER_ADDRESS = _config.TWITTER_ADDRESS;
+export const GITHUB_ADDRESS = _config.GITHUB_ADDRESS;
+
 export const DB_PATH = process.env.DB_PATH ?? ":memory:";
 
 export const provider = ETH_PROVIDER_URL.startsWith("http")

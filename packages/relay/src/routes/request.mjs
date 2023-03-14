@@ -148,15 +148,6 @@ export default ({ app, db, synchronizer }) => {
         );
       }
 
-      const calldata0 = unirepContract.interface.encodeFunctionData(
-        "updateEpochIfNeeded",
-        [attesterId]
-      );
-      const hash0 = await TransactionManager.queueTransaction(
-        UNIREP_ADDRESS,
-        calldata0
-      );
-
       const hash = await TransactionManager.queueTransaction(
         attesterId,
         calldata
