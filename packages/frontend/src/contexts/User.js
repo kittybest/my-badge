@@ -8,8 +8,7 @@ import { constructSchema } from "anondb/types";
 import {
   provider,
   UNIREP_ADDRESS,
-  TWITTER_ADDRESS,
-  GITHUB_ADDRESS,
+  ATTESTERS,
   SERVER,
   UNIREP_ABI,
 } from "../config";
@@ -18,13 +17,12 @@ import Wait from "../utils/wait";
 import poseidon from "poseidon-lite";
 
 class User {
+  userStates = {}; // key: attesterId, value: { userState, currentEpoch, latestTransitionedEpoch, hasSignedUp, data, provableData }
   userState = null;
   id;
-  currentEpoch;
-  latestTransitionedEpoch;
+  fieldCount = -1;
+  sumFieldCount = -1;
   hasSignedUp = false;
-  data = [];
-  provableData = [];
 
   constructor() {
     makeAutoObservable(this);
@@ -43,66 +41,90 @@ class User {
     this.id = identity.serializeIdentity();
 
     const db = new MemoryConnector(constructSchema(schema)); // not used in the beta version??
-    const userState = new UserState({
-      db,
-      provider,
-      prover,
-      unirepAddress: UNIREP_ADDRESS,
-      attesterId: TWITTER_ADDRESS,
-      _id: identity,
-    });
-    await userState.sync.start();
-    this.userState = userState;
-    await userState.waitForSync();
-    this.hasSignedUp = await userState.hasSignedUp();
-    await this.loadReputation();
-    this.latestTransitionedEpoch =
-      await this.userState.latestTransitionedEpoch();
+
+    for (const [platform, attesterId] of Object.entries(ATTESTERS)) {
+      console.log("attester", platform, "with address", attesterId);
+      const userState = new UserState({
+        db,
+        provider,
+        prover,
+        unirepAddress: UNIREP_ADDRESS,
+        attesterId,
+        _id: identity,
+      });
+      await userState.sync.start();
+
+      if (this.fieldCount < 0) {
+        this.fieldCount = userState.sync.settings.fieldCount;
+      }
+      if (this.sumFieldCount < 0) {
+        this.sumFieldCount = userState.sync.settings.sumFieldCount;
+      }
+
+      await userState.waitForSync();
+      const hasSignedUp = await userState.hasSignedUp();
+      const latestTransitionedEpoch = await userState.latestTransitionedEpoch();
+      const data = await userState.getData();
+      const provableData = await userState.getProvableData();
+
+      this.userStates[platform] = {
+        userState,
+        hasSignedUp,
+        latestTransitionedEpoch,
+        data,
+        provableData,
+      };
+    }
+    this.updateHasSignedUp();
   }
 
-  get fieldCount() {
-    // what is this?
-    return this.userState?.sync.settings.fieldCount;
+  async loadReputation(platform) {
+    this.userStates[platform].data = await this.userStates[
+      platform
+    ].userState.getData();
+    this.userStates[platform].provableData = await this.userStates[
+      platform
+    ].userState.getProvableData();
   }
 
-  get sumFieldCount() {
-    // what is this??
-    return this.userState?.sync.settings.sumFieldCount;
+  async waitForLoad(platform) {
+    for (var i = 0; i < 10; i++) {
+      if (this.userStates[platform]) break;
+      await Wait(1000);
+    }
+
+    if (!this.userStates[platform]) throw new Error("userState is undefined");
   }
 
-  epochKey(nonce) {
-    if (!this.userState) return "0x";
-    const epoch = this.userState.sync.calcCurrentEpoch();
-    const keys = this.userState.getEpochKeys(epoch);
+  updateHasSignedUp() {
+    for (const [platform, us] of Object.entries(this.userStates)) {
+      this.hasSignedUp = this.hasSignedUp || us.hasSignedUp;
+    }
+  }
+
+  epochKey(platform, nonce) {
+    if (!this.userStates[platform] || !this.userStates[platform].userState)
+      return "0x";
+    const epoch = this.userStates[platform].userState.sync.calcCurrentEpoch();
+    const keys = this.userStates[platform].userState.getEpochKeys(epoch);
     const key = keys[nonce];
     return `0x${key.toString(16)}`;
   }
 
-  async loadReputation() {
-    this.data = await this.userState.getData();
-    this.provableData = await this.userState.getProvableData();
-  }
-
   async signup(platform, access_token) {
-    for (var i = 0; i < 10; i++) {
-      if (this.userState) break;
-      await Wait(1000);
-    }
-
-    if (!this.userState) throw new Error("userState is undefined");
-
-    const attesterId =
-      platform === "twitter"
-        ? TWITTER_ADDRESS
-        : platform === "github"
-        ? GITHUB_ADDRESS
-        : undefined;
+    /* Assign attesterId */
+    const attesterId = ATTESTERS[platform];
     if (!attesterId) {
       throw new Error("You are not signing up through available web2 service.");
     }
 
+    /* Wait for loading userStates */
+    await this.waitForLoad(platform);
+
+    /* Store access_token to local storage */
     localStorage.setItem(`${platform}_access_token`, access_token);
 
+    /* Gen signupProof */
     const unirepContract = new ethers.Contract(
       UNIREP_ADDRESS,
       UNIREP_ABI,
@@ -111,10 +133,13 @@ class User {
     const currentEpoch = Number(
       await unirepContract.attesterCurrentEpoch(attesterId)
     );
-    const signupProof = await this.userState.genUserSignUpProof({
+    const signupProof = await this.userStates[
+      platform
+    ].userState.genUserSignUpProof({
       epoch: currentEpoch,
     });
 
+    /* Sign up to attester */
     const data = await fetch(`${SERVER}/api/signup`, {
       method: "POST",
       headers: {
@@ -130,46 +155,15 @@ class User {
       throw new Error(JSON.stringify(data.error));
     }
 
+    /* Update */
     await provider.waitForTransaction(data.hash);
-    await this.userState.waitForSync();
-    this.hasSignedUp = await this.userState.hasSignedUp();
-    this.latestTransitionedEpoch = this.userState.sync.calcCurrentEpoch();
-  }
-
-  async requestReputation(reqData, epkNonce) {
-    // check data change availablity
-    for (const key of Object.keys(reqData)) {
-      if (reqData[key] === "") {
-        delete reqData[key];
-        continue;
-      }
-      if (+key > this.sumFieldCount && +key % 2 !== this.sumFieldCount % 2) {
-        // what is this for ?????
-        throw new Error("Cannot change timestamp field");
-      }
-    }
-
-    // gen proof
-    const epochKeyProof = await this.userState.genEpochKeyProof({
-      nonce: epkNonce,
-    });
-
-    const data = await fetch(`${SERVER}/api/request`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(
-        stringifyBigInts({
-          reqData,
-          publicSignals: epochKeyProof.publicSignals,
-          proof: epochKeyProof.proof,
-        })
-      ),
-    }).then((r) => r.json());
-    await provider.waitForTransaction(data.hash);
-    await this.userState.waitForSync();
-    await this.loadReputation();
+    await this.userStates[platform].userState.waitForSync();
+    this.userStates[platform].hasSignedUp = await this.userStates[
+      platform
+    ].userState.hasSignedUp();
+    this.userStates[platform].latestTransitionedEpoch =
+      this.userStates[platform].userState.sync.calcCurrentEpoch();
+    this.updateHasSignedUp();
   }
 
   async stateTransition() {
@@ -216,26 +210,17 @@ class User {
   }
 
   async getRep(platform) {
-    for (var i = 0; i < 10; i++) {
-      if (this.userState) break;
-      await Wait(1000);
-    }
-
-    if (!this.userState) throw new Error("userState is undefined");
-
-    const attesterId =
-      platform === "twitter"
-        ? TWITTER_ADDRESS
-        : platform === "github"
-        ? GITHUB_ADDRESS
-        : undefined;
+    /* Check attesterId and userState */
+    const attesterId = ATTESTERS[platform];
     if (!attesterId) {
       throw new Error("You are not signing up through available web2 service.");
     }
+    await this.waitForLoad(platform);
 
+    /* Load access_token */
     const access_token = localStorage.getItem(`${platform}_access_token`);
 
-    // gen epochKeyProof
+    /* Gen epochKeyProof */
     const unirepContract = new ethers.Contract(
       UNIREP_ADDRESS,
       UNIREP_ABI,
@@ -244,11 +229,14 @@ class User {
     const currentEpoch = Number(
       await unirepContract.attesterCurrentEpoch(attesterId)
     );
-    const epochKeyProof = await this.userState.genEpochKeyProof({
+    const epochKeyProof = await this.userStates[
+      platform
+    ].userState.genEpochKeyProof({
       nonce: 0,
       epoch: currentEpoch,
     });
 
+    /* Call API to calculate and receive reputation data */
     const data = await fetch(`${SERVER}/api/request`, {
       method: "POST",
       headers: {
@@ -261,13 +249,13 @@ class User {
           access_token,
           attester: platform,
           attesterId,
-          currentData: this.data, // TODO: should be changed to proof
+          currentData: this.userStates[platform].data,
         })
       ),
     }).then((r) => r.json());
     await provider.waitForTransaction(data.hash);
-    await this.userState.waitForSync();
-    await this.loadReputation();
+    await this.userStates[platform].userState.waitForSync();
+    await this.loadReputation(platform);
   }
 }
 

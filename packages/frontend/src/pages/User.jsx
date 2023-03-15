@@ -1,17 +1,8 @@
 import React, { useState, useContext } from "react";
 import { observer } from "mobx-react-lite";
-import {
-  Container,
-  Button,
-  Image,
-  Grid,
-  Segment,
-  Message,
-} from "semantic-ui-react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTwitter, faGithub } from "@fortawesome/free-brands-svg-icons";
-
+import { Container, Button, Image, Grid, Message } from "semantic-ui-react";
 import User from "../contexts/User";
+import InfoCard from "../components/infoCard";
 
 export default observer(() => {
   const [isIdentityRevealed, setIdentityRevealed] = useState(false);
@@ -89,83 +80,50 @@ export default observer(() => {
             </Grid>
           </Container>
           <Container fluid className="user-body">
-            <Segment color="blue">
-              <Grid>
-                <Grid.Row stretched>
-                  <Grid.Column width={1}>
-                    <FontAwesomeIcon icon={faTwitter} />
-                  </Grid.Column>
-                  <Grid.Column width={4}>
-                    <h3>Twitter</h3>
-                    <p
-                      className={user.hasSignedUp ? "connected" : "unconnected"}
-                    >
-                      {user.hasSignedUp ? "connected" : "unconnected"}
-                    </p>
-                  </Grid.Column>
-                  <Grid.Column width={7} verticalAlign="middle">
-                    <p>
-                      <b>
-                        Rank <i>2</i> with rep{" "}
-                        <i>
-                          {Number(user.provableData[0]) -
-                            Number(user.provableData[1])}
-                        </i>
-                      </b>
-                      (updated next epoch:{" "}
-                      {Number(user.data[0]) - Number(user.data[1])})
-                    </p>
-                  </Grid.Column>
-                  <Grid.Column width={2}>
-                    <Button onClick={() => user.getRep("twitter")}>
-                      Update
-                    </Button>
-                  </Grid.Column>
-                  <Grid.Column width={2}>
-                    <Button>UST</Button>
-                  </Grid.Column>
-                </Grid.Row>
-              </Grid>
-            </Segment>
-            <Segment color="yellow">
-              <Grid>
-                <Grid.Row stretched>
-                  <Grid.Column width={1}>
-                    <FontAwesomeIcon icon={faGithub} />
-                  </Grid.Column>
-                  <Grid.Column width={4}>
-                    <h3>Github Stars</h3>
-                    <p className="unconnected">unconnected</p>
-                  </Grid.Column>
-                  <Grid.Column width={9} verticalAlign="middle">
-                    Not connected
-                  </Grid.Column>
-                  <Grid.Column width={2}>
-                    <Button>Connect</Button>
-                  </Grid.Column>
-                </Grid.Row>
-              </Grid>
-            </Segment>
-            <Segment color="red">
-              <Grid>
-                <Grid.Row stretched>
-                  <Grid.Column width={1}>
-                    <FontAwesomeIcon icon={faGithub} />
-                  </Grid.Column>
-                  <Grid.Column width={4}>
-                    <h3>Github Followers</h3>
-                    <p className="unconnected">unconnected</p>
-                  </Grid.Column>
-                  <Grid.Column width={9} verticalAlign="middle">
-                    Not connected
-                  </Grid.Column>
-                  <Grid.Column width={2}>
-                    <Button>Connect</Button>
-                  </Grid.Column>
-                </Grid.Row>
-              </Grid>
-            </Segment>
-          </Container>{" "}
+            <InfoCard
+              title={"Twitter"}
+              platform={"twitter"}
+              hasSignedUp={user.userStates.twitter.hasSignedUp}
+              data={Number(
+                user.userStates.twitter.data[0] -
+                  user.userStates.twitter.data[1]
+              )}
+              provableData={Number(
+                user.userStates.twitter.provableData[0] -
+                  user.userStates.twitter.provableData[1]
+              )}
+              color="blue"
+              update={() => user.getRep("twitter")}
+            />
+            <InfoCard
+              title={"Github Stars"}
+              platform={"github"}
+              hasSignedUp={user.userStates.github.hasSignedUp}
+              data={Number(
+                user.userStates.github.data[2] - user.userStates.github.data[3]
+              )}
+              provableData={Number(
+                user.userStates.github.provableData[2] -
+                  user.userStates.github.provableData[3]
+              )}
+              color="yellow"
+              update={() => user.getRep("github")}
+            />
+            <InfoCard
+              title={"Github Subscribers"}
+              platform={"github"}
+              hasSignedUp={user.userStates.github.hasSignedUp}
+              data={Number(
+                user.userStates.github.data[0] - user.userStates.github.data[1]
+              )}
+              provableData={Number(
+                user.userStates.github.provableData[0] -
+                  user.userStates.github.provableData[1]
+              )}
+              color="red"
+              update={() => user.getRep("github")}
+            />
+          </Container>
         </>
       ) : (
         <Message
