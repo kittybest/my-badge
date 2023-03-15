@@ -18,6 +18,7 @@ export default observer(() => {
   const [errorMsg, setErrorMsg] = useState("");
 
   const signup = async (platform, access_token) => {
+    setErrorMsg("");
     setIsLoading(true);
     try {
       console.log("before sign up");
@@ -27,7 +28,7 @@ export default observer(() => {
       console.log("after get initial rep");
       return navigate("/user");
     } catch (e) {
-      setErrorMsg(e);
+      setErrorMsg(e.toString());
       setIsLoading(false);
     }
   };

@@ -5,8 +5,18 @@ import TransactionManager from "./TransactionManager.mjs";
 import synchronizer from "./AppSynchronizer.mjs";
 
 class HashchainManager {
-  latestSyncEpoch = 0;
+  latestSyncEpoch = {};
+  prevEpoch = {};
+
   async startDaemon() {
+    const attestersData = await synchronizer._db.findMany("Attester", {});
+    attestersData.map((data) => {
+      if (data._id !== "0") {
+        this.latestSyncEpoch[data._id] = 0;
+        this.prevEpoch[data._id] = 0;
+      }
+    });
+
     // return
     // first sync up all the historical epochs
     // then start watching
@@ -21,35 +31,63 @@ class HashchainManager {
   async sync() {
     // Make sure we're synced up
     await synchronizer.waitForSync();
-    const currentEpoch = synchronizer.calcCurrentEpoch();
-    for (let x = this.latestSyncEpoch; x < currentEpoch; x++) {
-      // check the owed keys
-      if (synchronizer.provider.network.chainId === 31337) {
-        // hardhat dev nodes need to have their state refreshed manually
-        // for view only functions
-        await synchronizer.provider.send("evm_mine", []);
-      }
-      const isSealed = await synchronizer.unirepContract.attesterEpochSealed(
-        synchronizer.attesterId,
-        x
+
+    const attestersData = await synchronizer._db.findMany("Attester", {});
+    for (let i = 0; i < attestersData.length; i++) {
+      const data = attestersData[i];
+      if (data._id === "0") continue;
+      if (!this.prevEpoch[data._id]) this.prevEpoch[data._id] = 0;
+
+      const attesterId = BigInt(data._id);
+      const currentEpoch = Number(
+        await synchronizer.unirepContract.attesterCurrentEpoch(attesterId)
       );
-      if (!isSealed) {
-        console.log("executing epoch", x);
-        // otherwise we need to make an ordered tree
-        await this.processEpochKeys(x);
-        this.latestSyncEpoch = x;
-      } else {
-        this.latestSyncEpoch = x;
+
+      if (currentEpoch > this.prevEpoch[data._id]) {
+        const calldata =
+          synchronizer.unirepContract.interface.encodeFunctionData(
+            "updateEpochIfNeeded",
+            [attesterId]
+          );
+        const hash = await TransactionManager.queueTransaction(
+          synchronizer.unirepContract.address,
+          calldata
+        );
+        this.prevEpoch[data._id] = currentEpoch;
       }
+
+      for (let j = this.latestSyncEpoch[data._id]; j < currentEpoch; j++) {
+        // check the owed keys
+        const isSealed = await synchronizer.unirepContract.attesterEpochSealed(
+          attesterId,
+          j
+        );
+        if (!isSealed) {
+          console.log("executing epoch", j);
+          // otherwise we need to make an ordered tree
+          await this.processEpochKeys(j, attesterId);
+          this.latestSyncEpoch[data._id] = j;
+        } else {
+          this.latestSyncEpoch[data._id] = j;
+        }
+      }
+    }
+
+    if (synchronizer.provider.network.chainId === 31337) {
+      // hardhat dev nodes need to have their state refreshed manually
+      // for view only functions
+      await synchronizer.provider.send("evm_mine", []);
     }
   }
 
-  async processEpochKeys(epoch) {
+  async processEpochKeys(epoch, attesterId) {
     // first check if there is an unprocessed hashchain
-    const leafPreimages = await synchronizer.genEpochTreePreimages(epoch);
-    const { circuitInputs } = await BuildOrderedTree.buildInputsForLeaves(
-      leafPreimages
+    const leafPreimages = await synchronizer.genEpochTreePreimages(
+      epoch,
+      attesterId
     );
+    const { circuitInputs } =
+      BuildOrderedTree.buildInputsForLeaves(leafPreimages);
     const r = await synchronizer.prover.genProofAndPublicSignals(
       Circuit.buildOrderedTree,
       stringifyBigInts(circuitInputs)
@@ -60,7 +98,7 @@ class HashchainManager {
     );
     const calldata = synchronizer.unirepContract.interface.encodeFunctionData(
       "sealEpoch",
-      [epoch, synchronizer.attesterId, publicSignals, proof]
+      [epoch, attesterId, publicSignals, proof]
     );
     const hash = await TransactionManager.queueTransaction(
       synchronizer.unirepContract.address,

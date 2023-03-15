@@ -1,11 +1,12 @@
 import { ethers } from "ethers";
 import { EpochKeyProof } from "@unirep/circuits";
-import { APP_ADDRESS } from "../config.mjs";
 import TransactionManager from "../singletons/TransactionManager.mjs";
 import { createRequire } from "module";
+import { UNIREP_ADDRESS, provider } from "../config.mjs";
 import fetch from "node-fetch";
 
 const require = createRequire(import.meta.url);
+const Unirep = require("@unirep/contracts/artifacts/contracts/Unirep.sol/Unirep.json");
 const UnirepApp = require("@unirep-app/contracts/artifacts/contracts/UnirepApp.sol/UnirepApp.json");
 
 async function checkTwitterData(access_token) {
@@ -54,8 +55,14 @@ async function checkGithubData(access_token) {
 export default ({ app, db, synchronizer }) => {
   app.post("/api/request", async (req, res) => {
     try {
-      const { publicSignals, proof, attester, access_token, currentData } =
-        req.body;
+      const {
+        publicSignals,
+        proof,
+        attester,
+        attesterId,
+        access_token,
+        currentData,
+      } = req.body;
 
       let reqData = [0];
       if (attester === "twitter") {
@@ -102,14 +109,38 @@ export default ({ app, db, synchronizer }) => {
         proof,
         synchronizer.prover
       );
+
+      if (
+        BigInt(epochKeyProof.attesterId).toString() !==
+        BigInt(attesterId).toString()
+      ) {
+        res.status(400).json({ error: "Attester Id does not match." });
+        return;
+      }
+
       const valid = await epochKeyProof.verify();
       if (!valid) {
         res.status(400).json({ error: "Invalid proof" });
         return;
       }
-      const epoch = await synchronizer.loadCurrentEpoch();
-      const appContract = new ethers.Contract(APP_ADDRESS, UnirepApp.abi);
+      const unirepContract = new ethers.Contract(
+        UNIREP_ADDRESS,
+        Unirep.abi,
+        provider
+      );
+      const epoch = Number(
+        await unirepContract.attesterCurrentEpoch(attesterId)
+      );
+      if (Number(epochKeyProof.epoch) !== epoch) {
+        res.status(400).json({
+          error: `Wrong epoch: should be ${epoch}, but it is ${Number(
+            epochKeyProof.epoch
+          )} in the proof.`,
+        });
+        return;
+      }
 
+      const appContract = new ethers.Contract(attesterId, UnirepApp.abi);
       const keys = Object.keys(reqData);
       let calldata;
       if (keys.length === 1) {
@@ -125,7 +156,7 @@ export default ({ app, db, synchronizer }) => {
       }
 
       const hash = await TransactionManager.queueTransaction(
-        APP_ADDRESS,
+        attesterId,
         calldata
       );
       res.json({ hash });

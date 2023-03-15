@@ -1,10 +1,18 @@
 import { createContext } from "react";
+import { ethers } from "ethers";
 import { makeAutoObservable } from "mobx";
 import { ZkIdentity, Strategy, hash1, stringifyBigInts } from "@unirep/utils";
 import { UserState, schema } from "@unirep/core";
 import { MemoryConnector } from "anondb/web";
 import { constructSchema } from "anondb/types";
-import { provider, UNIREP_ADDRESS, APP_ADDRESS, SERVER } from "../config";
+import {
+  provider,
+  UNIREP_ADDRESS,
+  TWITTER_ADDRESS,
+  GITHUB_ADDRESS,
+  SERVER,
+  UNIREP_ABI,
+} from "../config";
 import prover from "./prover";
 import Wait from "../utils/wait";
 import poseidon from "poseidon-lite";
@@ -40,7 +48,7 @@ class User {
       provider,
       prover,
       unirepAddress: UNIREP_ADDRESS,
-      attesterId: APP_ADDRESS,
+      attesterId: TWITTER_ADDRESS,
       _id: identity,
     });
     await userState.sync.start();
@@ -83,8 +91,30 @@ class User {
 
     if (!this.userState) throw new Error("userState is undefined");
 
+    const attesterId =
+      platform === "twitter"
+        ? TWITTER_ADDRESS
+        : platform === "github"
+        ? GITHUB_ADDRESS
+        : undefined;
+    if (!attesterId) {
+      throw new Error("You are not signing up through available web2 service.");
+    }
+
     localStorage.setItem(`${platform}_access_token`, access_token);
-    const signupProof = await this.userState.genUserSignUpProof();
+
+    const unirepContract = new ethers.Contract(
+      UNIREP_ADDRESS,
+      UNIREP_ABI,
+      provider
+    );
+    const currentEpoch = Number(
+      await unirepContract.attesterCurrentEpoch(attesterId)
+    );
+    const signupProof = await this.userState.genUserSignUpProof({
+      epoch: currentEpoch,
+    });
+
     const data = await fetch(`${SERVER}/api/signup`, {
       method: "POST",
       headers: {
@@ -93,8 +123,13 @@ class User {
       body: JSON.stringify({
         publicSignals: signupProof.publicSignals,
         proof: signupProof.proof,
+        attesterId,
       }),
     }).then((r) => r.json());
+    if (data.error) {
+      throw new Error(JSON.stringify(data.error));
+    }
+
     await provider.waitForTransaction(data.hash);
     await this.userState.waitForSync();
     this.hasSignedUp = await this.userState.hasSignedUp();
@@ -188,11 +223,30 @@ class User {
 
     if (!this.userState) throw new Error("userState is undefined");
 
+    const attesterId =
+      platform === "twitter"
+        ? TWITTER_ADDRESS
+        : platform === "github"
+        ? GITHUB_ADDRESS
+        : undefined;
+    if (!attesterId) {
+      throw new Error("You are not signing up through available web2 service.");
+    }
+
     const access_token = localStorage.getItem(`${platform}_access_token`);
 
     // gen epochKeyProof
+    const unirepContract = new ethers.Contract(
+      UNIREP_ADDRESS,
+      UNIREP_ABI,
+      provider
+    );
+    const currentEpoch = Number(
+      await unirepContract.attesterCurrentEpoch(attesterId)
+    );
     const epochKeyProof = await this.userState.genEpochKeyProof({
       nonce: 0,
+      epoch: currentEpoch,
     });
 
     const data = await fetch(`${SERVER}/api/request`, {
@@ -206,6 +260,7 @@ class User {
           proof: epochKeyProof.proof,
           access_token,
           attester: platform,
+          attesterId,
           currentData: this.data, // TODO: should be changed to proof
         })
       ),
