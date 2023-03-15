@@ -36,6 +36,7 @@ class HashchainManager {
     for (let i = 0; i < attestersData.length; i++) {
       const data = attestersData[i];
       if (data._id === "0") continue;
+      if (!this.prevEpoch[data._id]) this.prevEpoch[data._id] = 0;
 
       const attesterId = BigInt(data._id);
       const currentEpoch = Number(
@@ -70,12 +71,12 @@ class HashchainManager {
           this.latestSyncEpoch[data._id] = j;
         }
       }
+    }
 
-      if (synchronizer.provider.network.chainId === 31337) {
-        // hardhat dev nodes need to have their state refreshed manually
-        // for view only functions
-        await synchronizer.provider.send("evm_mine", []);
-      }
+    if (synchronizer.provider.network.chainId === 31337) {
+      // hardhat dev nodes need to have their state refreshed manually
+      // for view only functions
+      await synchronizer.provider.send("evm_mine", []);
     }
   }
 
