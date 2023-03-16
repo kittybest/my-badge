@@ -121,7 +121,7 @@ export default observer(() => {
                   user.userStates.github.provableData[1]
               )}
               color="red"
-              update={() => user.getRep("github")}
+              update={async () => await user.getRep("github")}
             />
           </Container>
         </>

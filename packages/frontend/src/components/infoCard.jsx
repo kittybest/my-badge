@@ -1,5 +1,5 @@
-import React from "react";
-import { Button, Grid, Segment } from "semantic-ui-react";
+import React, { useState } from "react";
+import { Button, Grid, Segment, Message, Container } from "semantic-ui-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTwitter, faGithub } from "@fortawesome/free-brands-svg-icons";
 
@@ -16,6 +16,22 @@ const InfoCard = ({
   const icons = {
     twitter: faTwitter,
     github: faGithub,
+  };
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const onClickUpdate = async () => {
+    if (isLoading) return;
+
+    setErrorMsg("");
+    setIsLoading(true);
+    try {
+      await update();
+    } catch (e) {
+      setErrorMsg(e.toString());
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -44,7 +60,11 @@ const InfoCard = ({
             )}
           </Grid.Column>
           <Grid.Column width={2}>
-            {hasSignedUp && <Button onClick={update}>Update</Button>}
+            {hasSignedUp && (
+              <Button onClick={onClickUpdate} loading={isLoading}>
+                Update
+              </Button>
+            )}
           </Grid.Column>
           <Grid.Column width={2}>
             {hasSignedUp ? (
@@ -54,6 +74,13 @@ const InfoCard = ({
             )}
           </Grid.Column>
         </Grid.Row>
+        {errorMsg.length > 0 && (
+          <Grid.Row>
+            <Grid.Column>
+              <Message error header="Oops!" content={errorMsg} />
+            </Grid.Column>
+          </Grid.Row>
+        )}
       </Grid>
     </Segment>
   );
