@@ -162,6 +162,7 @@ export default observer(() => {
               connect={() => connect("twitter")}
               error={errorMsg.twitter}
               connectLoading={connectLoading.twitter}
+              ust={() => user.stateTransition("twitter")}
             />
             <InfoCard
               title={"Github Stars"}
@@ -179,6 +180,7 @@ export default observer(() => {
               connect={() => connect("github")}
               error={errorMsg.github}
               connectLoading={connectLoading.github}
+              ust={() => user.stateTransition("github")}
             />
             <InfoCard
               title={"Github Followers"}
@@ -196,6 +198,7 @@ export default observer(() => {
               connect={() => connect("github")}
               error={errorMsg.github}
               connectLoading={connectLoading.github}
+              ust={() => user.stateTransition("github")}
             />
           </Container>
         </>

@@ -4,7 +4,7 @@ import TransactionManager from "../singletons/TransactionManager.mjs";
 export default ({ app, db, synchronizer }) => {
   app.post("/api/transition", async (req, res) => {
     try {
-      const { publicSignals, proof } = req.body;
+      const { publicSignals, proof, attesterId } = req.body;
       const transitionProof = new UserStateTransitionProof(
         publicSignals,
         proof,
