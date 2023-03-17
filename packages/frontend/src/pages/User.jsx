@@ -32,7 +32,7 @@ export default observer(() => {
       await user.signup(platform, access_token);
       await user.getRep(platform);
     } catch (e) {
-      setErrorMsg({ ...errorMsg, platform: e.toString() });
+      setErrorMsg({ ...errorMsg });
       tmpLoading[platform] = false;
       setConnectLoading(tmpLoading);
     }
