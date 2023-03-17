@@ -21,20 +21,34 @@ const InfoCard = ({
     github: faGithub,
   };
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isUSTing, setIsUSTing] = useState(false);
   const [errorMsg, setErrorMsg] = useState(error);
 
   const onClickUpdate = async () => {
-    if (isLoading) return;
+    if (isUpdating || isUSTing) return;
 
     setErrorMsg("");
-    setIsLoading(true);
+    setIsUpdating(true);
     try {
       await update();
     } catch (e) {
       setErrorMsg(e.toString());
     }
-    setIsLoading(false);
+    setIsUpdating(false);
+  };
+
+  const onClickUST = async () => {
+    if (isUpdating || isUSTing) return;
+
+    setErrorMsg("");
+    setIsUSTing(true);
+    try {
+      await ust();
+    } catch (e) {
+      setErrorMsg(e.toString());
+    }
+    setIsUSTing(false);
   };
 
   return (
@@ -64,14 +78,16 @@ const InfoCard = ({
           </Grid.Column>
           <Grid.Column width={2}>
             {hasSignedUp && (
-              <Button onClick={onClickUpdate} loading={isLoading}>
+              <Button onClick={onClickUpdate} loading={isUpdating}>
                 Update
               </Button>
             )}
           </Grid.Column>
           <Grid.Column width={2}>
             {hasSignedUp ? (
-              <Button onClick={ust}>UST</Button>
+              <Button onClick={onClickUST} loading={isUSTing}>
+                UST
+              </Button>
             ) : (
               <Button onClick={connect} loading={connectLoading}>
                 Connect!
