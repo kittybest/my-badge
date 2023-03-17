@@ -12,6 +12,9 @@ const InfoCard = ({
   color,
   update,
   ust,
+  connect,
+  error,
+  connectLoading,
 }) => {
   const icons = {
     twitter: faTwitter,
@@ -19,7 +22,7 @@ const InfoCard = ({
   };
 
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState(error);
 
   const onClickUpdate = async () => {
     if (isLoading) return;
@@ -70,7 +73,9 @@ const InfoCard = ({
             {hasSignedUp ? (
               <Button onClick={ust}>UST</Button>
             ) : (
-              <Button>Connect!</Button>
+              <Button onClick={connect} loading={connectLoading}>
+                Connect!
+              </Button>
             )}
           </Grid.Column>
         </Grid.Row>
