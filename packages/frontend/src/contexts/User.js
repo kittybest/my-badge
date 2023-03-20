@@ -95,6 +95,15 @@ class User {
     if (!this.userStates[platform]) throw new Error("userState is undefined");
   }
 
+  async login(id) {
+    if (!id || id.length === 0) {
+      throw new Error("You have not entered identity yet.");
+    }
+    const identity = new ZkIdentity(Strategy.SERIALIZED, id);
+    localStorage.setItem("id", identity.serializeIdentity());
+    await this.load();
+  }
+
   updateHasSignedUp() {
     for (const [platform, us] of Object.entries(this.userStates)) {
       this.hasSignedUp = this.hasSignedUp || us.hasSignedUp;

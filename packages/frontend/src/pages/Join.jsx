@@ -1,7 +1,14 @@
 import React, { useEffect, useState, useContext } from "react";
 import { observer } from "mobx-react-lite";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Button, Divider, Input, Loader, Message } from "semantic-ui-react";
+import {
+  Button,
+  Divider,
+  Loader,
+  Message,
+  TextArea,
+  Form,
+} from "semantic-ui-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTwitter, faGithub } from "@fortawesome/free-brands-svg-icons";
 import { SERVER } from "../config.js";
@@ -15,6 +22,7 @@ export default observer(() => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [idInput, setIdInput] = useState("");
 
   const signup = async (platform, access_token) => {
     setErrorMsg("");
@@ -68,6 +76,19 @@ export default observer(() => {
     }
   };
 
+  const login = async () => {
+    try {
+      await user.login(idInput);
+      return navigate("/user");
+    } catch (e) {
+      setErrorMsg(e.toString());
+    }
+  };
+
+  const onIdInputChange = (event) => {
+    setIdInput(event.target.value);
+  };
+
   return (
     <>
       {isLoading ? (
@@ -101,11 +122,16 @@ export default observer(() => {
 
           <Divider horizontal>Already has account?</Divider>
 
-          <Input placeholder="Please enter your private key." size="large" />
-          <Button basic size="large">
+          <Form>
+            <TextArea
+              placeholder="Please enter your private key."
+              style={{ width: "300px" }}
+              onChange={onIdInputChange}
+            />
+          </Form>
+          <Button basic size="large" onClick={login}>
             Log in
           </Button>
-
           <Link to="/help">Any question?</Link>
         </div>
       )}
