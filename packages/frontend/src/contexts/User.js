@@ -166,19 +166,20 @@ class User {
     this.updateHasSignedUp();
   }
 
-  async stateTransition() {
+  async stateTransition(platform) {
     // check if previous data has been sealed
-    const sealed = await this.userState.sync.isEpochSealed(
-      await this.userState.latestTransitionedEpoch()
+    const sealed = await this.userStates[platform].userState.sync.isEpochSealed(
+      await this.userStates[platform].userState.latestTransitionedEpoch()
     );
     if (!sealed) {
-      // how to cause this error??? where will it call sealData???
       throw new Error("From epoch is not yet sealed");
     }
 
     // gen proof
-    await this.userState.waitForSync();
-    const signupProof = await this.userState.genUserStateTransitionProof();
+    await this.userStates[platform].userState.waitForSync();
+    const signupProof = await this.userStates[
+      platform
+    ].userState.genUserStateTransitionProof();
     const data = await fetch(`${SERVER}/api/transition`, {
       method: "POST",
       headers: {
@@ -187,13 +188,15 @@ class User {
       body: JSON.stringify({
         publicSignals: signupProof.publicSignals,
         proof: signupProof.proof,
+        attesterId: ATTESTERS[platform],
       }),
     }).then((r) => r.json());
     await provider.waitForTransaction(data.hash);
-    await this.userState.waitForSync();
-    await this.loadReputation();
-    this.latestTransitionedEpoch =
-      await this.userState.latestTransitionedEpoch();
+    await this.userStates[platform].userState.waitForSync();
+    await this.loadReputation(platform);
+    this.latestTransitionedEpoch = await this.userStates[
+      platform
+    ].userState.latestTransitionedEpoch();
   }
 
   async proveReputation(minRep = 0, _graffitiPreImage = 0) {

@@ -37,6 +37,7 @@ class HashchainManager {
       const data = attestersData[i];
       if (data._id === "0") continue;
       if (!this.prevEpoch[data._id]) this.prevEpoch[data._id] = 0;
+      if (!this.latestSyncEpoch[data._id]) this.latestSyncEpoch[data._id] = 0;
 
       const attesterId = BigInt(data._id);
       const currentEpoch = Number(
