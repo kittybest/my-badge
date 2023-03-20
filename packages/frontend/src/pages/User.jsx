@@ -50,6 +50,7 @@ export default observer(() => {
       let tmpError = { ...errorMsg };
       tmpError[platform] = signupError;
       setErrorMsg(tmpError);
+      params.delete("platform");
       params.delete("signupError");
     }
     setParams(params);
