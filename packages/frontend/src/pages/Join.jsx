@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { observer } from "mobx-react-lite";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button, Divider, Input, Loader, Message } from "semantic-ui-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTwitter, faGithub } from "@fortawesome/free-brands-svg-icons";
@@ -9,8 +9,7 @@ import User from "../contexts/User";
 
 export default observer(() => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const params = new URLSearchParams(location.search);
+  const [params, setParams] = useSearchParams();
 
   const user = useContext(User);
 
@@ -21,11 +20,8 @@ export default observer(() => {
     setErrorMsg("");
     setIsLoading(true);
     try {
-      console.log("before sign up");
       await user.signup(platform, access_token);
-      console.log("after sign up");
       await user.getRep(platform);
-      console.log("after get initial rep");
       return navigate("/user");
     } catch (e) {
       setErrorMsg(e.toString());
@@ -39,9 +35,14 @@ export default observer(() => {
     const signupError = params.get("signupError");
     if (platform && access_token) {
       signup(platform, access_token);
+      params.delete("platform");
+      params.delete("access_token");
+      params.delete("signupCode");
     } else if (signupError) {
       setErrorMsg(signupError);
+      params.delete("signupError");
     }
+    setParams(params);
   }, []);
 
   const join = async (platform) => {

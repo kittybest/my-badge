@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { useLocation } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { Container, Button, Image, Grid, Message } from "semantic-ui-react";
 import User from "../contexts/User";
 import { SERVER } from "../config.js";
@@ -15,9 +15,7 @@ export default observer(() => {
     github: false,
   });
   const user = useContext(User);
-
-  const location = useLocation();
-  const params = new URLSearchParams(location.search);
+  const [params, setParams] = useSearchParams();
 
   const copyIdentity = () => {
     navigator.clipboard.writeText(user.id);
@@ -31,6 +29,7 @@ export default observer(() => {
     try {
       await user.signup(platform, access_token);
       await user.getRep(platform);
+      return navigate("/user");
     } catch (e) {
       setErrorMsg({ ...errorMsg });
       tmpLoading[platform] = false;
@@ -44,11 +43,16 @@ export default observer(() => {
     const signupError = params.get("signupError");
     if (platform && access_token) {
       signup(platform, access_token);
+      params.delete("platform");
+      params.delete("access_token");
+      params.delete("signupCode");
     } else if (signupError) {
       let tmpError = { ...errorMsg };
       tmpError[platform] = signupError;
       setErrorMsg(tmpError);
+      params.delete("signupError");
     }
+    setParams(params);
   }, []);
 
   const connect = async (platform) => {
