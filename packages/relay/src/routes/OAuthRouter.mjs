@@ -97,6 +97,7 @@ async function completeTwitterAuth(req, res, db) {
       "signupError",
       "There was a problem authenticating you"
     );
+    url.searchParams.append("platform", "twitter");
     res.redirect(url.toString());
     return;
   }
@@ -125,6 +126,7 @@ async function completeTwitterAuth(req, res, db) {
   if (!user.data.id) {
     const url = new URL(_state.redirectDestination);
     url.searchParams.append("signupError", "Unknown problem");
+    url.searchParams.append("platform", "twitter");
     res.redirect(url.toString());
     return;
   }
@@ -143,6 +145,7 @@ async function completeTwitterAuth(req, res, db) {
       "signupError",
       "You have already signed up with this account"
     );
+    url.searchParams.append("platform", "twitter");
     res.redirect(url.toString());
     return;
   }
@@ -193,6 +196,7 @@ async function completeGithubAuth(req, res, db) {
       "signupError",
       "There was a problem authenticating you"
     );
+    url.searchParams.append("platform", "github");
     res.redirect(url.toString());
     return;
   }
@@ -215,6 +219,7 @@ async function completeGithubAuth(req, res, db) {
   if (!user.id) {
     const _url = new URL(_state.redirectDestination);
     _url.searchParams.append("signupError", "Unknown problem");
+    _url.searchParams.append("platform", "github");
     res.redirect(_url.toString());
     return;
   }
@@ -231,6 +236,7 @@ async function completeGithubAuth(req, res, db) {
       "signupError",
       "You have already signed up with this account"
     );
+    _url.searchParams.append("platform", "github");
     res.redirect(_url.toString());
     return;
   }

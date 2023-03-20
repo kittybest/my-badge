@@ -39,7 +39,10 @@ export default observer(() => {
       params.delete("access_token");
       params.delete("signupCode");
     } else if (signupError) {
-      setErrorMsg(signupError);
+      setErrorMsg(
+        `Sign up through ${platform.toUpperCase()} error: ${signupError}`
+      );
+      params.delete("platform");
       params.delete("signupError");
     }
     setParams(params);

@@ -1,7 +1,7 @@
 import { createContext } from "react";
 import { ethers } from "ethers";
 import { makeAutoObservable } from "mobx";
-import { ZkIdentity, Strategy, hash1, stringifyBigInts } from "@unirep/utils";
+import { ZkIdentity, Strategy, stringifyBigInts } from "@unirep/utils";
 import { UserState, schema } from "@unirep/core";
 import { MemoryConnector } from "anondb/web";
 import { constructSchema } from "anondb/types";
@@ -18,7 +18,6 @@ import poseidon from "poseidon-lite";
 
 class User {
   userStates = {}; // key: attesterId, value: { userState, currentEpoch, latestTransitionedEpoch, hasSignedUp, data, provableData }
-  userState = null;
   id;
   fieldCount = -1;
   sumFieldCount = -1;
@@ -259,6 +258,17 @@ class User {
     await provider.waitForTransaction(data.hash);
     await this.userStates[platform].userState.waitForSync();
     await this.loadReputation(platform);
+  }
+
+  async logout() {
+    for (const [platform, us] of Object.entries(this.userStates)) {
+      await us.userState.sync.stop();
+      await us.userState.sync._db.closeAndWipe();
+      window.localStorage.removeItem(`${platform}_access_token`);
+    }
+    this.userStates = {};
+    this.hasSignedUp = false;
+    window.localStorage.removeItem("id"); // for if anyone else wanna sign up and use
   }
 }
 
