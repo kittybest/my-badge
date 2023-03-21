@@ -66,12 +66,15 @@ class User {
       const data = await userState.getData();
       const provableData = await userState.getProvableData();
 
+      const access_token = localStorage.getItem(`${platform}_access_token`);
+
       this.userStates[platform] = {
         userState,
         hasSignedUp,
         latestTransitionedEpoch,
         data,
         provableData,
+        access_token,
       };
     }
     this.updateHasSignedUp();
@@ -129,9 +132,6 @@ class User {
     /* Wait for loading userStates */
     await this.waitForLoad(platform);
 
-    /* Store access_token to local storage */
-    localStorage.setItem(`${platform}_access_token`, access_token);
-
     /* Gen signupProof */
     const unirepContract = new ethers.Contract(
       UNIREP_ADDRESS,
@@ -172,6 +172,9 @@ class User {
     this.userStates[platform].latestTransitionedEpoch =
       this.userStates[platform].userState.sync.calcCurrentEpoch();
     this.updateHasSignedUp();
+
+    /* Store access_token to local storage */
+    await this.storeAccessToken(platform, access_token);
   }
 
   async stateTransition(platform) {
@@ -278,6 +281,13 @@ class User {
     this.userStates = {};
     this.hasSignedUp = false;
     window.localStorage.removeItem("id"); // for if anyone else wanna sign up and use
+  }
+
+  async storeAccessToken(platform, access_token) {
+    await this.waitForLoad(platform);
+
+    window.localStorage.setItem(`${platform}_access_token`, access_token);
+    this.userStates[platform].access_token = access_token;
   }
 }
 

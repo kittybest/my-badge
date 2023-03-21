@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Grid, Segment, Message, Container } from "semantic-ui-react";
+import { Button, Grid, Segment, Message } from "semantic-ui-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTwitter, faGithub } from "@fortawesome/free-brands-svg-icons";
 
@@ -7,6 +7,7 @@ const InfoCard = ({
   title,
   platform,
   hasSignedUp,
+  connected,
   data,
   provableData,
   color,
@@ -60,8 +61,8 @@ const InfoCard = ({
           </Grid.Column>
           <Grid.Column width={4}>
             <h3>{title}</h3>
-            <p className={hasSignedUp ? "connected" : "unconnected"}>
-              {hasSignedUp ? "connected" : "unconnected"}
+            <p className={connected ? "connected" : "unconnected"}>
+              {connected ? "connected" : "unconnected"}
             </p>
           </Grid.Column>
           <Grid.Column width={7} verticalAlign="middle">
@@ -76,24 +77,34 @@ const InfoCard = ({
               <p>Not connected</p>
             )}
           </Grid.Column>
-          <Grid.Column width={2}>
-            {hasSignedUp && (
-              <Button onClick={onClickUpdate} loading={isUpdating}>
-                Update
-              </Button>
-            )}
-          </Grid.Column>
-          <Grid.Column width={2}>
-            {hasSignedUp ? (
-              <Button onClick={onClickUST} loading={isUSTing}>
-                UST
-              </Button>
-            ) : (
+          {!hasSignedUp && (
+            <Grid.Column width={4}>
               <Button onClick={connect} loading={connectLoading}>
                 Connect!
               </Button>
-            )}
-          </Grid.Column>
+            </Grid.Column>
+          )}
+          {hasSignedUp && !connected && (
+            <Grid.Column width={2}>
+              <Button onClick={connect} loading={connectLoading}>
+                Connect!
+              </Button>
+            </Grid.Column>
+          )}
+          {hasSignedUp && connected && (
+            <Grid.Column width={2}>
+              <Button onClick={onClickUpdate} loading={isUpdating}>
+                Update
+              </Button>
+            </Grid.Column>
+          )}
+          {hasSignedUp && (
+            <Grid.Column width={2}>
+              <Button onClick={onClickUST} loading={isUSTing}>
+                UST
+              </Button>
+            </Grid.Column>
+          )}
         </Grid.Row>
         {errorMsg.length > 0 && (
           <Grid.Row>

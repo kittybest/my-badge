@@ -61,7 +61,9 @@ async function twitterAuth(req, res, db) {
     type: "twitter",
     data: challenge,
     redirectDestination: req.query.redirectDestination,
+    isSigningUp: req.query.isSigningUp === "true",
   });
+
   const url = new URL("https://twitter.com/i/oauth2/authorize");
   url.searchParams.append("response_type", "code");
   url.searchParams.append("client_id", TWITTER_CLIENT_ID);
@@ -90,6 +92,7 @@ async function completeTwitterAuth(req, res, db) {
       _id: state,
     },
   });
+
   if (error) {
     // access was denied
     const url = new URL(_state.redirectDestination);
@@ -133,29 +136,32 @@ async function completeTwitterAuth(req, res, db) {
   // end oauth logic
   // generate a signup code and give it to the user
   // prevent double signup
-  const signupId = `twitter-${user.data.id}`;
-  const existingSignup = await db.findOne("SignupCode", {
-    where: {
-      signupId,
-    },
-  });
   const url = new URL(_state.redirectDestination);
-  if (existingSignup || existingSignup?.usedAt) {
-    url.searchParams.append(
-      "signupError",
-      "You have already signed up with this account"
-    );
-    url.searchParams.append("platform", "twitter");
-    res.redirect(url.toString());
-    return;
+  if (_state.isSigningUp) {
+    const signupId = `twitter-${user.data.id}`;
+    const existingSignup = await db.findOne("SignupCode", {
+      where: {
+        signupId,
+      },
+    });
+    if (existingSignup || existingSignup?.usedAt) {
+      url.searchParams.append(
+        "signupError",
+        "You have already signed up with this account"
+      );
+      url.searchParams.append("platform", "twitter");
+      res.redirect(url.toString());
+      return;
+    }
+    await db.create("SignupCode", {
+      signupId,
+    });
   }
-  const signupCode = await db.create("SignupCode", {
-    signupId,
-  });
+
   // now go back to the frontend signup flow
-  url.searchParams.append("signupCode", signupCode._id);
   url.searchParams.append("platform", "twitter");
   url.searchParams.append("access_token", auth.access_token);
+  url.searchParams.append("isSigningUp", _state.isSigningUp);
   res.redirect(url.toString());
 }
 
@@ -164,6 +170,7 @@ async function githubAuth(req, res, db) {
   const state = await db.create("OAuthState", {
     type: "github",
     redirectDestination: req.query.redirectDestination,
+    isSigningUp: req.query.isSigningUp === "true",
   });
   const url = new URL("https://github.com/login/oauth/authorize");
   url.searchParams.append("client_id", GITHUB_CLIENT_ID);
@@ -224,28 +231,31 @@ async function completeGithubAuth(req, res, db) {
     return;
   }
   // end oauth logic
-  const signupId = `github-${user.id}`;
-  const existingSignup = await db.findOne("SignupCode", {
-    where: {
-      signupId,
-    },
-  });
   const _url = new URL(_state.redirectDestination);
-  if (existingSignup || existingSignup?.usedAt) {
-    _url.searchParams.append(
-      "signupError",
-      "You have already signed up with this account"
-    );
-    _url.searchParams.append("platform", "github");
-    res.redirect(_url.toString());
-    return;
+  if (_state.isSigningUp) {
+    const signupId = `github-${user.id}`;
+    const existingSignup = await db.findOne("SignupCode", {
+      where: {
+        signupId,
+      },
+    });
+    if (existingSignup || existingSignup?.usedAt) {
+      _url.searchParams.append(
+        "signupError",
+        "You have already signed up with this account"
+      );
+      _url.searchParams.append("platform", "github");
+      res.redirect(_url.toString());
+      return;
+    }
+    await db.create("SignupCode", {
+      signupId,
+    });
   }
-  const signupCode = await db.create("SignupCode", {
-    signupId,
-  });
+
   // now go back to the frontend signup flow
-  _url.searchParams.append("signupCode", signupCode._id);
   _url.searchParams.append("platform", "github");
   _url.searchParams.append("access_token", access_token);
+  _url.searchParams.append("isSigningUp", _state.isSigningUp);
   res.redirect(_url.toString());
 }

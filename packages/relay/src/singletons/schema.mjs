@@ -12,6 +12,7 @@ const _schema = [
       },
       ["type", "String"],
       ["redirectDestination", "String"],
+      ["isSigningUp", "Bool"],
       ["data", "String", { optional: true }],
     ],
   },

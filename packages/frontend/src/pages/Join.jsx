@@ -41,19 +41,19 @@ export default observer(() => {
     const platform = params.get("platform");
     const access_token = params.get("access_token");
     const signupError = params.get("signupError");
+    const isSigningUp = params.get("isSigningUp");
     if (platform && access_token) {
-      signup(platform, access_token);
-      params.delete("platform");
-      params.delete("access_token");
-      params.delete("signupCode");
+      if (isSigningUp && parseInt(isSigningUp)) {
+        signup(platform, access_token);
+      } else {
+        user.storeAccessToken(platform, access_token);
+      }
     } else if (signupError) {
       setErrorMsg(
         `Sign up through ${platform.toUpperCase()} error: ${signupError}`
       );
-      params.delete("platform");
-      params.delete("signupError");
     }
-    setParams(params);
+    setParams("");
   }, []);
 
   const join = async (platform) => {
@@ -66,10 +66,12 @@ export default observer(() => {
     if (platform === "twitter") {
       const url = new URL("/api/oauth/twitter", SERVER);
       url.searchParams.set("redirectDestination", dest.toString());
+      url.searchParams.set("isSigningUp", true);
       window.location.replace(url.toString());
     } else if (platform === "github") {
       const url = new URL("/api/oauth/github", SERVER);
       url.searchParams.set("redirectDestination", dest.toString());
+      url.searchParams.set("isSigningUp", true);
       window.location.replace(url.toString());
     } else {
       console.log("wwaitttt whatttt???");
