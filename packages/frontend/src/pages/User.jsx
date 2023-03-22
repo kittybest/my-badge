@@ -41,19 +41,19 @@ export default observer(() => {
     const platform = params.get("platform");
     const access_token = params.get("access_token");
     const signupError = params.get("signupError");
+    const isSigningUp = params.get("isSigningUp");
     if (platform && access_token) {
-      signup(platform, access_token);
-      params.delete("platform");
-      params.delete("access_token");
-      params.delete("signupCode");
+      if (isSigningUp && parseInt(isSigningUp)) {
+        signup(platform, access_token);
+      } else {
+        user.storeAccessToken(platform, access_token);
+      }
     } else if (signupError) {
       let tmpError = { ...errorMsg };
       tmpError[platform] = signupError;
       setErrorMsg(tmpError);
-      params.delete("platform");
-      params.delete("signupError");
     }
-    setParams(params);
+    setParams("");
   }, []);
 
   const connect = async (platform) => {
@@ -68,14 +68,17 @@ export default observer(() => {
     // authorization through relay
     const currentUrl = new URL(window.location.href);
     const dest = new URL("/user", currentUrl.origin);
+    const isSigningUp = !user.userStates[platform].hasSignedUp;
 
     if (platform === "twitter") {
       const url = new URL("/api/oauth/twitter", SERVER);
       url.searchParams.set("redirectDestination", dest.toString());
+      url.searchParams.set("isSigningUp", isSigningUp);
       window.location.replace(url.toString());
     } else if (platform === "github") {
       const url = new URL("/api/oauth/github", SERVER);
       url.searchParams.set("redirectDestination", dest.toString());
+      url.searchParams.set("isSigningUp", isSigningUp);
       window.location.replace(url.toString());
     } else {
       let tmpError = { ...errorMsg };
@@ -154,6 +157,7 @@ export default observer(() => {
               title={"Twitter"}
               platform={"twitter"}
               hasSignedUp={user.userStates.twitter.hasSignedUp}
+              connected={user.userStates.twitter.access_token !== null}
               data={Number(
                 user.userStates.twitter.data[0] -
                   user.userStates.twitter.data[1]
@@ -173,6 +177,7 @@ export default observer(() => {
               title={"Github Stars"}
               platform={"github"}
               hasSignedUp={user.userStates.github.hasSignedUp}
+              connected={user.userStates.github.access_token !== null}
               data={Number(
                 user.userStates.github.data[2] - user.userStates.github.data[3]
               )}
@@ -191,6 +196,7 @@ export default observer(() => {
               title={"Github Followers"}
               platform={"github"}
               hasSignedUp={user.userStates.github.hasSignedUp}
+              connected={user.userStates.github.access_token !== null}
               data={Number(
                 user.userStates.github.data[0] - user.userStates.github.data[1]
               )}
