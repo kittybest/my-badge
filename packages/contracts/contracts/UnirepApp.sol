@@ -6,6 +6,13 @@ import { Unirep } from "@unirep/contracts/Unirep.sol";
 // import "hardhat/console.sol";
 
 contract UnirepApp {
+
+    event SubmitProof (
+        uint256 epochKey,
+        uint data,
+        uint256[8] proof
+    );
+
     Unirep public unirep;
 
     constructor(Unirep _unirep, uint256 _epochLength) {
@@ -49,4 +56,19 @@ contract UnirepApp {
             val
         );
     }
+
+    function submitProof(
+        uint256[] memory publicSignals,
+        uint256[8] memory proof
+    ) public {
+        unirep.verifyReputationProof(publicSignals, proof);
+
+        emit SubmitProof(
+            publicSignals[0],
+            publicSignals[1], /// changed to the one that correspond to new constructed proof
+            proof
+        );
+    }
+
+
 }
