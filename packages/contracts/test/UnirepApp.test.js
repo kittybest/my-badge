@@ -31,6 +31,7 @@ async function genUserState(id, app) {
 describe("Unirep App", function () {
   let unirep;
   let app;
+  let verifier;
 
   // epoch length
   const epochLength = 30;
@@ -43,9 +44,16 @@ describe("Unirep App", function () {
   it("deployment", async function () {
     const [deployer] = await ethers.getSigners();
     unirep = await deployUnirep(deployer);
+    await unirep.deployed();
+
+    const Verifier = await ethers.getContractFactory("ProveDataVerifier");
+    verifier = await Verifier.deploy();
+    await verifier.deployed();
+
     const App = await ethers.getContractFactory("UnirepApp");
-    app = await App.deploy(unirep.address, epochLength);
+    app = await App.deploy(unirep.address, epochLength, verifier.address);
     await app.deployed();
+
     startTime = (await unirep.attesterStartTimestamp(app.address)).toNumber();
   });
 

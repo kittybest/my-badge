@@ -6,28 +6,44 @@ import { deployUnirep } from "@unirep/contracts/deploy/index.js";
 import hardhat from "hardhat";
 const { ethers } = hardhat;
 
+/* Re-construct require if needed */
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-
-const UnirepApp = require("../abi/UnirepApp.json");
 
 const [signer] = await ethers.getSigners();
 const unirep = await deployUnirep(signer);
 const epochLength = 1500;
+/* End of re-constructing require */
 
+/* Deploy Prove Data Verifier */
+const DataVerifierF = await ethers.getContractFactory("ProveDataVerifier");
+const dataVerifier = await DataVerifierF.deploy();
+await dataVerifier.deployed();
+/* End of deploying Prove Data Verifier */
+
+/* Deploy UnirepApp 1 */
 const App = await ethers.getContractFactory("UnirepApp");
-
-const app1 = await App.deploy(unirep.address, epochLength);
+const app1 = await App.deploy(
+  unirep.address,
+  epochLength,
+  dataVerifier.address
+); // TODO: add verifier
 await app1.deployed();
 console.log(
   `Unirep app 1 with epoch length ${epochLength} deployed to ${app1.address}`
 );
 
-const app2 = await App.deploy(unirep.address, epochLength);
+/* Deploy UnirepApp 2 */
+const app2 = await App.deploy(
+  unirep.address,
+  epochLength,
+  dataVerifier.address
+);
 await app2.deployed();
 console.log(
   `Unirep app 2 with epoch length ${epochLength} deployed to ${app2.address}`
 );
+/* End of deploying UnirepApps */
 
 const config = `module.exports = {
   UNIREP_ADDRESS: '${unirep.address}',
