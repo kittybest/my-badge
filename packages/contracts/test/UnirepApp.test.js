@@ -2,20 +2,19 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const { deployUnirep } = require("@unirep/contracts/deploy");
 const { genRandomSalt, hashOne, ZkIdentity } = require("@unirep/utils");
-const { schema, UserState } = require("@unirep/core");
+const { schema } = require("@unirep/core");
+const AppUserState = require("../src/userState");
 const { DB, SQLiteConnector } = require("anondb/node");
 const { Unirep } = require("@unirep/contracts");
 
-const {
-  defaultProver: prover,
-} = require("@unirep/circuits/provers/defaultProver");
+const { appProver: prover } = require("@unirep-app/circuits/provers/appProver");
 
 async function genUserState(id, app) {
   // generate a user state
   const db = await SQLiteConnector.create(schema, ":memory:");
   const unirepAddress = await app.unirep();
   const attesterId = BigInt(app.address);
-  const userState = new UserState({
+  const userState = new AppUserState({
     db,
     prover,
     unirepAddress,

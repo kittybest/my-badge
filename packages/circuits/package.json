@@ -17,7 +17,7 @@
     "buildProveDataSnark": "yarn buildSnarks proveData",
     "buildEpochKeySnark": "yarn buildSnarks epochKey",
     "buildTs": "tsc",
-    "copyCircom": "rm -rf ./dist/zksnarkBuild && cp -rf ./zksnarkBuild ./dist/zksnarkBuild",
+    "copyCircom": "sh scripts/copyCircom.sh",
     "time": "ts-node scripts/time.ts",
     "test": "mocha -r ts-node/register test/proveData.test.ts --exit"
   },

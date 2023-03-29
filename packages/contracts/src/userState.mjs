@@ -1,11 +1,9 @@
-import { DataProof, CircuitConfig } from "@unirep-app/circuits";
-import { Prover } from "@unirep/circuits";
+import { DataProof, AppCircuit } from "@unirep-app/circuits";
+import { Prover, CircuitConfig } from "@unirep/circuits";
 import { UserState } from "@unirep/core";
 import { hash4, ZkIdentity, stringifyBigInts } from "@unirep/utils";
 import { ethers } from "ethers";
 import UNIREP_APP_ABI from "../abi/UnirepApp.json";
-
-const { FIELD_COUNT } = CircuitConfig.default;
 
 export default class AppUserState extends UserState {
   /* Constructor */
@@ -17,10 +15,6 @@ export default class AppUserState extends UserState {
       config.provider
     );
   }
-
-  fillZero = (data, length) => {
-    return [...data, ...Array(length - data.length).fill(0)];
-  };
 
   /* Generate DataProof
    * options:
@@ -45,7 +39,7 @@ export default class AppUserState extends UserState {
       reveal_nonce: revealNonce ?? 0,
     };
     const results = await this.sync.prover.genProofAndPublicSignals(
-      Circuit.proveData,
+      AppCircuit.proveData,
       stringifyBigInts(circuitInputs)
     );
 

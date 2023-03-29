@@ -9,7 +9,7 @@ const buildPath = "../zksnarkBuild";
 /**
  * The default prover that uses the circuits in default built folder `zksnarkBuild/`
  */
-export const defaultProver = {
+export const appProver = {
   /**
    * Generate proof and public signals with `snarkjs.groth16.fullProve`
    * @param circuitName Name of the circuit, which can be chosen from `Circuit`

@@ -1,7 +1,7 @@
 import * as utils from "@unirep/utils";
 
 import { CircuitConfig } from "@unirep/circuits";
-import { defaultProver } from "../provers/defaultProver";
+import { appProver } from "../provers/appProver";
 import { AppCircuit } from "../src";
 
 const {
@@ -130,7 +130,7 @@ const genDataCircuitInput = (config: {
 
 const genProofAndVerify = async (circuit: AppCircuit, circuitInputs: any) => {
   const startTime = new Date().getTime();
-  const { proof, publicSignals } = await defaultProver.genProofAndPublicSignals(
+  const { proof, publicSignals } = await appProver.genProofAndPublicSignals(
     circuit,
     circuitInputs
   );
@@ -140,11 +140,7 @@ const genProofAndVerify = async (circuit: AppCircuit, circuitInputs: any) => {
       (endTime - startTime) / 1000
     )} s)`
   );
-  const isValid = await defaultProver.verifyProof(
-    circuit,
-    publicSignals,
-    proof
-  );
+  const isValid = await appProver.verifyProof(circuit, publicSignals, proof);
   return { isValid, proof, publicSignals };
 };
 
