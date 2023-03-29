@@ -1,5 +1,6 @@
 import path from "path";
-import { Circuit } from "../src";
+import { Circuit } from "@unirep/circuits";
+import { AppCircuit } from "../src";
 import * as snarkjs from "snarkjs";
 import { SnarkProof, SnarkPublicSignals } from "@unirep/utils";
 
@@ -16,7 +17,7 @@ export const defaultProver = {
    * @returns snark proof and public signals
    */
   genProofAndPublicSignals: async (
-    circuitName: string | Circuit,
+    circuitName: string | AppCircuit | Circuit,
     inputs: any
   ): Promise<any> => {
     const circuitWasmPath = path.join(
@@ -42,7 +43,7 @@ export const defaultProver = {
    * @returns True if the proof is valid, false otherwise
    */
   verifyProof: async (
-    circuitName: string | Circuit,
+    circuitName: string | AppCircuit | Circuit,
     publicSignals: SnarkPublicSignals,
     proof: SnarkProof
   ): Promise<boolean> => {
@@ -55,7 +56,7 @@ export const defaultProver = {
    * @param name Name of the circuit, which can be chosen from `Circuit`
    * @returns vkey of the circuit
    */
-  getVKey: async (name: string | Circuit) => {
+  getVKey: async (name: string | AppCircuit | Circuit) => {
     return require(path.join(buildPath, `${name}.vkey.json`));
   },
 };

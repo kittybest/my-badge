@@ -1,6 +1,7 @@
 import { expect } from "chai";
-import { ZkIdentity, hash1, genEpochKey } from "@unirep/utils";
-import { Circuit, CircuitConfig, DataProof } from "../src";
+import { ZkIdentity, genEpochKey } from "@unirep/utils";
+import { CircuitConfig } from "@unirep/circuits";
+import { DataProof, AppCircuit } from "../src";
 import { genDataCircuitInput, genProofAndVerify, fillZero } from "./utils";
 
 const { SUM_FIELD_COUNT, NUM_EPOCH_KEY_NONCE_PER_EPOCH, FIELD_COUNT } =
@@ -23,7 +24,7 @@ describe("Prove reputation from attester circuit", function () {
       _data: data,
     });
     const { isValid, publicSignals, proof } = await genProofAndVerify(
-      Circuit.proveData,
+      AppCircuit.proveData,
       circuitInputs
     );
     expect(isValid).to.be.true;
@@ -55,7 +56,7 @@ describe("Prove reputation from attester circuit", function () {
       _data: data,
     });
     const { isValid, proof, publicSignals } = await genProofAndVerify(
-      Circuit.proveData,
+      AppCircuit.proveData,
       circuitInputs
     );
     expect(isValid).to.be.true;
@@ -87,7 +88,7 @@ describe("Prove reputation from attester circuit", function () {
       revealNonce,
     });
     const { isValid, proof, publicSignals } = await genProofAndVerify(
-      Circuit.proveData,
+      AppCircuit.proveData,
       circuitInputs
     );
     expect(isValid).to.be.true;
@@ -138,7 +139,7 @@ describe("Prove reputation from attester circuit", function () {
       revealNonce,
     });
     const { isValid, proof, publicSignals } = await genProofAndVerify(
-      Circuit.proveData,
+      AppCircuit.proveData,
       circuitInputs
     );
     expect(isValid).to.be.true;
@@ -167,7 +168,7 @@ describe("Prove reputation from attester circuit", function () {
       _data: data,
     });
     await new Promise<void>((rs, rj) => {
-      genProofAndVerify(Circuit.proveData, circuitInputs)
+      genProofAndVerify(AppCircuit.proveData, circuitInputs)
         .then(() => rj())
         .catch(() => rs());
     });
@@ -187,7 +188,7 @@ describe("Prove reputation from attester circuit", function () {
       _data: data,
     });
     await new Promise<void>((rs, rj) => {
-      genProofAndVerify(Circuit.proveData, circuitInputs)
+      genProofAndVerify(AppCircuit.proveData, circuitInputs)
         .then(() => rj())
         .catch(() => rs());
     });
@@ -209,7 +210,7 @@ describe("Prove reputation from attester circuit", function () {
       revealNonce,
     });
     await new Promise<void>((rs, rj) => {
-      genProofAndVerify(Circuit.proveData, circuitInputs)
+      genProofAndVerify(AppCircuit.proveData, circuitInputs)
         .then(() => rj())
         .catch(() => rs());
     });

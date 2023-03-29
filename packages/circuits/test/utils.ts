@@ -1,7 +1,9 @@
 import * as utils from "@unirep/utils";
 
-import { Circuit, SNARK_SCALAR_FIELD, CircuitConfig } from "../src";
+import { CircuitConfig } from "@unirep/circuits";
 import { defaultProver } from "../provers/defaultProver";
+import { AppCircuit } from "../src";
+
 const {
   EPOCH_TREE_DEPTH,
   EPOCH_TREE_ARITY,
@@ -126,7 +128,7 @@ const genDataCircuitInput = (config: {
   return utils.stringifyBigInts(circuitInputs);
 };
 
-const genProofAndVerify = async (circuit: Circuit, circuitInputs: any) => {
+const genProofAndVerify = async (circuit: AppCircuit, circuitInputs: any) => {
   const startTime = new Date().getTime();
   const { proof, publicSignals } = await defaultProver.genProofAndPublicSignals(
     circuit,
