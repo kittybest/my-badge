@@ -25,11 +25,8 @@ const genNewEpochTree = (
 };
 
 export const fillZero = (data: number[], length: number) => {
-  return [
-    ...data,
-    ...Array(length - data.length).fill(0),
-  ]
-}
+  return [...data, ...Array(length - data.length).fill(0)];
+};
 
 export const randomData = () => [
   ...Array(SUM_FIELD_COUNT)
@@ -97,14 +94,7 @@ const genDataCircuitInput = (config: {
   _data: (bigint | number)[];
   revealNonce?: number;
 }) => {
-  const {
-    id,
-    epoch,
-    nonce,
-    attesterId,
-    _data,
-    revealNonce,
-  } = Object.assign(
+  const { id, epoch, nonce, attesterId, _data, revealNonce } = Object.assign(
     {
       _data: [],
     },

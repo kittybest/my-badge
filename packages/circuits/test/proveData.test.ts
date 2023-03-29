@@ -20,7 +20,7 @@ describe("Prove reputation from attester circuit", function () {
       epoch,
       nonce,
       attesterId,
-      _data: data
+      _data: data,
     });
     const { isValid, publicSignals, proof } = await genProofAndVerify(
       Circuit.proveData,
@@ -29,14 +29,14 @@ describe("Prove reputation from attester circuit", function () {
     expect(isValid).to.be.true;
     // check control outputs
     expect(publicSignals[2].toString()).to.equal(
-      DataProof.buildControl({epoch, nonce, attesterId}).toString()
+      DataProof.buildControl({ epoch, nonce, attesterId }).toString()
     );
     const dataProof = new DataProof(publicSignals, proof);
     expect(dataProof.epoch.toString()).to.equal(epoch.toString());
     expect(dataProof.nonce.toString()).to.equal("0");
     expect(dataProof.revealNonce.toString()).to.equal("0");
     expect(dataProof.attesterId.toString()).to.equal(attesterId.toString());
-    for (let i = 0; i < FIELD_COUNT; i ++) {
+    for (let i = 0; i < FIELD_COUNT; i++) {
       expect(dataProof.data[i].toString()).to.equal(data[i].toString());
     }
   });
@@ -61,7 +61,7 @@ describe("Prove reputation from attester circuit", function () {
     expect(isValid).to.be.true;
     // check control outputs
     expect(publicSignals[2].toString()).to.equal(
-      DataProof.buildControl({epoch, nonce, attesterId}).toString()
+      DataProof.buildControl({ epoch, nonce, attesterId }).toString()
     );
 
     const dataProof = new DataProof(publicSignals, proof);
@@ -94,15 +94,32 @@ describe("Prove reputation from attester circuit", function () {
 
     // check control outputs
     expect(publicSignals[2].toString()).to.equal(
-      DataProof.buildControl({epoch, nonce, attesterId, revealNonce}).toString(),
-      'actual control not as expected'
+      DataProof.buildControl({
+        epoch,
+        nonce,
+        attesterId,
+        revealNonce,
+      }).toString(),
+      "actual control not as expected"
     );
 
     const dataProof = new DataProof(publicSignals, proof);
-    expect(dataProof.epoch.toString()).to.equal(epoch.toString(), 'actual epoch not as expected');
-    expect(dataProof.nonce.toString()).to.equal(nonce.toString(), 'actual nonce not as expected');
-    expect(dataProof.revealNonce.toString()).to.equal(revealNonce.toString(), 'actual revealNonce not as expected');
-    expect(dataProof.attesterId.toString()).to.equal(attesterId.toString(), 'actual attesterId not as expected');
+    expect(dataProof.epoch.toString()).to.equal(
+      epoch.toString(),
+      "actual epoch not as expected"
+    );
+    expect(dataProof.nonce.toString()).to.equal(
+      nonce.toString(),
+      "actual nonce not as expected"
+    );
+    expect(dataProof.revealNonce.toString()).to.equal(
+      revealNonce.toString(),
+      "actual revealNonce not as expected"
+    );
+    expect(dataProof.attesterId.toString()).to.equal(
+      attesterId.toString(),
+      "actual attesterId not as expected"
+    );
   });
 
   it("should output an epoch key", async () => {

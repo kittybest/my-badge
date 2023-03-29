@@ -2,7 +2,7 @@ import { Circuit, Prover } from "./circuits";
 import { SnarkProof } from "@unirep/utils";
 import { BigNumberish } from "@ethersproject/bignumber";
 import { BaseProof } from "./BaseProof";
-import CircuitConfig from './CircuitConfig';
+import CircuitConfig from "./CircuitConfig";
 
 /**
  * The reputation proof structure that helps to query the public signals
@@ -51,12 +51,7 @@ export class DataProof extends BaseProof {
     this.circuit = Circuit.proveData;
   }
 
-  static buildControl({
-    attesterId,
-    epoch,
-    nonce,
-    revealNonce,
-  }: any) {
+  static buildControl({ attesterId, epoch, nonce, revealNonce }: any) {
     let control = BigInt(0);
     control += BigInt(revealNonce ?? 0) << BigInt(232);
     control += BigInt(attesterId) << BigInt(72);

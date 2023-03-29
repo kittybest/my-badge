@@ -5,22 +5,44 @@ import { Unirep } from "@unirep/contracts/Unirep.sol";
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
 
-contract UnirepApp {
+interface IVerifier {
+    /**
+     * @return bool Whether the proof is valid given the hardcoded verifying key
+     *          above and the public inputs
+     */
+    function verifyProof(
+        uint256[] calldata publicSignals,
+        uint256[8] calldata proof
+    ) external view returns (bool);
+}
 
-    event SubmitProof (
-        uint256 epochKey,
-        uint data,
+contract UnirepApp {
+    uint8 public constant FIELD_COUNT = 6;
+    uint256 public constant SNARK_SCALAR_FIELD = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
+
+    Unirep public unirep;
+    IVerifier immutable dataVerifier;
+
+    event SubmitDataProof (
+        uint256 indexed epochKey,
+        uint256[FIELD_COUNT] data,
         uint256[8] proof
     );
 
-    Unirep public unirep;
+    error InvalidEpoch(uint256 epoch);
+    error InvalidStateTreeRoot(uint256 stateTreeRoot);
+    error InvalidProof();
+    error InvalidEpochKey();
 
-    constructor(Unirep _unirep, uint256 _epochLength) {
+    constructor(Unirep _unirep, uint256 _epochLength, IVerifier _dataVerifier) {
         // set unirep address
         unirep = _unirep;
 
         // sign up as an attester
         unirep.attesterSignUp(_epochLength);
+
+        // setup the verifier contracts
+        dataVerifier = _dataVerifier;
     }
 
     // sign up users in this app
@@ -57,15 +79,54 @@ contract UnirepApp {
         );
     }
 
-    function submitProof(
+    function decodeDataProofControl(uint256 control) public pure returns(uint256 attesterId, uint256 epoch, uint256 epochKey) {
+        epochKey = control & ((1 << 8) - 1);
+        epoch = (control >> 8) & ((1 << 64) -1);
+        attesterId = (control >> 72) & ((1 << 160) - 1);
+
+        return (epochKey, epoch, attesterId);
+    }
+
+    function submitDataProof(
         uint256[] memory publicSignals,
         uint256[8] memory proof
     ) public {
-        unirep.verifyReputationProof(publicSignals, proof);
+        // check if proof is valid
+        bool valid = dataVerifier.verifyProof(publicSignals, proof);
+        if (!valid) revert InvalidProof();
 
-        emit SubmitProof(
-            publicSignals[0],
-            publicSignals[1], /// changed to the one that correspond to new constructed proof
+        // check if epoch key exceed the constraint
+        uint256 epochKey = publicSignals[0];
+        if (epochKey >= SNARK_SCALAR_FIELD) revert InvalidEpochKey();
+
+        // decode publicSignals
+        uint256 revealNonce;
+        uint256 attesterId;
+        uint256 epoch;
+        uint256 nonce;
+        (revealNonce, attesterId, epoch, nonce) = unirep.decodeEpochKeyControl(publicSignals[2]);
+
+        // check the root does exists
+        uint256 stateTreeRoot = publicSignals[1];
+
+        if (!unirep.attesterStateTreeRootExists(uint160(attesterId), epoch, stateTreeRoot))
+            revert InvalidStateTreeRoot(stateTreeRoot);
+
+        // check if epoch not match
+        if (epoch > unirep.attesterCurrentEpoch(uint160(attesterId)))
+            revert InvalidEpoch(epoch);
+
+        // TODO: proof nullifier???
+
+
+        uint256[FIELD_COUNT] memory data;
+        for(uint8 x = 0; x < FIELD_COUNT; x ++) {
+            data[x] = publicSignals[3+x];
+        }
+
+        emit SubmitDataProof(
+            epochKey,
+            data,
             proof
         );
     }

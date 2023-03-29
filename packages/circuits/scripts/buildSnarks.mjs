@@ -51,7 +51,7 @@ for (const name of circuits) {
       child_process.exec(
         `${HOME}/.cargo/bin/circom --r1cs --wasm -o ${outDir} ${inputFile}`,
         (err, stdout, stderr) => {
-          console.log(err, stdout, stderr)
+          console.log(err, stdout, stderr);
           if (err) rj(err);
           else rs();
         }
