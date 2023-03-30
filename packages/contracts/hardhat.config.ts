@@ -1,6 +1,8 @@
-require("@nomiclabs/hardhat-ethers");
+import "@typechain/hardhat";
+import "@nomiclabs/hardhat-ethers";
+import "@nomicfoundation/hardhat-chai-matchers";
 
-module.exports = {
+export default {
   defaultNetwork: "local",
   networks: {
     hardhat: {
