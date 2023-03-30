@@ -1,29 +1,25 @@
-const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const { SQLiteConnector } = require("anondb/node");
 const { deployUnirep } = require("@unirep/contracts/deploy");
 const { genRandomSalt, hashOne, ZkIdentity } = require("@unirep/utils");
 const { schema } = require("@unirep/core");
-const AppUserState = require("../src/userState");
-const { DB, SQLiteConnector } = require("anondb/node");
-const { Unirep } = require("@unirep/contracts");
-
-const { appProver: prover } = require("@unirep-app/circuits/provers/appProver");
+const { genUserState: _genUserState } = require("./utils");
 
 async function genUserState(id, app) {
   // generate a user state
   const db = await SQLiteConnector.create(schema, ":memory:");
   const unirepAddress = await app.unirep();
   const attesterId = BigInt(app.address);
-  const userState = new AppUserState({
-    db,
-    prover,
+
+  const userState = await _genUserState(
+    ethers.provider,
     unirepAddress,
-    provider: ethers.provider,
+    id,
     attesterId,
-    _id: id,
-  });
-  await userState.start();
-  await userState.waitForSync();
+    db
+  );
+
+  console.log(userState);
   return userState;
 }
 
@@ -56,7 +52,7 @@ describe("Unirep App", function () {
     startTime = (await unirep.attesterStartTimestamp(app.address)).toNumber();
   });
 
-  it("user sign up", async () => {
+  it("user sign up", async function () {
     const userState = await genUserState(id, app);
 
     // generate
@@ -64,7 +60,7 @@ describe("Unirep App", function () {
     await app.userSignUp(publicSignals, proof).then((t) => t.wait());
   });
 
-  it("submit attestations", async () => {
+  it("submit attestations", async function () {
     const userState = await genUserState(id, app);
 
     const nonce = 0;
@@ -82,7 +78,7 @@ describe("Unirep App", function () {
       .then((t) => t.wait());
   });
 
-  it("(attester/relayer) process attestations", async () => {
+  it("(attester/relayer) process attestations", async function () {
     const userState = await genUserState(id, app);
     const epoch = await userState.loadCurrentEpoch();
     await unirep.buildHashchain(app.address, epoch).then((t) => t.wait());
@@ -102,7 +98,7 @@ describe("Unirep App", function () {
     await unirep.processHashchain(publicSignals, proof).then((t) => t.wait());
   });
 
-  it("user state transition", async () => {
+  it("user state transition", async function () {
     const oldEpoch = await unirep.attesterCurrentEpoch(app.address);
     const timestamp = Math.floor(+new Date() / 1000);
     const waitTime = startTime + epochLength - timestamp;
@@ -123,7 +119,7 @@ describe("Unirep App", function () {
       .then((t) => t.wait());
   });
 
-  it("reputation proof", async () => {
+  it("reputation proof", async function () {
     const userState = await genUserState(id, app);
 
     const { publicSignals, proof } = await userState.genProveReputationProof({
@@ -134,5 +130,12 @@ describe("Unirep App", function () {
     await unirep
       .verifyReputationProof(publicSignals, proof)
       .then((t) => t.wait());
+  });
+
+  it("proof data", async function () {
+    const userState = await genUserState(id, app);
+    const nonce = 0;
+    const { publicSignals, proof } = await userState.genDataProof({});
+    await app.submitDataProof(publicSignals, proof).then((t) => t.wait());
   });
 });

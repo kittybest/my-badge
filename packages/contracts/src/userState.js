@@ -1,11 +1,16 @@
-import { DataProof, AppCircuit } from "@unirep-app/circuits";
-import { Prover, CircuitConfig } from "@unirep/circuits";
-import { UserState } from "@unirep/core";
-import { hash4, ZkIdentity, stringifyBigInts } from "@unirep/utils";
-import { ethers } from "ethers";
-import UNIREP_APP_ABI from "../abi/UnirepApp.json";
+const { DataProof, AppCircuit } = require("@unirep-app/circuits");
+const { UserState } = require("@unirep/core");
+const { stringifyBigInts } = require("@unirep/utils");
+const { ethers } = require("ethers");
+const UNIREP_APP_ABI = require("../abi/UnirepApp.json");
 
-export default class AppUserState extends UserState {
+// import { DataProof, AppCircuit } from "@unirep-app/circuits";
+// import { UserState } from "@unirep/core";
+// import { stringifyBigInts } from "@unirep/utils";
+// import { ethers } from "ethers";
+// import UNIREP_APP_ABI from "../abi/UnirepApp.json";
+
+class AppUserState extends UserState {
   /* Constructor */
   constructor(config, id, unirepAppAddress) {
     super(config, id);
@@ -50,3 +55,5 @@ export default class AppUserState extends UserState {
     );
   }
 }
+
+module.exports = { AppUserState };
