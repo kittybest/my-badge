@@ -1,17 +1,18 @@
 import { ethers } from "ethers";
-import { EpochKeyProof } from "@unirep/circuits";
-import TransactionManager from "../singletons/TransactionManager.mjs";
-import { createRequire } from "module";
-import { UNIREP_ADDRESS, provider } from "../config.mjs";
+import { Express } from "express";
+import { DB } from "anondb/node";
+import { Synchronizer } from "@unirep/core";
 import fetch from "node-fetch";
+import { EpochKeyProof } from "@unirep/circuits";
+import TransactionManager from "../singletons/TransactionManager";
+import { UNIREP_ADDRESS, provider } from "../config";
 
-const require = createRequire(import.meta.url);
-const Unirep = require("@unirep/contracts/artifacts/contracts/Unirep.sol/Unirep.json");
-const UnirepApp = require("@unirep-app/contracts/artifacts/contracts/UnirepApp.sol/UnirepApp.json");
+import UNIREP_ABI from "@unirep/contracts/artifacts/contracts/Unirep.sol/Unirep.json";
+import UNIREPAPP_ABI from "@unirep-app/contracts/artifacts/contracts/UnirepApp.sol/UnirepApp.json";
 
-async function checkTwitterData(access_token) {
+async function checkTwitterData(access_token: any) {
   try {
-    const user = await fetch(
+    const user: any = await fetch(
       "https://api.twitter.com/2/users/me?user.fields=public_metrics",
       {
         headers: {
@@ -19,40 +20,40 @@ async function checkTwitterData(access_token) {
         },
       }
     ).then((r) => r.json());
-    return { followers: user.data.public_metrics.followers_count };
-  } catch (e) {
+    return { followers: user.data.public_metrics.followers_count as number };
+  } catch (e: any) {
     console.log(e);
     return { error: e };
   }
 }
 
-async function checkGithubData(access_token) {
+async function checkGithubData(access_token: any) {
   console.log("github token: ", access_token);
   try {
-    const user = await fetch("https://api.github.com/user", {
+    const user: any = await fetch("https://api.github.com/user", {
       headers: {
         authorization: `token ${access_token}`,
       },
     }).then((r) => r.json());
 
-    const starred = await fetch("https://api.github.com/user/starred", {
+    const starred: any = await fetch("https://api.github.com/user/starred", {
       headers: {
         authorization: `Bearer ${access_token}`,
       },
     }).then((r) => r.json());
-    let stars = 0;
-    starred.map((repo) => {
+    let stars: number = 0;
+    starred.map((repo: any) => {
       stars += repo.stargazers_count;
     });
 
-    return { followers: user.followers, stars };
-  } catch (e) {
+    return { followers: user.followers as number, stars };
+  } catch (e: any) {
     console.log(e);
     return { error: e };
   }
 }
 
-export default ({ app, db, synchronizer }) => {
+export default (app: Express, db: DB, synchronizer: Synchronizer) => {
   app.post("/api/request", async (req, res) => {
     try {
       const {
@@ -74,7 +75,7 @@ export default ({ app, db, synchronizer }) => {
             .json({ error: "Something's wrong while getting twitter data." });
         }
 
-        const diff = followers - (currentData[0] - currentData[1]);
+        const diff = (followers ?? 0) - (currentData[0] - currentData[1]);
         if (diff >= 0) {
           reqData = [diff];
         } else {
@@ -88,13 +89,13 @@ export default ({ app, db, synchronizer }) => {
             .json({ error: "Something's wrong while getting github data." });
         }
 
-        const diff1 = followers - (currentData[0] - currentData[1]);
+        const diff1 = (followers ?? 0) - (currentData[0] - currentData[1]);
         if (diff1 >= 0) {
           reqData = [diff1, 0];
         } else {
           reqData = [0, -diff1];
         }
-        const diff2 = stars - (currentData[2] - currentData[3]);
+        const diff2 = (stars ?? 0) - (currentData[2] - currentData[3]);
         if (diff2 >= 0) {
           reqData.push(diff2);
         } else {
@@ -104,15 +105,14 @@ export default ({ app, db, synchronizer }) => {
       }
       console.log("reqData:", reqData);
 
-      const epochKeyProof = new EpochKeyProof(
+      const epochKeyProof: EpochKeyProof = new EpochKeyProof(
         publicSignals,
         proof,
         synchronizer.prover
       );
 
       if (
-        BigInt(epochKeyProof.attesterId).toString() !==
-        BigInt(attesterId).toString()
+        epochKeyProof.attesterId.toString() !== BigInt(attesterId).toString()
       ) {
         res.status(400).json({ error: "Attester Id does not match." });
         return;
@@ -125,7 +125,7 @@ export default ({ app, db, synchronizer }) => {
       }
       const unirepContract = new ethers.Contract(
         UNIREP_ADDRESS,
-        Unirep.abi,
+        UNIREP_ABI.abi,
         provider
       );
       const epoch = Number(
@@ -140,9 +140,9 @@ export default ({ app, db, synchronizer }) => {
         return;
       }
 
-      const appContract = new ethers.Contract(attesterId, UnirepApp.abi);
+      const appContract = new ethers.Contract(attesterId, UNIREPAPP_ABI.abi);
       const keys = Object.keys(reqData);
-      let calldata;
+      let calldata: string = "";
       if (keys.length === 1) {
         calldata = appContract.interface.encodeFunctionData(
           "submitAttestation",
@@ -160,7 +160,7 @@ export default ({ app, db, synchronizer }) => {
         calldata
       );
       res.json({ hash });
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ error });
     }
   });

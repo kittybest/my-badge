@@ -1,7 +1,11 @@
 import { ethers } from "ethers";
+import { DB } from "anondb/node";
 
 export class TransactionManager {
-  configure(key, provider, db) {
+  wallet?: ethers.Wallet;
+  _db?: DB;
+
+  configure(key: string, provider: any, db: DB) {
     this.wallet = new ethers.Wallet(key, provider);
     this._db = db;
   }
@@ -49,14 +53,14 @@ export class TransactionManager {
     }
   }
 
-  async tryBroadcastTransaction(signedData) {
+  async tryBroadcastTransaction(signedData: string) {
     if (!this.wallet) throw new Error("Not initialized");
     const hash = ethers.utils.keccak256(signedData);
     try {
       console.log(`Sending tx ${hash}`);
       await this.wallet.provider.sendTransaction(signedData);
       return true;
-    } catch (err) {
+    } catch (err: any) {
       const tx = await this.wallet.provider.getTransaction(hash);
       if (tx) {
         // if the transaction is reverted the nonce is still used, so we return true
@@ -78,7 +82,7 @@ export class TransactionManager {
     }
   }
 
-  async getNonce(address) {
+  async getNonce(address: string) {
     const latest = await this._db?.findOne("AccountNonce", {
       where: {
         address,
@@ -100,12 +104,12 @@ export class TransactionManager {
     return latest.nonce;
   }
 
-  async wait(hash) {
+  async wait(hash: string) {
     return this.wallet?.provider.waitForTransaction(hash);
   }
 
-  async queueTransaction(to, data = {}) {
-    const args = {};
+  async queueTransaction(to: string, data: string | any = {}) {
+    const args = {} as any;
     if (typeof data === "string") {
       // assume it's input data
       args.data = data;

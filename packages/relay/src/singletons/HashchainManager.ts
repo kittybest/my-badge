@@ -1,15 +1,16 @@
-import { ethers } from "ethers";
 import { Circuit, BuildOrderedTree } from "@unirep/circuits";
 import { stringifyBigInts } from "@unirep/utils";
-import TransactionManager from "./TransactionManager.mjs";
-import synchronizer from "./AppSynchronizer.mjs";
+import TransactionManager from "./TransactionManager";
+import synchronizer from "./AppSynchronizer";
 
 class HashchainManager {
   latestSyncEpoch = {};
   prevEpoch = {};
 
   async startDaemon() {
-    const attestersData = await synchronizer._db.findMany("Attester", {});
+    const attestersData = await synchronizer._db.findMany("Attester", {
+      where: {},
+    });
     attestersData.map((data) => {
       if (data._id !== "0") {
         this.latestSyncEpoch[data._id] = 0;
@@ -32,7 +33,9 @@ class HashchainManager {
     // Make sure we're synced up
     await synchronizer.waitForSync();
 
-    const attestersData = await synchronizer._db.findMany("Attester", {});
+    const attestersData = await synchronizer._db.findMany("Attester", {
+      where: {},
+    });
     for (let i = 0; i < attestersData.length; i++) {
       const data = attestersData[i];
       if (data._id === "0") continue;

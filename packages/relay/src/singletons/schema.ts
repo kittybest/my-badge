@@ -1,5 +1,6 @@
 import { schema } from "@unirep/core";
 import { nanoid } from "nanoid";
+import { TableData } from "anondb/node";
 
 const _schema = [
   {
@@ -12,7 +13,7 @@ const _schema = [
       },
       ["type", "String"],
       ["redirectDestination", "String"],
-      ["isSigningUp", "Bool"],
+      ["isSigningUp", "Bool", { optional: true }],
       ["data", "String", { optional: true }],
     ],
   },
@@ -50,16 +51,19 @@ const _schema = [
 // export default [...schema, ..._schema]
 
 export default _schema
-  .map((obj) => ({
-    ...obj,
-    primaryKey: obj.primaryKey || "_id",
-    rows: [
-      ...obj.rows,
-      {
-        name: "_id",
-        type: "String",
-        default: () => nanoid(),
-      },
-    ],
-  }))
+  .map(
+    (obj) =>
+      ({
+        ...obj,
+        primaryKey: obj.primaryKey || "_id",
+        rows: [
+          ...obj.rows,
+          {
+            name: "_id",
+            type: "String",
+            default: () => nanoid(),
+          },
+        ],
+      } as TableData)
+  )
   .concat(schema);

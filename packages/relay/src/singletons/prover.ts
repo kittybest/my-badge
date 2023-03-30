@@ -2,9 +2,6 @@ import path from "path";
 import fs from "fs/promises";
 import { Circuit } from "@unirep/circuits";
 import * as snarkjs from "snarkjs";
-import url from "url";
-
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 const buildPath = path.join(__dirname, `../../keys`);
 
@@ -18,7 +15,10 @@ export default {
    * @param inputs The user inputs of the circuit
    * @returns snark proof and public signals
    */
-  genProofAndPublicSignals: async (circuitName, inputs) => {
+  genProofAndPublicSignals: async (
+    circuitName: string | Circuit,
+    inputs: any
+  ) => {
     const circuitWasmPath = path.join(buildPath, `${circuitName}.wasm`);
     const zkeyPath = path.join(buildPath, `${circuitName}.zkey`);
     const { proof, publicSignals } = await snarkjs.groth16.fullProve(
@@ -37,7 +37,11 @@ export default {
    * @param proof The snark proof that is generated from `genProofAndPublicSignals`
    * @returns True if the proof is valid, false otherwise
    */
-  verifyProof: async (circuitName, publicSignals, proof) => {
+  verifyProof: async (
+    circuitName: string | Circuit,
+    publicSignals: string[],
+    proof: string[]
+  ) => {
     const vkeyData = await fs.readFile(
       path.join(buildPath, `${circuitName}.vkey.json`)
     );
@@ -47,14 +51,10 @@ export default {
 
   /**
    * Get vkey from default built folder `zksnarkBuild/`
-   * @param name Name of the circuit, which can be chosen from `Circuit`
+   * @param circuitName Name of the circuit, which can be chosen from `Circuit`
    * @returns vkey of the circuit
    */
-  getVKey: async (name) => {
-    const vkeyData = await fs.readFile(
-      path.join(buildPath, `${circuitName}.vkey.json`)
-    );
-    const vkey = JSON.parse(vkeyData.toString());
-    return snarkjs.groth16.verify(vkey, publicSignals, proof);
+  getVKey: async (circuitName: string | Circuit) => {
+    return require(path.join(buildPath, `${circuitName}.vkey.json`));
   },
 };

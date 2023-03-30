@@ -4,15 +4,18 @@ import {
   TWITTER_CLIENT_ID,
   TWITTER_REDIRECT_URI,
   GITHUB_REDIRECT_URI,
-} from "../config.mjs";
+} from "../config";
 import fetch from "node-fetch";
 import crypto from "crypto";
+import { Express } from "express";
+import { DB } from "anondb";
+import { Synchronizer } from "@unirep/core";
 
-export default ({ app, db, synchronizer }) => {
+export default (app: Express, db: DB, synchronizer: Synchronizer) => {
   app.get("/api/oauth/github", async (req, res) => {
     try {
       await githubAuth(req, res, db);
-    } catch (e) {
+    } catch (e: any) {
       console.log("github auth error:", e);
       res.status(500).json({
         message: "Uncaught error",
@@ -23,7 +26,7 @@ export default ({ app, db, synchronizer }) => {
   app.get("/api/oauth/github/callback", async (req, res) => {
     try {
       await completeGithubAuth(req, res, db);
-    } catch (e) {
+    } catch (e: any) {
       console.log("github callback error:", e);
       res.status(500).json({
         message: "Uncaught error",
@@ -34,7 +37,7 @@ export default ({ app, db, synchronizer }) => {
   app.get("/api/oauth/twitter", async (req, res) => {
     try {
       await twitterAuth(req, res, db);
-    } catch (e) {
+    } catch (e: any) {
       console.log("twitter auth error:", e);
       res.status(500).json({
         message: "Uncaught error",
@@ -45,7 +48,7 @@ export default ({ app, db, synchronizer }) => {
   app.get("/api/oauth/twitter/callback", async (req, res) => {
     try {
       await completeTwitterAuth(req, res, db);
-    } catch (e) {
+    } catch (e: any) {
       console.log("twitter callback error:", e);
       res.status(500).json({
         message: "Uncaught error",
@@ -55,7 +58,7 @@ export default ({ app, db, synchronizer }) => {
   });
 };
 
-async function twitterAuth(req, res, db) {
+async function twitterAuth(req: any, res: any, db: DB) {
   const challenge = crypto.randomBytes(32).toString("hex");
   const _state = await db.create("OAuthState", {
     type: "twitter",
@@ -76,7 +79,7 @@ async function twitterAuth(req, res, db) {
   res.redirect(url.toString());
 }
 
-async function completeTwitterAuth(req, res, db) {
+async function completeTwitterAuth(req: any, res: any, db: DB) {
   const { state, code, error } = req.query;
   const _state = await db.findOne("OAuthState", {
     where: { _id: state },
@@ -114,14 +117,14 @@ async function completeTwitterAuth(req, res, db) {
   const body = Object.entries(args)
     .map(([key, val]) => `${key}=${encodeURIComponent(val)}`)
     .join("&");
-  const auth = await fetch("https://api.twitter.com/2/oauth2/token", {
+  const auth: any = await fetch("https://api.twitter.com/2/oauth2/token", {
     method: "POST",
     body,
     headers: {
       "content-type": "application/x-www-form-urlencoded",
     },
   }).then((r) => r.json());
-  const user = await fetch("https://api.twitter.com/2/users/me", {
+  const user: any = await fetch("https://api.twitter.com/2/users/me", {
     headers: {
       authorization: `Bearer ${auth.access_token}`,
     },
@@ -165,7 +168,7 @@ async function completeTwitterAuth(req, res, db) {
   res.redirect(url.toString());
 }
 
-async function githubAuth(req, res, db) {
+async function githubAuth(req: any, res: any, db: DB) {
   // no need to PKCE
   const state = await db.create("OAuthState", {
     type: "github",
@@ -180,7 +183,7 @@ async function githubAuth(req, res, db) {
   res.redirect(url.toString());
 }
 
-async function completeGithubAuth(req, res, db) {
+async function completeGithubAuth(req: any, res: any, db: DB) {
   const { code, state, error } = req.query;
   const _state = await db.findOne("OAuthState", {
     where: { _id: state },
@@ -211,14 +214,14 @@ async function completeGithubAuth(req, res, db) {
   url.searchParams.append("client_id", GITHUB_CLIENT_ID);
   url.searchParams.append("client_secret", GITHUB_CLIENT_SECRET);
   url.searchParams.append("code", code);
-  const auth = await fetch(url.toString(), {
+  const auth: any = await fetch(url.toString(), {
     method: "POST",
     headers: {
       accept: "application/json",
     },
   });
   const { access_token, scope, token_type } = await auth.json();
-  const user = await fetch("https://api.github.com/user", {
+  const user: any = await fetch("https://api.github.com/user", {
     headers: {
       authorization: `token ${access_token}`,
     },

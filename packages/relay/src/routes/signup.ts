@@ -1,25 +1,23 @@
 import { SignupProof } from "@unirep/circuits";
 import { ethers } from "ethers";
-import TransactionManager from "../singletons/TransactionManager.mjs";
-import { createRequire } from "module";
-import { UNIREP_ADDRESS, provider } from "../config.mjs";
-const require = createRequire(import.meta.url);
-const UnirepApp = require("@unirep-app/contracts/artifacts/contracts/UnirepApp.sol/UnirepApp.json");
-const Unirep = require("@unirep/contracts/artifacts/contracts/Unirep.sol/Unirep.json");
+import { Express } from "express";
+import { DB } from "anondb/node";
+import { Synchronizer } from "@unirep/core";
+import TransactionManager from "../singletons/TransactionManager";
+import { UNIREP_ADDRESS, provider } from "../config";
+import UNIREP_ABI from "@unirep/contracts/artifacts/contracts/Unirep.sol/Unirep.json";
+import UNIREPAPP_ABI from "@unirep-app/contracts/artifacts/contracts/UnirepApp.sol/UnirepApp.json";
 
-export default ({ app, db, synchronizer }) => {
+export default (app: Express, db: DB, synchronizer: Synchronizer) => {
   app.post("/api/signup", async (req, res) => {
     try {
       const { publicSignals, proof, attesterId } = req.body;
-      const signupProof = new SignupProof(
+      const signupProof: SignupProof = new SignupProof(
         publicSignals,
         proof,
         synchronizer.prover
       );
-      if (
-        BigInt(signupProof.attesterId).toString() !==
-        BigInt(attesterId).toString()
-      ) {
+      if (signupProof.attesterId.toString() !== BigInt(attesterId).toString()) {
         res.status(400).json({ error: "Attester ID does not match." });
         return;
       }
@@ -30,23 +28,23 @@ export default ({ app, db, synchronizer }) => {
       }
       const unirepContract = new ethers.Contract(
         UNIREP_ADDRESS,
-        Unirep.abi,
+        UNIREP_ABI.abi,
         provider
       );
       const currentEpoch = Number(
         await unirepContract.attesterCurrentEpoch(attesterId)
       );
 
-      if (currentEpoch !== Number(BigInt(signupProof.epoch))) {
+      if (currentEpoch !== Number(signupProof.epoch)) {
         res.status(400).json({
           error: `Wrong epoch: current epoch should be ${currentEpoch}, but the epoch in your proof is ${Number(
-            BigInt(signupProof.epoch)
+            signupProof.epoch
           )}`,
         });
         return;
       }
       // make a transaction lil bish
-      const appContract = new ethers.Contract(attesterId, UnirepApp.abi);
+      const appContract = new ethers.Contract(attesterId, UNIREPAPP_ABI.abi);
       const calldata = appContract.interface.encodeFunctionData("userSignUp", [
         signupProof.publicSignals,
         signupProof.proof,
