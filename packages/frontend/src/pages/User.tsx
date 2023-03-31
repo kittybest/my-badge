@@ -1,16 +1,21 @@
-import React, { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { useSearchParams } from "react-router-dom";
 import { Container, Button, Image, Grid, Message } from "semantic-ui-react";
 import User from "../contexts/User";
-import { SERVER } from "../config.js";
+import { SERVER } from "../config";
 import InfoCard from "../components/infoCard";
 
 export default observer(() => {
   const [isIdentityRevealed, setIdentityRevealed] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const [errorMsg, setErrorMsg] = useState({ twitter: "", github: "" });
-  const [connectLoading, setConnectLoading] = useState({
+  const [errorMsg, setErrorMsg] = useState<{ [key: string]: string }>({
+    twitter: "",
+    github: "",
+  });
+  const [connectLoading, setConnectLoading] = useState<{
+    [key: string]: boolean;
+  }>({
     twitter: false,
     github: false,
   });
@@ -22,14 +27,13 @@ export default observer(() => {
     setIsCopied(true);
   };
 
-  const signup = async (platform, access_token) => {
+  const signup = async (platform: string, access_token: string) => {
     let tmpLoading = { ...connectLoading };
     tmpLoading[platform] = true;
     setConnectLoading(tmpLoading);
     try {
       await user.signup(platform, access_token);
       await user.getRep(platform);
-      return navigate("/user");
     } catch (e) {
       setErrorMsg({ ...errorMsg });
       tmpLoading[platform] = false;
@@ -38,11 +42,13 @@ export default observer(() => {
   };
 
   useEffect(() => {
-    const platform = params.get("platform");
-    const access_token = params.get("access_token");
-    const signupError = params.get("signupError");
-    const isSigningUp = params.get("isSigningUp");
-    if (platform && access_token) {
+    const platform: string | null = params.get("platform");
+    const access_token: string | null = params.get("access_token");
+    const signupError: string | null = params.get("signupError");
+    const isSigningUp: string | null = params.get("isSigningUp");
+    if (!platform) {
+      console.error("No platform returns");
+    } else if (platform && access_token) {
       if (isSigningUp && parseInt(isSigningUp)) {
         signup(platform, access_token);
       } else {
@@ -56,7 +62,7 @@ export default observer(() => {
     setParams("");
   }, []);
 
-  const connect = async (platform) => {
+  const connect = async (platform: string) => {
     if (connectLoading[platform]) return;
 
     console.log("join through", platform);
@@ -68,17 +74,17 @@ export default observer(() => {
     // authorization through relay
     const currentUrl = new URL(window.location.href);
     const dest = new URL("/user", currentUrl.origin);
-    const isSigningUp = !user.userStates[platform].hasSignedUp;
+    const isSigningUp: boolean = !user.userStates[platform].hasSignedUp;
 
     if (platform === "twitter") {
       const url = new URL("/api/oauth/twitter", SERVER);
       url.searchParams.set("redirectDestination", dest.toString());
-      url.searchParams.set("isSigningUp", isSigningUp);
+      url.searchParams.set("isSigningUp", isSigningUp.toString());
       window.location.replace(url.toString());
     } else if (platform === "github") {
       const url = new URL("/api/oauth/github", SERVER);
       url.searchParams.set("redirectDestination", dest.toString());
-      url.searchParams.set("isSigningUp", isSigningUp);
+      url.searchParams.set("isSigningUp", isSigningUp.toString());
       window.location.replace(url.toString());
     } else {
       let tmpError = { ...errorMsg };

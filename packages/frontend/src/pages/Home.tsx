@@ -14,10 +14,10 @@ export default observer(() => {
     github_followers: ["chiali", "doggy", "yuriko"],
   };
 
-  const formCardGroup = (data) => {
+  const formCardGroup = (data: string[]) => {
     return (
       <Card.Group style={{ marginTop: "24px" }}>
-        {data.map((name) => (
+        {data.map((name: string) => (
           <Card fluid header={name} key={name} />
         ))}
       </Card.Group>

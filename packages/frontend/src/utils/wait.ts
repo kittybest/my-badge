@@ -1,3 +1,3 @@
-export default async (t) => {
+export default async (t: number) => {
   return new Promise((resolve) => setTimeout(resolve, t));
 };

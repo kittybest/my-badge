@@ -1,7 +1,32 @@
 import React, { useState } from "react";
-import { Button, Grid, Segment, Message } from "semantic-ui-react";
+import {
+  Button,
+  Grid,
+  Segment,
+  Message,
+  SemanticCOLORS,
+} from "semantic-ui-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTwitter, faGithub } from "@fortawesome/free-brands-svg-icons";
+import {
+  faTwitter,
+  faGithub,
+  IconDefinition,
+} from "@fortawesome/free-brands-svg-icons";
+
+type Props = {
+  title: string;
+  platform: string;
+  hasSignedUp: boolean;
+  connected: boolean;
+  data: number;
+  provableData: number;
+  color: SemanticCOLORS;
+  update: () => void;
+  ust: () => void;
+  connect: () => void;
+  error: string;
+  connectLoading: boolean;
+};
 
 const InfoCard = ({
   title,
@@ -16,8 +41,8 @@ const InfoCard = ({
   connect,
   error,
   connectLoading,
-}) => {
-  const icons = {
+}: Props) => {
+  const icons: { [key: string]: IconDefinition } = {
     twitter: faTwitter,
     github: faGithub,
   };
@@ -26,27 +51,27 @@ const InfoCard = ({
   const [isUSTing, setIsUSTing] = useState(false);
   const [errorMsg, setErrorMsg] = useState(error);
 
-  const onClickUpdate = async () => {
+  const onClickUpdate = () => {
     if (isUpdating || isUSTing) return;
 
     setErrorMsg("");
     setIsUpdating(true);
     try {
-      await update();
-    } catch (e) {
+      update();
+    } catch (e: any) {
       setErrorMsg(e.toString());
     }
     setIsUpdating(false);
   };
 
-  const onClickUST = async () => {
+  const onClickUST = () => {
     if (isUpdating || isUSTing) return;
 
     setErrorMsg("");
     setIsUSTing(true);
     try {
-      await ust();
-    } catch (e) {
+      ust();
+    } catch (e: any) {
       setErrorMsg(e.toString());
     }
     setIsUSTing(false);

@@ -8,7 +8,8 @@ import { constructSchema } from "anondb/types";
 import {
   provider,
   UNIREP_ADDRESS,
-  ATTESTERS,
+  TWITTER_ADDRESS,
+  GITHUB_ADDRESS,
   SERVER,
   UNIREP_ABI,
 } from "../config";
@@ -16,12 +17,27 @@ import prover from "./prover";
 import Wait from "../utils/wait";
 import poseidon from "poseidon-lite";
 
+interface AppUserState {
+  userState: UserState;
+  hasSignedUp: boolean;
+  latestTransitionedEpoch: number;
+  data: bigint[];
+  provableData: bigint[];
+  attesterId: string;
+  access_token: string;
+}
+
+const ATTESTERS: { [key: string]: string } = {
+  twitter: TWITTER_ADDRESS,
+  github: GITHUB_ADDRESS,
+};
+
 class User {
-  userStates = {}; // key: attesterId, value: { userState, currentEpoch, latestTransitionedEpoch, hasSignedUp, data, provableData }
-  id;
-  fieldCount = -1;
-  sumFieldCount = -1;
-  hasSignedUp = false;
+  userStates: { [key: string]: AppUserState } = {}; // key: attesterId, value: { userState, currentEpoch, latestTransitionedEpoch, hasSignedUp, data, provableData }
+  id: string = "";
+  fieldCount: number = -1;
+  sumFieldCount: number = -1;
+  hasSignedUp: boolean = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -29,10 +45,10 @@ class User {
   }
 
   async load() {
-    const id = localStorage.getItem("id");
+    const id: string | null = localStorage.getItem("id");
     const identity = new ZkIdentity(
       id ? Strategy.SERIALIZED : Strategy.RANDOM,
-      id
+      id ?? undefined
     );
     if (!id) {
       localStorage.setItem("id", identity.serializeIdentity());
@@ -43,14 +59,17 @@ class User {
 
     for (const [platform, attesterId] of Object.entries(ATTESTERS)) {
       console.log("attester", platform, "with address", attesterId);
-      const userState = new UserState({
-        db,
-        provider,
-        prover,
-        unirepAddress: UNIREP_ADDRESS,
-        attesterId,
-        _id: identity,
-      });
+      const userState = new UserState(
+        {
+          db,
+          provider,
+          prover,
+          unirepAddress: UNIREP_ADDRESS,
+          attesterId: BigInt(attesterId),
+          _id: identity,
+        },
+        identity
+      );
       await userState.sync.start();
 
       if (this.fieldCount < 0) {
@@ -66,7 +85,8 @@ class User {
       const data = await userState.getData();
       const provableData = await userState.getProvableData();
 
-      const access_token = localStorage.getItem(`${platform}_access_token`);
+      const access_token =
+        localStorage.getItem(`${platform}_access_token`) ?? "";
 
       this.userStates[platform] = {
         userState,
@@ -74,13 +94,14 @@ class User {
         latestTransitionedEpoch,
         data,
         provableData,
+        attesterId,
         access_token,
       };
     }
     this.updateHasSignedUp();
   }
 
-  async loadReputation(platform) {
+  async loadReputation(platform: string) {
     this.userStates[platform].data = await this.userStates[
       platform
     ].userState.getData();
@@ -89,7 +110,7 @@ class User {
     ].userState.getProvableData();
   }
 
-  async waitForLoad(platform) {
+  async waitForLoad(platform: string) {
     for (var i = 0; i < 10; i++) {
       if (this.userStates[platform]) break;
       await Wait(1000);
@@ -98,7 +119,7 @@ class User {
     if (!this.userStates[platform]) throw new Error("userState is undefined");
   }
 
-  async login(id) {
+  async login(id: string) {
     if (!id || id.length === 0) {
       throw new Error("You have not entered identity yet.");
     }
@@ -113,18 +134,19 @@ class User {
     }
   }
 
-  epochKey(platform, nonce) {
+  epochKey(platform: string, nonce: number) {
     if (!this.userStates[platform] || !this.userStates[platform].userState)
       return "0x";
     const epoch = this.userStates[platform].userState.sync.calcCurrentEpoch();
-    const keys = this.userStates[platform].userState.getEpochKeys(epoch);
-    const key = keys[nonce];
+    const keys: BigInt | BigInt[] =
+      this.userStates[platform].userState.getEpochKeys(epoch);
+    const key = Array.isArray(keys) ? keys[nonce] : keys;
     return `0x${key.toString(16)}`;
   }
 
-  async signup(platform, access_token) {
+  async signup(platform: string, access_token: string) {
     /* Assign attesterId */
-    const attesterId = ATTESTERS[platform];
+    const attesterId: string = ATTESTERS[platform];
     if (!attesterId) {
       throw new Error("You are not signing up through available web2 service.");
     }
@@ -177,7 +199,7 @@ class User {
     await this.storeAccessToken(platform, access_token);
   }
 
-  async stateTransition(platform) {
+  async stateTransition(platform: string) {
     // check if previous data has been sealed
     const sealed = await this.userStates[platform].userState.sync.isEpochSealed(
       await this.userStates[platform].userState.latestTransitionedEpoch()
@@ -205,25 +227,12 @@ class User {
     await provider.waitForTransaction(data.hash);
     await this.userStates[platform].userState.waitForSync();
     await this.loadReputation(platform);
-    this.latestTransitionedEpoch = await this.userStates[
+    this.userStates[platform].latestTransitionedEpoch = await this.userStates[
       platform
     ].userState.latestTransitionedEpoch();
   }
 
-  async proveReputation(minRep = 0, _graffitiPreImage = 0) {
-    let graffitiPreImage = _graffitiPreImage;
-    if (typeof graffitiPreImage === "string") {
-      graffitiPreImage = `0x${Buffer.from(_graffitiPreImage).toString("hex")}`;
-    }
-    const reputationProof = await this.userState.genProveReputationProof({
-      epkNonce: 0,
-      minRep: Number(minRep),
-      graffitiPreImage,
-    });
-    return { ...reputationProof, valid: await reputationProof.verify() };
-  }
-
-  async getRep(platform) {
+  async getRep(platform: string) {
     /* Check attesterId and userState */
     const attesterId = ATTESTERS[platform];
     if (!attesterId) {
@@ -283,7 +292,7 @@ class User {
     window.localStorage.removeItem("id"); // for if anyone else wanna sign up and use
   }
 
-  async storeAccessToken(platform, access_token) {
+  async storeAccessToken(platform: string, access_token: string) {
     await this.waitForLoad(platform);
 
     window.localStorage.setItem(`${platform}_access_token`, access_token);

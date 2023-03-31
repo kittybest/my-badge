@@ -6,7 +6,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const webpack = require("webpack");
 
 module.exports = (env) => ({
-  entry: ["./src/index.jsx"],
+  entry: ["./src/index.tsx"],
   mode: "development",
   devServer: {
     port: 3000,
@@ -22,8 +22,10 @@ module.exports = (env) => ({
     path: path.resolve(__dirname, "build"),
     publicPath: "/",
   },
+  // Enable sourcemaps for debugging webpack's output.
+  // devtool: "source-map",
   resolve: {
-    extensions: ["*", ".js", ".jsx", ".json", ".scss"],
+    extensions: ["*", ".js", ".jsx", ".json", ".scss", ".ts", ".tsx"],
     fallback: {
       path: require.resolve("path-browserify"),
       crypto: require.resolve("crypto-browserify"),
@@ -39,7 +41,22 @@ module.exports = (env) => ({
   module: {
     rules: [
       {
-        test: /\.jsx$/,
+        test: /\.tsx?$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: "babel-loader",
+            options: {
+              presets: ["@babel/preset-react"],
+            },
+          },
+          {
+            loader: "ts-loader",
+          },
+        ],
+      },
+      {
+        test: /\.js$/,
         exclude: /node_modules/,
         loader: "babel-loader",
         options: {
@@ -59,9 +76,24 @@ module.exports = (env) => ({
         ],
       },
       {
-        test: /\.(css|scss)$/,
+        test: /\.s[ac]ss$/i,
+        use: [
+          MiniCssExtractPlugin.loader,
+          // Translates CSS into CommonJS
+          "css-loader",
+          // Compiles Sass to CSS
+          "sass-loader",
+        ],
+      },
+      {
+        test: /\.(css)$/,
         // exclude: /node_modules/,
-        use: [MiniCssExtractPlugin.loader, "css-loader"],
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+          },
+          "css-loader",
+        ],
       },
     ],
   },

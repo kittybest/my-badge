@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext } from "react";
 import { observer } from "mobx-react-lite";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -11,7 +11,7 @@ import {
 } from "semantic-ui-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTwitter, faGithub } from "@fortawesome/free-brands-svg-icons";
-import { SERVER } from "../config.js";
+import { SERVER } from "../config";
 import User from "../contexts/User";
 
 export default observer(() => {
@@ -24,14 +24,14 @@ export default observer(() => {
   const [errorMsg, setErrorMsg] = useState("");
   const [idInput, setIdInput] = useState("");
 
-  const signup = async (platform, access_token) => {
+  const signup = async (platform: string, access_token: string) => {
     setErrorMsg("");
     setIsLoading(true);
     try {
       await user.signup(platform, access_token);
       await user.getRep(platform);
       return navigate("/user");
-    } catch (e) {
+    } catch (e: any) {
       setErrorMsg(e.toString());
       setIsLoading(false);
     }
@@ -50,13 +50,13 @@ export default observer(() => {
       }
     } else if (signupError) {
       setErrorMsg(
-        `Sign up through ${platform.toUpperCase()} error: ${signupError}`
+        `Sign up through ${platform?.toUpperCase()} error: ${signupError}`
       );
     }
     setParams("");
   }, []);
 
-  const join = async (platform) => {
+  const join = async (platform: string) => {
     console.log("join through", platform);
 
     // authorization through relay
@@ -66,12 +66,12 @@ export default observer(() => {
     if (platform === "twitter") {
       const url = new URL("/api/oauth/twitter", SERVER);
       url.searchParams.set("redirectDestination", dest.toString());
-      url.searchParams.set("isSigningUp", true);
+      url.searchParams.set("isSigningUp", true.toString());
       window.location.replace(url.toString());
     } else if (platform === "github") {
       const url = new URL("/api/oauth/github", SERVER);
       url.searchParams.set("redirectDestination", dest.toString());
-      url.searchParams.set("isSigningUp", true);
+      url.searchParams.set("isSigningUp", true.toString());
       window.location.replace(url.toString());
     } else {
       console.log("wwaitttt whatttt???");
@@ -82,12 +82,12 @@ export default observer(() => {
     try {
       await user.login(idInput);
       return navigate("/user");
-    } catch (e) {
+    } catch (e: any) {
       setErrorMsg(e.toString());
     }
   };
 
-  const onIdInputChange = (event) => {
+  const onIdInputChange = (event: any) => {
     setIdInput(event.target.value);
   };
 
