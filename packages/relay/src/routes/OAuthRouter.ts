@@ -117,18 +117,20 @@ async function completeTwitterAuth(req: any, res: any, db: DB) {
   const body = Object.entries(args)
     .map(([key, val]) => `${key}=${encodeURIComponent(val)}`)
     .join("&");
-  const auth: any = await fetch("https://api.twitter.com/2/oauth2/token", {
+  const authRes: any = await fetch("https://api.twitter.com/2/oauth2/token", {
     method: "POST",
     body,
     headers: {
       "content-type": "application/x-www-form-urlencoded",
     },
-  }).then((r) => r.json());
-  const user: any = await fetch("https://api.twitter.com/2/users/me", {
+  });
+  const auth = await authRes.json();
+  const userRes: any = await fetch("https://api.twitter.com/2/users/me", {
     headers: {
       authorization: `Bearer ${auth.access_token}`,
     },
-  }).then((r) => r.json());
+  });
+  const user = await userRes.json();
   if (!user.data.id) {
     const url = new URL(_state.redirectDestination);
     url.searchParams.append("signupError", "Unknown problem");
@@ -221,11 +223,12 @@ async function completeGithubAuth(req: any, res: any, db: DB) {
     },
   });
   const { access_token, scope, token_type } = await auth.json();
-  const user: any = await fetch("https://api.github.com/user", {
+  const userRes: any = await fetch("https://api.github.com/user", {
     headers: {
       authorization: `token ${access_token}`,
     },
-  }).then((r) => r.json());
+  });
+  const user = await userRes.json();
   if (!user.id) {
     const _url = new URL(_state.redirectDestination);
     _url.searchParams.append("signupError", "Unknown problem");

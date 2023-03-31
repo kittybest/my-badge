@@ -1,14 +1,21 @@
 import { Circuit, BuildOrderedTree } from "@unirep/circuits";
 import { stringifyBigInts } from "@unirep/utils";
+import { Synchronizer } from "@unirep/core";
 import TransactionManager from "./TransactionManager";
-import synchronizer from "./AppSynchronizer";
 
 class HashchainManager {
   latestSyncEpoch = {};
   prevEpoch = {};
+  synchronizer?: Synchronizer;
+
+  configure(_synchronizer: Synchronizer) {
+    this.synchronizer = _synchronizer;
+  }
 
   async startDaemon() {
-    const attestersData = await synchronizer._db.findMany("Attester", {
+    if (!this.synchronizer) throw new Error("Not initialized");
+
+    const attestersData = await this.synchronizer._db.findMany("Attester", {
       where: {},
     });
     attestersData.map((data) => {
@@ -30,10 +37,12 @@ class HashchainManager {
   }
 
   async sync() {
-    // Make sure we're synced up
-    await synchronizer.waitForSync();
+    if (!this.synchronizer) throw new Error("Not initialized");
 
-    const attestersData = await synchronizer._db.findMany("Attester", {
+    // Make sure we're synced up
+    await this.synchronizer.waitForSync();
+
+    const attestersData = await this.synchronizer._db.findMany("Attester", {
       where: {},
     });
     for (let i = 0; i < attestersData.length; i++) {
@@ -44,17 +53,17 @@ class HashchainManager {
 
       const attesterId = BigInt(data._id);
       const currentEpoch = Number(
-        await synchronizer.unirepContract.attesterCurrentEpoch(attesterId)
+        await this.synchronizer.unirepContract.attesterCurrentEpoch(attesterId)
       );
 
       if (currentEpoch > this.prevEpoch[data._id]) {
         const calldata =
-          synchronizer.unirepContract.interface.encodeFunctionData(
+          this.synchronizer.unirepContract.interface.encodeFunctionData(
             "updateEpochIfNeeded",
             [attesterId]
           );
         const hash = await TransactionManager.queueTransaction(
-          synchronizer.unirepContract.address,
+          this.synchronizer.unirepContract.address,
           calldata
         );
         this.prevEpoch[data._id] = currentEpoch;
@@ -62,10 +71,11 @@ class HashchainManager {
 
       for (let j = this.latestSyncEpoch[data._id]; j < currentEpoch; j++) {
         // check the owed keys
-        const isSealed = await synchronizer.unirepContract.attesterEpochSealed(
-          attesterId,
-          j
-        );
+        const isSealed =
+          await this.synchronizer.unirepContract.attesterEpochSealed(
+            attesterId,
+            j
+          );
         if (!isSealed) {
           console.log("executing epoch", j);
           // otherwise we need to make an ordered tree
@@ -77,22 +87,24 @@ class HashchainManager {
       }
     }
 
-    if (synchronizer.provider.network.chainId === 31337) {
+    if (this.synchronizer.provider.network.chainId === 31337) {
       // hardhat dev nodes need to have their state refreshed manually
       // for view only functions
-      await synchronizer.provider.send("evm_mine", []);
+      await this.synchronizer.provider.send("evm_mine", []);
     }
   }
 
   async processEpochKeys(epoch, attesterId) {
+    if (!this.synchronizer) throw new Error("Not initialized");
+
     // first check if there is an unprocessed hashchain
-    const leafPreimages = await synchronizer.genEpochTreePreimages(
+    const leafPreimages = await this.synchronizer.genEpochTreePreimages(
       epoch,
       attesterId
     );
     const { circuitInputs } =
       BuildOrderedTree.buildInputsForLeaves(leafPreimages);
-    const r = await synchronizer.prover.genProofAndPublicSignals(
+    const r = await this.synchronizer.prover.genProofAndPublicSignals(
       Circuit.buildOrderedTree,
       stringifyBigInts(circuitInputs)
     );
@@ -100,15 +112,16 @@ class HashchainManager {
       r.publicSignals,
       r.proof
     );
-    const calldata = synchronizer.unirepContract.interface.encodeFunctionData(
-      "sealEpoch",
-      [epoch, attesterId, publicSignals, proof]
-    );
+    const calldata =
+      this.synchronizer.unirepContract.interface.encodeFunctionData(
+        "sealEpoch",
+        [epoch, attesterId, publicSignals, proof]
+      );
     const hash = await TransactionManager.queueTransaction(
-      synchronizer.unirepContract.address,
+      this.synchronizer.unirepContract.address,
       calldata
     );
-    await synchronizer.provider.waitForTransaction(hash);
+    await this.synchronizer.provider.waitForTransaction(hash);
   }
 }
 

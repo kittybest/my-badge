@@ -1,9 +1,13 @@
 import path from "path";
 import fs from "fs";
 import express from "express";
-import { provider, PRIVATE_KEY } from "./config";
+import { Synchronizer } from "@unirep/core";
+import { SQLiteConnector } from "anondb/node.js";
+
+import { provider, PRIVATE_KEY, UNIREP_ADDRESS, DB_PATH } from "./config";
 import TransactionManager from "./singletons/TransactionManager";
-import synchronizer from "./singletons/AppSynchronizer";
+import prover from "./singletons/prover";
+import schema from "./singletons/schema";
 import HashchainManager from "./singletons/HashchainManager";
 
 main().catch((err) => {
@@ -12,12 +16,17 @@ main().catch((err) => {
 });
 
 async function main() {
-  if (synchronizer.isInitDB) {
-    await synchronizer.initDB();
-  }
+  const db = await SQLiteConnector.create(schema, DB_PATH ?? ":memory:");
+  const synchronizer = new Synchronizer({
+    db,
+    provider,
+    unirepAddress: UNIREP_ADDRESS,
+    prover,
+  });
   await synchronizer.start();
   TransactionManager.configure(PRIVATE_KEY, provider, synchronizer._db);
   await TransactionManager.start();
+  HashchainManager.configure(synchronizer);
   HashchainManager.startDaemon();
 
   const app = express();
