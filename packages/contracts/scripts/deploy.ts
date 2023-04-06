@@ -30,7 +30,7 @@ async function main() {
     `Unirep app 2 with epoch length ${epochLength} deployed to ${app2.address}`
   );
 
-  const config = `module.exports = {
+  const config = `export default {
     UNIREP_ADDRESS: '${unirep.address}',
     TWITTER_ADDRESS: '${app1.address}',
     GITHUB_ADDRESS: '${app2.address}',
