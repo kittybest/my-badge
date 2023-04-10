@@ -51,26 +51,26 @@ const InfoCard = ({
   const [isUSTing, setIsUSTing] = useState(false);
   const [errorMsg, setErrorMsg] = useState(error);
 
-  const onClickUpdate = () => {
+  const onClickUpdate = async () => {
     if (isUpdating || isUSTing) return;
 
     setErrorMsg("");
     setIsUpdating(true);
     try {
-      update();
+      await update();
     } catch (e: any) {
       setErrorMsg(e.toString());
     }
     setIsUpdating(false);
   };
 
-  const onClickUST = () => {
+  const onClickUST = async () => {
     if (isUpdating || isUSTing) return;
 
     setErrorMsg("");
     setIsUSTing(true);
     try {
-      ust();
+      await ust();
     } catch (e: any) {
       setErrorMsg(e.toString());
     }

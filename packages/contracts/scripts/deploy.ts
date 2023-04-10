@@ -14,7 +14,7 @@ async function main() {
 
   const [signer] = await ethers.getSigners();
   const unirep = await deployUnirep(signer);
-  const epochLength = 1500;
+  const epochLength = 150;
 
   const App = await ethers.getContractFactory("UnirepApp");
 
