@@ -1,4 +1,4 @@
-include "./circomlib/circuits/poseidon.circom";
+include "./circomlib/poseidon.circom";
 
 template EpochTreeLeaf(FIELD_COUNT, R) {
   signal input epoch_key;

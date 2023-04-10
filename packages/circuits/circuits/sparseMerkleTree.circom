@@ -1,5 +1,5 @@
-include "./circomlib/circuits/poseidon.circom";
-include "./circomlib/circuits/comparators.circom";
+include "./circomlib/poseidon.circom";
+include "./circomlib/comparators.circom";
 include "./exists.circom";
 
 template SMTRootCalc(HEIGHT, ARITY) {

@@ -1,8 +1,8 @@
 pragma circom 2.0.0;
 
-include "./circomlib/circuits/bitify.circom";
-include "./circomlib/circuits/comparators.circom";
-include "./circomlib/circuits/poseidon.circom";
+include "./circomlib/bitify.circom";
+include "./circomlib/comparators.circom";
+include "./circomlib/poseidon.circom";
 
 template EpochKeyLite(EPOCH_KEY_NONCE_PER_EPOCH) {
     signal input identity_secret;

@@ -4,8 +4,8 @@ pragma circom 2.0.0;
     Verify that an epoch key exists in a state tree
 */
 
-include "./circomlib/circuits/poseidon.circom";
-include "./circomlib/circuits/bitify.circom";
+include "./circomlib/poseidon.circom";
+include "./circomlib/bitify.circom";
 include "./incrementalMerkleTree.circom";
 include "./epochKeyLite.circom";
 include "./leafHasher.circom";

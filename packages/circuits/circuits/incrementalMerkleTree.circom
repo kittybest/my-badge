@@ -4,8 +4,8 @@ pragma circom 2.0.0;
 // https://github.com/peppersec/tornado-mixer/blob/master/circuits/merkleTree.circom
 // https://github.com/appliedzkp/semaphore/blob/master/circuits/circom/semaphore-base.circom
 
-include "./circomlib/circuits/mux1.circom";
-include "./circomlib/circuits/poseidon.circom";
+include "./circomlib/mux1.circom";
+include "./circomlib/poseidon.circom";
 
 template MerkleTreeInclusionProof(n_levels) {
     signal input leaf;

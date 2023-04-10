@@ -13,9 +13,8 @@
   "scripts": {
     "pre": "node scripts/prepare",
     "build": "yarn buildTs && yarn buildSnarks && yarn copyCircom",
-    "buildSnarks": "node --max-old-space-size=8192 scripts/buildSnarks.ts",
+    "buildSnarks": "ts-node scripts/buildSnarks",
     "buildProveDataSnark": "yarn buildSnarks proveData",
-    "buildEpochKeySnark": "yarn buildSnarks epochKey",
     "buildTs": "tsc",
     "copyCircom": "sh scripts/copyCircom.sh",
     "time": "ts-node scripts/time.ts",

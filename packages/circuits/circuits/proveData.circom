@@ -7,9 +7,9 @@ pragma circom 2.0.0;
         4. output a chosen epoch key
 */
 
-include "./circomlib/circuits/comparators.circom";
-include "./circomlib/circuits/gates.circom";
-include "./circomlib/circuits/poseidon.circom";
+include "./circomlib/comparators.circom";
+include "./circomlib/gates.circom";
+include "./circomlib/poseidon.circom";
 include "./sparseMerkleTree.circom";
 include "./incrementalMerkleTree.circom";
 include "./epochKey.circom";
