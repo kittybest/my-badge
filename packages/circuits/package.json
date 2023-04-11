@@ -12,10 +12,9 @@
   "homepage": "https://github.com/unirep/unirep#readme",
   "scripts": {
     "pre": "node scripts/prepare",
-    "build": "yarn buildTs && yarn buildSnarks && yarn copyCircom",
+    "build": "yarn buildSnarks && yarn copyCircom",
     "buildSnarks": "ts-node scripts/buildSnarks",
     "buildProveDataSnark": "yarn buildSnarks proveData",
-    "buildTs": "tsc",
     "copyCircom": "sh scripts/copyCircom.sh",
     "time": "ts-node scripts/time.ts",
     "test": "mocha -r ts-node/register test/proveData.test.ts --exit"
