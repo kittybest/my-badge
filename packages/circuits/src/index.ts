@@ -1,3 +1,3 @@
 export * from "./circuits";
-export * from "./DataProof";
+export * from "./dataProof";
 export * from "./appProver";

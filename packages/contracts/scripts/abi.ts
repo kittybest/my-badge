@@ -5,10 +5,10 @@ import Verifier_ABI from "../artifacts/contracts/ProveDataVerifier.sol/ProveData
 
 fs.writeFileSync(
   path.join(__dirname, "../abi/UnirepApp.json"),
-  JSON.stringify(UNIREPAPP_ABI)
+  JSON.stringify(UNIREPAPP_ABI.abi)
 );
 
 fs.writeFileSync(
   path.join(__dirname, "../abi/ProveDataVerifier.json"),
-  JSON.stringify(Verifier_ABI)
+  JSON.stringify(Verifier_ABI.abi)
 );

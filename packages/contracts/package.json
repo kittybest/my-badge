@@ -13,7 +13,7 @@
     "abi": "ts-node scripts/abi",
     "hardhat": "hardhat",
     "deploy": "hardhat run scripts/deploy.ts",
-    "test": "hardhat test test/UnirepApp.test.js --network hardhat"
+    "test": "hardhat test test/UnirepApp.test.ts --network hardhat"
   },
   "bugs": {
     "url": "https://github.com/vivianjeng/create-unirep-app/issues"
