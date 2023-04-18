@@ -11,7 +11,7 @@ interface IVerifier {
      *          above and the public inputs
      */
     function verifyProof(
-        uint256[] calldata publicSignals,
+        uint256[9] calldata publicSignals,
         uint256[8] calldata proof
     ) external view returns (bool);
 }
@@ -93,7 +93,7 @@ contract UnirepApp {
     }
 
     function submitDataProof(
-        uint256[] memory publicSignals,
+        uint256[9] memory publicSignals,
         uint256[8] memory proof
     ) public {
         // check if proof is valid
