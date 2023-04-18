@@ -1,8 +1,8 @@
 {
   "name": "@unirep-app/circuits",
   "version": "1.0.0",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "repository": "https://github.com/unirep/unirep.git",
   "author": "Unirep team <team@unirep.io>",
   "license": "MIT",
@@ -12,10 +12,9 @@
   "homepage": "https://github.com/unirep/unirep#readme",
   "scripts": {
     "pre": "node scripts/prepare",
-    "build": "yarn buildTs && yarn buildSnarks && yarn copyCircom",
+    "build": "yarn buildSnarks && tsc && yarn copyCircom",
     "buildSnarks": "ts-node scripts/buildSnarks",
     "buildProveDataSnark": "yarn buildSnarks proveData",
-    "buildTs": "tsc",
     "copyCircom": "sh scripts/copyCircom.sh",
     "time": "ts-node scripts/time.ts",
     "test": "mocha -r ts-node/register test/proveData.test.ts --exit"
