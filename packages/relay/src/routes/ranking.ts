@@ -10,6 +10,27 @@ import UNIREP_ABI from "@unirep/contracts/artifacts/contracts/Unirep.sol/Unirep.
 import UNIREPAPP_ABI from "@unirep-app/contracts/artifacts/contracts/UnirepApp.sol/UnirepApp.json";
 
 export default (app: Express, db: DB, synchronizer: Synchronizer) => {
+  // get my ranking
+  app.get("/api/ranking", async (req, res) => {
+    const { epochKeys } = req.query;
+    try {
+      // query recrods in the database --> sort --> return ranking
+    } catch (error: any) {
+      console.log("get ranking of", epochKeys, "error:", error);
+      res.status(500).json({ error });
+    }
+  });
+
+  // get top5 of certain platform
+  app.get("/api/ranking/:platform", async (req, res) => {
+    const platform = req.params.platform;
+    try {
+    } catch (error: any) {
+      console.log("get", platform, "ranking error", error);
+      res.status(500).json({ error });
+    }
+  });
+
   // upload data proof and publicSignals
   app.post("/api/ranking", async (req, res) => {
     try {
