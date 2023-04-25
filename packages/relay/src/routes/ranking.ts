@@ -22,11 +22,11 @@ export default (app: Express, db: DB, synchronizer: Synchronizer) => {
   });
 
   // get top5 of certain platform
-  app.get("/api/ranking/:platform", async (req, res) => {
-    const platform = req.params.platform;
+  app.get("/api/ranking/:attesterId", async (req, res) => {
+    const attesterId = req.params.attesterId;
     try {
     } catch (error: any) {
-      console.log("get", platform, "ranking error", error);
+      console.log("get", attesterId, "ranking error", error);
       res.status(500).json({ error });
     }
   });

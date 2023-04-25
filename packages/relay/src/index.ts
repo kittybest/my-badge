@@ -9,6 +9,7 @@ import TransactionManager from "./singletons/TransactionManager";
 import prover from "./singletons/prover";
 import schema from "./singletons/schema";
 import HashchainManager from "./singletons/HashchainManager";
+import AppSynchronizer from "./singletons/Synchronizer";
 
 main().catch((err) => {
   console.log(`Uncaught error: ${err}`);
@@ -17,7 +18,7 @@ main().catch((err) => {
 
 async function main() {
   const db = await SQLiteConnector.create(schema, DB_PATH ?? ":memory:");
-  const synchronizer = new Synchronizer({
+  const synchronizer = new AppSynchronizer({
     db,
     provider,
     unirepAddress: UNIREP_ADDRESS,
