@@ -34,8 +34,8 @@ export default (app: Express, db: DB, synchronizer: Synchronizer) => {
   // upload data proof and publicSignals
   app.post("/api/ranking", async (req, res) => {
     try {
-      const { publicSignals, proof, attesterId, currentData } = req.body;
-      console.log("upload ranking data:", publicSignals, currentData);
+      const { publicSignals, proof, attesterId } = req.body;
+      console.log("upload ranking data:", publicSignals);
 
       // make data proof
       const dataProof: DataProof = new DataProof(publicSignals, proof);

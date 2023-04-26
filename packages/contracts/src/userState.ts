@@ -4,7 +4,7 @@ import { stringifyBigInts } from "@unirep/utils";
 import { ethers } from "ethers";
 import UNIREP_APP_ABI from "../abi/UnirepApp.json";
 
-class AppUserState extends UserState {
+export class AppUserState extends UserState {
   unirepApp: any;
 
   /* Constructor */
@@ -53,5 +53,3 @@ class AppUserState extends UserState {
     );
   }
 }
-
-export default AppUserState;

@@ -8,7 +8,7 @@
   "main": "build/src/index.js",
   "repository": "git+https://github.com/vivianjeng/create-unirep-app.git",
   "scripts": {
-    "build": "yarn buildVerifier && hardhat compile && yarn abi",
+    "build": "yarn buildVerifier && hardhat compile && yarn abi && tsc",
     "buildVerifier": "ts-node ./scripts/genVerifier",
     "abi": "ts-node scripts/abi",
     "hardhat": "hardhat",

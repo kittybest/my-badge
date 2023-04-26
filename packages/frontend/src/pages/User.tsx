@@ -155,6 +155,11 @@ export default observer(() => {
                     />
                   </Container>
                 </Grid.Column>
+                <Grid.Column>
+                  <Button onClick={() => user.uploadDataProof("twitter")}>
+                    Upload data proof
+                  </Button>
+                </Grid.Column>
               </Grid.Row>
             </Grid>
           </Container>

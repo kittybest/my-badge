@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import { makeAutoObservable } from "mobx";
 import { ZkIdentity, Strategy, stringifyBigInts } from "@unirep/utils";
 import { UserState, schema } from "@unirep/core";
+import { AppUserState } from "@unirep-app/contracts";
 import { MemoryConnector } from "anondb/web";
 import { constructSchema } from "anondb/types";
 import {
@@ -17,8 +18,8 @@ import prover from "./prover";
 import Wait from "../utils/wait";
 import poseidon from "poseidon-lite";
 
-interface AppUserState {
-  userState: UserState;
+interface App {
+  userState: AppUserState;
   hasSignedUp: boolean;
   latestTransitionedEpoch: number;
   data: bigint[];
@@ -33,7 +34,7 @@ const ATTESTERS: { [key: string]: string } = {
 };
 
 class User {
-  userStates: { [key: string]: AppUserState } = {}; // key: attesterId, value: { userState, currentEpoch, latestTransitionedEpoch, hasSignedUp, data, provableData }
+  userStates: { [key: string]: App } = {}; // key: attesterId, value: { userState, currentEpoch, latestTransitionedEpoch, hasSignedUp, data, provableData }
   id: string = "";
   fieldCount: number = -1;
   sumFieldCount: number = -1;
@@ -59,7 +60,7 @@ class User {
 
     for (const [platform, attesterId] of Object.entries(ATTESTERS)) {
       console.log("attester", platform, "with address", attesterId);
-      const userState = new UserState(
+      const userState = new AppUserState(
         {
           db,
           provider,
@@ -68,7 +69,8 @@ class User {
           attesterId: BigInt(attesterId),
           _id: identity,
         },
-        identity
+        identity,
+        attesterId
       );
       await userState.sync.start();
 
@@ -297,6 +299,29 @@ class User {
 
     window.localStorage.setItem(`${platform}_access_token`, access_token);
     this.userStates[platform].access_token = access_token;
+  }
+
+  async uploadDataProof(platform: string) {
+    const { publicSignals, proof } = await this.userStates[
+      "twitter"
+    ].userState.genDataProof({});
+    const attesterId = ATTESTERS[platform];
+
+    /* Call API to calculate and receive reputation data */
+    const data = await fetch(`${SERVER}/api/ranking`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(
+        stringifyBigInts({
+          publicSignals,
+          proof,
+          attesterId,
+        })
+      ),
+    }).then((r) => r.json());
+    await provider.waitForTransaction(data.hash);
   }
 }
 
