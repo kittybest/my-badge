@@ -1,8 +1,7 @@
 import { Synchronizer } from "@unirep/core";
+import { Prover } from "@unirep/circuits";
 import { ethers } from "ethers";
-import { TransactionDB } from "anondb";
-import { TWITTER_ADDRESS, GITHUB_ADDRESS } from "../config";
-import UNIREP_APP_ABI from "@unirep-app/contracts/abi/UnirepApp.json";
+import { TransactionDB, DB } from "anondb";
 
 type EventHandlerArgs = {
   event: ethers.Event;
@@ -11,39 +10,41 @@ type EventHandlerArgs = {
 };
 
 export default class AppSynchronizer extends Synchronizer {
-  twitterContract: ethers.Contract;
-  githubContract: ethers.Contract;
+  appContracts: ethers.Contract[] = [];
 
-  constructor({ db, provider, unirepAddress, prover }) {
+  constructor(
+    db: DB,
+    provider,
+    unirepAddress: string,
+    prover: Prover,
+    appContracts: ethers.Contract[]
+  ) {
     super({ db, provider, unirepAddress, prover });
-
-    this.twitterContract = new ethers.Contract(
-      TWITTER_ADDRESS,
-      UNIREP_APP_ABI,
-      provider
-    );
-    this.githubContract = new ethers.Contract(
-      GITHUB_ADDRESS,
-      UNIREP_APP_ABI,
-      provider
-    );
+    this.appContracts = appContracts;
   }
 
+  /* override */
   get contracts() {
-    return {
-      ...super.contracts,
-      [this.twitterContract.address]: {
-        contract: this.twitterContract,
-        eventNames: ["SubmitDataProof"],
-      },
-      [this.githubContract.address]: {
-        contract: this.githubContract,
-        eventNames: ["SubmitDataProof"],
-      },
-    };
+    let ret = { ...super.contracts };
+    if (this.appContracts) {
+      this.appContracts.map((c) => {
+        ret = {
+          ...ret,
+          [c.address]: {
+            contract: c,
+            eventNames: ["SubmitDataProof"],
+          },
+        };
+      });
+    }
+    return ret;
   }
 
-  async handleDataProofSubmitted({ event, db, decodedData }: EventHandlerArgs) {
+  /*
+  /* event handlers 
+   */
+  async handleSubmitDataProof({ event, db, decodedData }: EventHandlerArgs) {
+    /* need to store the data with epoch key to db */
     const transactionHash = event.transactionHash;
     console.log(event);
     console.log(transactionHash);

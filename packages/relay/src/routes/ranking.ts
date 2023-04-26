@@ -14,7 +14,7 @@ export default (app: Express, db: DB, synchronizer: Synchronizer) => {
   app.get("/api/ranking", async (req, res) => {
     const { epochKeys } = req.query;
     try {
-      // query recrods in the database --> sort --> return ranking
+      // query recrods in the database --> sort --> return ranking (highest or most recent?)
     } catch (error: any) {
       console.log("get ranking of", epochKeys, "error:", error);
       res.status(500).json({ error });

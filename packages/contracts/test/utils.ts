@@ -3,7 +3,7 @@ import { Prover } from "@unirep/circuits";
 
 import { appProver } from "@unirep-app/circuits";
 // import AppProver from "../../circuits/src/appProver";
-import AppUserState from "../src/userState";
+import { AppUserState } from "../src/userState";
 
 async function genUnirepState(
   provider,

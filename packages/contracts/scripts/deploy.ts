@@ -16,15 +16,19 @@ async function main() {
   const unirep = await deployUnirep(signer);
   const epochLength = 150;
 
+  const Verifier = await ethers.getContractFactory("ProveDataVerifier");
+  const verifier = await Verifier.deploy();
+  await verifier.deployed();
+
   const App = await ethers.getContractFactory("UnirepApp");
 
-  const app1 = await App.deploy(unirep.address, epochLength);
+  const app1 = await App.deploy(unirep.address, epochLength, verifier.address);
   await app1.deployed();
   console.log(
     `Unirep app 1 with epoch length ${epochLength} deployed to ${app1.address}`
   );
 
-  const app2 = await App.deploy(unirep.address, epochLength);
+  const app2 = await App.deploy(unirep.address, epochLength, verifier.address);
   await app2.deployed();
   console.log(
     `Unirep app 2 with epoch length ${epochLength} deployed to ${app2.address}`

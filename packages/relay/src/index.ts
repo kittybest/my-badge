@@ -1,10 +1,18 @@
 import path from "path";
 import fs from "fs";
 import express from "express";
-import { Synchronizer } from "@unirep/core";
+import { ethers } from "ethers";
 import { SQLiteConnector } from "anondb/node.js";
 
-import { provider, PRIVATE_KEY, UNIREP_ADDRESS, DB_PATH } from "./config";
+import {
+  provider,
+  PRIVATE_KEY,
+  UNIREP_ADDRESS,
+  DB_PATH,
+  TWITTER_ADDRESS,
+  GITHUB_ADDRESS,
+} from "./config";
+import UNIREP_APP_ABI from "@unirep-app/contracts/abi/UnirepApp.json";
 import TransactionManager from "./singletons/TransactionManager";
 import prover from "./singletons/prover";
 import schema from "./singletons/schema";
@@ -17,13 +25,28 @@ main().catch((err) => {
 });
 
 async function main() {
+  // database
   const db = await SQLiteConnector.create(schema, DB_PATH ?? ":memory:");
-  const synchronizer = new AppSynchronizer({
+
+  // contracts
+  const twitterContract = new ethers.Contract(
+    TWITTER_ADDRESS,
+    UNIREP_APP_ABI,
+    provider
+  );
+  const githubContract = new ethers.Contract(
+    GITHUB_ADDRESS,
+    UNIREP_APP_ABI,
+    provider
+  );
+
+  const synchronizer = new AppSynchronizer(
     db,
     provider,
-    unirepAddress: UNIREP_ADDRESS,
+    UNIREP_ADDRESS,
     prover,
-  });
+    [twitterContract, githubContract]
+  );
   await synchronizer.start();
   TransactionManager.configure(PRIVATE_KEY, provider, synchronizer._db);
   await TransactionManager.start();
