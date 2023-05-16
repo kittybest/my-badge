@@ -2,7 +2,8 @@ import { ethers } from "ethers";
 import { TransactionDB, DB } from "anondb";
 import { Synchronizer } from "@unirep/core";
 import { Prover } from "@unirep/circuits";
-import UNIREP_APP_ABI from "@unirep-app/contracts/abi/UnirepApp.json";
+import UNIREP_TWITTER_ABI from "@unirep-app/contracts/abi/UnirepTwitter.json";
+import UNIREP_GITHUB_ABI from "@unirep-app/contracts/abi/UnirepGithub.json";
 import { provider, TWITTER_ADDRESS, GITHUB_ADDRESS } from "../config";
 
 type EventHandlerArgs = {
@@ -14,12 +15,12 @@ type EventHandlerArgs = {
 // contracts
 const twitterContract = new ethers.Contract(
   TWITTER_ADDRESS,
-  UNIREP_APP_ABI,
+  UNIREP_TWITTER_ABI,
   provider
 );
 const githubContract = new ethers.Contract(
   GITHUB_ADDRESS,
-  UNIREP_APP_ABI,
+  UNIREP_GITHUB_ABI,
   provider
 );
 
@@ -37,11 +38,11 @@ export default class AppSynchronizer extends Synchronizer {
       ...super.contracts,
       [TWITTER_ADDRESS]: {
         contract: twitterContract,
-        eventNames: ["SubmitDataProof"],
+        eventNames: ["SubmitTwitterDataProof"],
       },
       [GITHUB_ADDRESS]: {
         contract: githubContract,
-        eventNames: ["SubmitDataProof"],
+        eventNames: ["SubmitGithubDataProof"],
       },
     };
   }
@@ -49,7 +50,22 @@ export default class AppSynchronizer extends Synchronizer {
   /*
   /* event handlers 
    */
-  async handleSubmitDataProof({ event, db, decodedData }: EventHandlerArgs) {
+  async handleSubmitTwitterDataProof({
+    event,
+    db,
+    decodedData,
+  }: EventHandlerArgs) {
+    /* need to store the data with epoch key to db */
+    const transactionHash = event.transactionHash;
+    console.log(event);
+    console.log(transactionHash);
+  }
+
+  async handleSubmitGithubDataProof({
+    event,
+    db,
+    decodedData,
+  }: EventHandlerArgs) {
     /* need to store the data with epoch key to db */
     const transactionHash = event.transactionHash;
     console.log(event);

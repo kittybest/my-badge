@@ -4,9 +4,15 @@ import { Express } from "express";
 import { DB } from "anondb/node";
 import { Synchronizer } from "@unirep/core";
 import TransactionManager from "../singletons/TransactionManager";
-import { UNIREP_ADDRESS, provider } from "../config";
+import {
+  UNIREP_ADDRESS,
+  TWITTER_ADDRESS,
+  GITHUB_ADDRESS,
+  provider,
+} from "../config";
 import UNIREP_ABI from "@unirep/contracts/artifacts/contracts/Unirep.sol/Unirep.json";
-import UNIREPAPP_ABI from "@unirep-app/contracts/artifacts/contracts/UnirepApp.sol/UnirepApp.json";
+import UNIREP_TWITTER_ABI from "@unirep-app/contracts/abi/UnirepTwitter.json";
+import UNIREP_GITHUB_ABI from "@unirep-app/contracts/abi/UnirepGithub.json";
 
 export default (app: Express, db: DB, synchronizer: Synchronizer) => {
   app.post("/api/signup", async (req, res) => {
@@ -44,7 +50,16 @@ export default (app: Express, db: DB, synchronizer: Synchronizer) => {
         return;
       }
       // make a transaction lil bish
-      const appContract = new ethers.Contract(attesterId, UNIREPAPP_ABI.abi);
+      let abi: any;
+      if (attesterId === TWITTER_ADDRESS) {
+        abi = UNIREP_TWITTER_ABI;
+      } else if (attesterId === GITHUB_ADDRESS) {
+        abi = UNIREP_GITHUB_ABI;
+      } else {
+        res.status(500).json({ error: "attesterId does not match" });
+      }
+
+      const appContract = new ethers.Contract(attesterId, abi);
       const calldata = appContract.interface.encodeFunctionData("userSignUp", [
         signupProof.publicSignals,
         signupProof.proof,

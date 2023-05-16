@@ -16,7 +16,7 @@ interface IVerifier {
     ) external view returns (bool);
 }
 
-contract UnirepApp {
+contract UnirepTwitter {
     /* Constants */
     uint8 public constant FIELD_COUNT = 6;
     uint256 public constant SNARK_SCALAR_FIELD = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
@@ -26,7 +26,7 @@ contract UnirepApp {
     IVerifier immutable dataVerifier;
 
     /* Events */
-    event SubmitDataProof (
+    event SubmitTwitterDataProof (
         uint256 indexed epochKey,
         uint256[FIELD_COUNT] data,
         uint256[8] proof
@@ -129,7 +129,7 @@ contract UnirepApp {
             data[x] = publicSignals[3+x];
         }
 
-        emit SubmitDataProof(
+        emit SubmitTwitterDataProof(
             epochKey,
             data,
             proof

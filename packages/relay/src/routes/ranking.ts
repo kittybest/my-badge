@@ -3,11 +3,17 @@ import { ethers } from "ethers";
 import { DB } from "anondb/node";
 import { Synchronizer } from "@unirep/core";
 import { DataProof } from "@unirep-app/circuits";
-import { UNIREP_ADDRESS, provider } from "../config";
+import {
+  UNIREP_ADDRESS,
+  provider,
+  TWITTER_ADDRESS,
+  GITHUB_ADDRESS,
+} from "../config";
 import TransactionManager from "../singletons/TransactionManager";
 
 import UNIREP_ABI from "@unirep/contracts/artifacts/contracts/Unirep.sol/Unirep.json";
-import UNIREPAPP_ABI from "@unirep-app/contracts/artifacts/contracts/UnirepApp.sol/UnirepApp.json";
+import UNIREP_TWITTER_ABI from "@unirep-app/contracts/abi/UnirepTwitter.json";
+import UNIREP_GITHUB_ABI from "@unirep-app/contracts/abi/UnirepGithub.json";
 
 export default (app: Express, db: DB, synchronizer: Synchronizer) => {
   // get my ranking
@@ -72,11 +78,26 @@ export default (app: Express, db: DB, synchronizer: Synchronizer) => {
       }
 
       // send data on chain
-      const appContract = new ethers.Contract(attesterId, UNIREPAPP_ABI.abi);
-      let calldata = appContract.interface.encodeFunctionData(
-        "submitDataProof",
-        [dataProof.publicSignals, dataProof.proof]
-      );
+      let appContract: any;
+      let calldata: any;
+      if (attesterId === TWITTER_ADDRESS) {
+        appContract = new ethers.Contract(attesterId, UNIREP_TWITTER_ABI);
+        calldata = appContract.interface.encodeFunctionData(
+          "submitTwitterDataProof",
+          [dataProof.publicSignals, dataProof.proof]
+        );
+      } else if (attesterId === GITHUB_ADDRESS) {
+        appContract = new ethers.Contract(attesterId, UNIREP_GITHUB_ABI);
+        calldata = appContract.interface.encodeFunctionData(
+          "submitGithubDataProof",
+          [dataProof.publicSignals, dataProof.proof]
+        );
+      }
+
+      if (!calldata) {
+        res.status(500).json({ error: "attesterId does not match" });
+      }
+
       const hash = await TransactionManager.queueTransaction(
         attesterId,
         calldata
