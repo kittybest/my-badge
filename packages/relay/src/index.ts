@@ -7,7 +7,6 @@ import { provider, PRIVATE_KEY, UNIREP_ADDRESS, DB_PATH } from "./config";
 import TransactionManager from "./singletons/TransactionManager";
 import prover from "./singletons/prover";
 import schema from "./singletons/schema";
-import HashchainManager from "./singletons/HashchainManager";
 import AppSynchronizer from "./singletons/Synchronizer";
 
 main().catch((err) => {
@@ -19,6 +18,9 @@ async function main() {
   // database
   const db = await SQLiteConnector.create(schema, DB_PATH ?? ":memory:");
 
+  TransactionManager.configure(PRIVATE_KEY, provider, db);
+  await TransactionManager.start();
+
   const synchronizer = new AppSynchronizer(
     db,
     provider,
@@ -26,10 +28,6 @@ async function main() {
     prover
   );
   await synchronizer.start();
-  TransactionManager.configure(PRIVATE_KEY, provider, synchronizer._db);
-  await TransactionManager.start();
-  HashchainManager.configure(synchronizer);
-  HashchainManager.startDaemon();
 
   const app = express();
   const port = process.env.PORT ?? 8000;

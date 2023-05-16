@@ -39,7 +39,7 @@ contract UnirepGithub {
     error InvalidEpochKey();
 
     /* Constructor */
-    constructor(Unirep _unirep, uint256 _epochLength, IVerifier _dataVerifier) {
+    constructor(Unirep _unirep, uint48 _epochLength, IVerifier _dataVerifier) {
         // set unirep address
         unirep = _unirep;
 
@@ -60,7 +60,7 @@ contract UnirepGithub {
 
     function submitManyAttestations(
         uint256 epochKey,
-        uint256 targetEpoch,
+        uint48 targetEpoch,
         uint[] calldata fieldIndices,
         uint[] calldata vals
     ) public {
@@ -72,7 +72,7 @@ contract UnirepGithub {
 
     function submitAttestation(
         uint256 epochKey,
-        uint256 targetEpoch,
+        uint48 targetEpoch,
         uint256 fieldIndex,
         uint256 val
     ) public {
