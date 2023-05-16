@@ -1,8 +1,9 @@
 import { createContext } from "react";
 import { ethers } from "ethers";
 import { makeAutoObservable } from "mobx";
-import { ZkIdentity, Strategy, stringifyBigInts } from "@unirep/utils";
-import { UserState, schema } from "@unirep/core";
+import { stringifyBigInts } from "@unirep/utils";
+import { Identity } from "@semaphore-protocol/identity";
+import { schema } from "@unirep/core";
 import { AppUserState } from "@unirep-app/contracts";
 import { MemoryConnector } from "anondb/web";
 import { constructSchema } from "anondb/types";
@@ -16,7 +17,6 @@ import {
 } from "../config";
 import prover from "./prover";
 import Wait from "../utils/wait";
-import poseidon from "poseidon-lite";
 
 interface App {
   userState: AppUserState;
@@ -46,15 +46,11 @@ class User {
   }
 
   async load() {
-    const id: string | null = localStorage.getItem("id");
-    const identity = new ZkIdentity(
-      id ? Strategy.SERIALIZED : Strategy.RANDOM,
-      id ?? undefined
-    );
+    const id: string = localStorage.getItem("id") ?? "";
+    const identity = new Identity(id);
     if (!id) {
-      localStorage.setItem("id", identity.serializeIdentity());
+      localStorage.setItem("id", identity.toString());
     }
-    this.id = identity.serializeIdentity();
 
     const db = new MemoryConnector(constructSchema(schema)); // not used in the beta version??
 
@@ -125,8 +121,8 @@ class User {
     if (!id || id.length === 0) {
       throw new Error("You have not entered identity yet.");
     }
-    const identity = new ZkIdentity(Strategy.SERIALIZED, id);
-    localStorage.setItem("id", identity.serializeIdentity());
+    const identity = new Identity(id);
+    localStorage.setItem("id", identity.toString());
     await this.load();
   }
 
@@ -202,13 +198,8 @@ class User {
   }
 
   async stateTransition(platform: string) {
-    // check if previous data has been sealed
-    const sealed = await this.userStates[platform].userState.sync.isEpochSealed(
-      await this.userStates[platform].userState.latestTransitionedEpoch()
-    );
-    if (!sealed) {
-      throw new Error("From epoch is not yet sealed");
-    }
+    if (Object.keys(this.userStates).length === 0)
+      throw new Error("user state not initialized");
 
     // gen proof
     await this.userStates[platform].userState.waitForSync();
