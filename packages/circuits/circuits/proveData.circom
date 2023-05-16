@@ -7,21 +7,20 @@ pragma circom 2.0.0;
         4. output a chosen epoch key
 */
 
-include "./circomlib/comparators.circom";
-include "./circomlib/gates.circom";
-include "./circomlib/poseidon.circom";
-include "./sparseMerkleTree.circom";
-include "./incrementalMerkleTree.circom";
-include "./epochKey.circom";
+include "../../../node_modules/@unirep/circuits/circuits/circomlib/circuits/comparators.circom";
+include "../../../node_modules/@unirep/circuits/circuits/circomlib/circuits/gates.circom";
+include "../../../node_modules/@unirep/circuits/circuits/circomlib/circuits/poseidon.circom";
 
-template ProveData(STATE_TREE_DEPTH, EPOCH_KEY_NONCE_PER_EPOCH, SUM_FIELD_COUNT, FIELD_COUNT, EPK_R) {
+include "../../../node_modules/@unirep/circuits/circuits/epochKey.circom";
+
+template ProveData(STATE_TREE_DEPTH, NUM_EPOCH_KEY_NONCE_PER_EPOCH, SUM_FIELD_COUNT, FIELD_COUNT) {
     signal output epoch_key;
 
     // Global state tree leaf: Identity & user state root
     signal input identity_secret;
     // Global state tree
     signal input state_tree_indexes[STATE_TREE_DEPTH];
-    signal input state_tree_elements[STATE_TREE_DEPTH][1];
+    signal input state_tree_elements[STATE_TREE_DEPTH];
     signal output state_tree_root;
     // Attestation by the attester
     signal input data[FIELD_COUNT];
@@ -46,9 +45,8 @@ template ProveData(STATE_TREE_DEPTH, EPOCH_KEY_NONCE_PER_EPOCH, SUM_FIELD_COUNT,
     /* Do the epoch key proof, state tree membership */
     component epoch_key_prover = EpochKey(
       STATE_TREE_DEPTH,
-      EPOCH_KEY_NONCE_PER_EPOCH,
-      FIELD_COUNT,
-      EPK_R
+      NUM_EPOCH_KEY_NONCE_PER_EPOCH,
+      FIELD_COUNT
     );
     epoch_key_prover.identity_secret <== identity_secret;
     epoch_key_prover.reveal_nonce <== reveal_nonce;
@@ -58,7 +56,7 @@ template ProveData(STATE_TREE_DEPTH, EPOCH_KEY_NONCE_PER_EPOCH, SUM_FIELD_COUNT,
     epoch_key_prover.sig_data <== 0;
     for (var i = 0; i < STATE_TREE_DEPTH; i++) {
         epoch_key_prover.state_tree_indexes[i] <== state_tree_indexes[i];
-        epoch_key_prover.state_tree_elements[i] <== state_tree_elements[i][0];
+        epoch_key_prover.state_tree_elements[i] <== state_tree_elements[i];
     }
     for (var i = 0; i < FIELD_COUNT; i++) {
         epoch_key_prover.data[i] <== data[i];
