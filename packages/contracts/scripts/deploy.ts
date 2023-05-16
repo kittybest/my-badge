@@ -2,7 +2,6 @@ import fs from "fs";
 import path from "path";
 import { deployUnirep } from "@unirep/contracts/deploy/index.js";
 import hardhat from "hardhat";
-import UNIREPAPP_ABI from "../abi/UnirepApp.json";
 
 main().catch((err) => {
   console.log(`Uncaught error: ${err}`);
