@@ -42,7 +42,6 @@ export async function genUserState(
       provider,
       attesterId: [attesterId],
     },
-    userIdentity,
-    [attesterId.toString()]
+    userIdentity
   );
 }
