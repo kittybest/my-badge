@@ -1,30 +1,11 @@
 import * as utils from "@unirep/utils";
+import { Identity } from "@semaphore-protocol/identity";
 
 import { CircuitConfig } from "@unirep/circuits";
-import { appProver } from "../src/appProver";
-import { AppCircuit } from "../src";
+import { AppCircuit, appProver } from "../src";
 
-const {
-  EPOCH_TREE_DEPTH,
-  EPOCH_TREE_ARITY,
-  STATE_TREE_DEPTH,
-  NUM_EPOCH_KEY_NONCE_PER_EPOCH,
-  SUM_FIELD_COUNT,
-  FIELD_COUNT,
-} = CircuitConfig.default;
-
-const genNewEpochTree = (
-  _epochTreeDepth: number = EPOCH_TREE_DEPTH,
-  _epochTreeArity = EPOCH_TREE_ARITY
-) => {
-  const tree = new utils.IncrementalMerkleTree(
-    _epochTreeDepth,
-    0,
-    _epochTreeArity
-  );
-  tree.insert(0);
-  return tree;
-};
+const { STATE_TREE_DEPTH, SUM_FIELD_COUNT, FIELD_COUNT } =
+  CircuitConfig.default;
 
 export const fillZero = (data: number[], length: number) => {
   return [...data, ...Array(length - data.length).fill(0)];
@@ -46,7 +27,7 @@ export const randomData = () => [
 ];
 
 const genEpochKeyCircuitInput = (config: {
-  id: utils.ZkIdentity;
+  id: Identity;
   tree: utils.IncrementalMerkleTree;
   leafIndex: number;
   epoch: number;
@@ -77,7 +58,7 @@ const genEpochKeyCircuitInput = (config: {
   const circuitInputs = {
     state_tree_elements: proof.siblings,
     state_tree_indexes: proof.pathIndices,
-    identity_secret: id.secretHash,
+    identity_secret: id.secret,
     data,
     sig_data: sigData ?? BigInt(0),
     nonce,
@@ -89,7 +70,7 @@ const genEpochKeyCircuitInput = (config: {
 };
 
 const genDataCircuitInput = (config: {
-  id: utils.ZkIdentity;
+  id: Identity;
   epoch: number;
   nonce: number;
   attesterId: number | bigint;
@@ -107,7 +88,7 @@ const genDataCircuitInput = (config: {
   // Global state tree
   const stateTree = new utils.IncrementalMerkleTree(STATE_TREE_DEPTH);
   const hashedLeaf = utils.genStateTreeLeaf(
-    id.secretHash,
+    id.secret,
     BigInt(attesterId),
     epoch,
     data as any
@@ -116,13 +97,13 @@ const genDataCircuitInput = (config: {
   const stateTreeProof = stateTree.createProof(0); // if there is only one GST leaf, the index is 0
 
   const circuitInputs = {
-    identity_secret: id.secretHash,
+    identity_secret: id.secret,
     state_tree_indexes: stateTreeProof.pathIndices,
     state_tree_elements: stateTreeProof.siblings,
     data,
+    attester_id: attesterId,
     epoch,
     nonce,
-    attester_id: attesterId,
     reveal_nonce: revealNonce ?? 0,
   };
   return utils.stringifyBigInts(circuitInputs);
@@ -144,9 +125,4 @@ const genProofAndVerify = async (circuit: AppCircuit, circuitInputs: any) => {
   return { isValid, proof, publicSignals };
 };
 
-export {
-  genNewEpochTree,
-  genEpochKeyCircuitInput,
-  genDataCircuitInput,
-  genProofAndVerify,
-};
+export { genEpochKeyCircuitInput, genDataCircuitInput, genProofAndVerify };
