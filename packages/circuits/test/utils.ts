@@ -2,7 +2,8 @@ import * as utils from "@unirep/utils";
 import { Identity } from "@semaphore-protocol/identity";
 
 import { CircuitConfig } from "@unirep/circuits";
-import { AppCircuit, appProver } from "../src";
+import { AppCircuit } from "../src";
+import { appProver } from "../provers/appProver";
 
 const { STATE_TREE_DEPTH, SUM_FIELD_COUNT, FIELD_COUNT } =
   CircuitConfig.default;

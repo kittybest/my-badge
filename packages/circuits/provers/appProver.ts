@@ -1,6 +1,6 @@
 import path from "path";
 import { Circuit } from "@unirep/circuits";
-import { AppCircuit } from "./circuits";
+import { AppCircuit } from "../src/index";
 import * as snarkjs from "snarkjs";
 import { SnarkProof, SnarkPublicSignals } from "@unirep/utils";
 
