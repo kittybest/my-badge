@@ -1,32 +1,11 @@
 import { DataProof, AppCircuit } from "@unirep-app/circuits";
 import { UserState } from "@unirep/core";
 import { stringifyBigInts } from "@unirep/utils";
-import { ethers } from "ethers";
-import UNIREP_TWITTER_ABI from "@unirep-app/contracts/abi/UnirepTwitter.json";
-import UNIREP_GITHUB_ABI from "@unirep-app/contracts/abi/UnirepGithub.json";
 
 export class AppUserState extends UserState {
-  unirepTwitter: any;
-  unirepGithub: any;
-
   /* Constructor */
-  constructor(config, id, addresses: string[]) {
+  constructor(config, id) {
     super(config, id);
-
-    if (addresses.length > 0) {
-      this.unirepTwitter = new ethers.Contract(
-        addresses[0],
-        UNIREP_TWITTER_ABI,
-        config.provider
-      );
-    }
-    if (addresses.length > 1) {
-      this.unirepGithub = new ethers.Contract(
-        addresses[1],
-        UNIREP_GITHUB_ABI,
-        config.provider
-      );
-    }
   }
 
   /* Generate DataProof
@@ -60,8 +39,6 @@ export class AppUserState extends UserState {
       AppCircuit.proveData,
       stringifyBigInts(circuitInputs)
     );
-
-    console.log("gen data proof results:", results);
 
     return new DataProof(
       results.publicSignals,
