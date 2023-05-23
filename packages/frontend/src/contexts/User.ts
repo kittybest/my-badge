@@ -32,6 +32,7 @@ class User {
   data: { [key: string]: bigint[] } = {}; // platform: array of data
   provableData: { [key: string]: bigint[] } = {}; // platform: array of data
   hasSignedUp: { [key: string]: boolean } = {};
+  rankings: number[] = [0, 0, 0]; // [twitter, github_stars, github_followers]
 
   constructor() {
     makeAutoObservable(this);
@@ -138,7 +139,7 @@ class User {
       console.error(
         "Error: Something is wrong, just wanna get epoch key of certain nonce but got an array."
       );
-      return;
+      return "0x";
     }
     const key = Array.isArray(keys) ? keys[0] : keys;
     return `0x${key.toString(16)}`;
@@ -313,6 +314,7 @@ class User {
     const { publicSignals, proof } = await this.userState.genDataProof({
       attesterId,
     });
+    const epochKey = parseInt(this.epochKey(platform, 0) ?? "0", 16);
 
     /* Call API to calculate and receive reputation data */
     const data = await fetch(`${SERVER}/api/ranking`, {
@@ -325,14 +327,47 @@ class User {
           publicSignals,
           proof,
           attesterId,
+          epochKey,
         })
       ),
     }).then((r) => r.json());
     if (data.error) {
-      console.error(data.error);
-    } else {
-      await provider.waitForTransaction(data.hash);
+      throw new Error(data.error.toString());
     }
+
+    await provider.waitForTransaction(data.hash);
+  }
+
+  async refreshRanking() {
+    /* Check if UserState is loaded */
+    if (!this.userState) throw new Error("UserState is undefined");
+
+    const epochKeyTwitter = this.userState.getEpochKeys(
+      8,
+      0,
+      ATTESTERS["twitter"]
+    );
+    const epochKeyGithub = this.userState.getEpochKeys(
+      8,
+      0,
+      ATTESTERS["github"]
+    );
+    console.log(epochKeyTwitter, epochKeyGithub);
+    const ret = await fetch(
+      `${SERVER}/api/ranking?epochKeys=${epochKeyTwitter}_${epochKeyGithub}`
+    ).then((r) => r.json());
+
+    if (ret.error) {
+      throw new Error(ret.error.toString());
+    }
+
+    ret.rankings.map((r: number, i: number) => {
+      if (r > 0) {
+        this.rankings[i] = r;
+      }
+    });
+
+    console.log("New rankings are:", this.rankings);
   }
 }
 

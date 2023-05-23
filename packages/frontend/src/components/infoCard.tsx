@@ -24,6 +24,7 @@ type Props = {
   update: () => void;
   ust: () => void;
   connect: () => void;
+  upload: () => void;
   error: string;
   connectLoading: boolean;
 };
@@ -38,6 +39,7 @@ const InfoCard = ({
   color,
   update,
   ust,
+  upload,
   connect,
   error,
   connectLoading,
@@ -49,6 +51,7 @@ const InfoCard = ({
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUSTing, setIsUSTing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(error);
 
   const onClickUpdate = async () => {
@@ -77,6 +80,19 @@ const InfoCard = ({
     setIsUSTing(false);
   };
 
+  const onClickUpload = async () => {
+    if (isUpdating || isUSTing || isUploading) return;
+
+    setErrorMsg("");
+    setIsUploading(true);
+    try {
+      await upload();
+    } catch (e: any) {
+      setErrorMsg(e.toString());
+    }
+    setIsUploading(false);
+  };
+
   return (
     <Segment color={color}>
       <Grid>
@@ -90,7 +106,7 @@ const InfoCard = ({
               {connected ? "connected" : "unconnected"}
             </p>
           </Grid.Column>
-          <Grid.Column width={7} verticalAlign="middle">
+          <Grid.Column width={5} verticalAlign="middle">
             {hasSignedUp ? (
               <p>
                 <b>
@@ -120,6 +136,13 @@ const InfoCard = ({
             <Grid.Column width={2}>
               <Button onClick={onClickUpdate} loading={isUpdating}>
                 Update
+              </Button>
+            </Grid.Column>
+          )}
+          {hasSignedUp && (
+            <Grid.Column width={2}>
+              <Button onClick={onClickUpload} loading={isUploading}>
+                Upload
               </Button>
             </Grid.Column>
           )}

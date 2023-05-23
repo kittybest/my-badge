@@ -24,12 +24,10 @@ export default (app: Express, db: DB, synchronizer: Synchronizer) => {
       return;
     }
     if (typeof epochKeys !== "string") {
-      res
-        .status(400)
-        .json({
-          error:
-            "The epochKeys should be passed under the format [epochKey1]_[epochKey2]_[...]_[epochKeyN]",
-        });
+      res.status(400).json({
+        error:
+          "The epochKeys should be passed under the format [epochKey1]_[epochKey2]_[...]_[epochKeyN]",
+      });
       return;
     }
 
@@ -59,7 +57,6 @@ export default (app: Express, db: DB, synchronizer: Synchronizer) => {
   app.post("/api/ranking", async (req, res) => {
     try {
       const { publicSignals, proof, attesterId, epochKey } = req.body;
-      console.log("upload ranking data:", publicSignals);
 
       // make data proof
       const dataProof: DataProof = new DataProof(
@@ -121,10 +118,6 @@ export default (app: Express, db: DB, synchronizer: Synchronizer) => {
         attesterId,
         calldata
       );
-
-      const rankingData = await db.findMany("RankingData", {
-        where: {},
-      });
 
       res.json({ hash });
     } catch (error: any) {
