@@ -71,8 +71,8 @@ class User {
     await this.userState.waitForSync();
 
     for (const [platform, attesterId] of Object.entries(ATTESTERS)) {
-      this.accessTokens[platform] =
-        localStorage.getItem(`${platform}_access_token`) ?? "";
+      const _accessToken = localStorage.getItem(`${platform}_access_token`);
+      if (_accessToken) this.accessTokens[platform] = _accessToken;
     }
 
     await this.updateHasSignedUp();

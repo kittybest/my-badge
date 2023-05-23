@@ -168,10 +168,16 @@ export default observer(() => {
               title={"Twitter"}
               platform={"twitter"}
               hasSignedUp={user.hasSignedUp.twitter}
-              connected={user.accessTokens.twitter !== null}
-              data={Number(user.data.twitter[0] - user.data.twitter[1])}
+              connected={user.accessTokens.twitter !== undefined}
+              data={Number(
+                user.data.twitter
+                  ? user.data.twitter[0] - user.data.twitter[1]
+                  : 0
+              )}
               provableData={Number(
-                user.provableData.twitter[0] - user.provableData.twitter[1]
+                user.provableData.twitter
+                  ? user.provableData.twitter[0] - user.provableData.twitter[1]
+                  : 0
               )}
               color="blue"
               update={() => user.getRep("twitter")}
@@ -184,10 +190,14 @@ export default observer(() => {
               title={"Github Stars"}
               platform={"github"}
               hasSignedUp={user.hasSignedUp.github}
-              connected={user.accessTokens.github !== null}
-              data={Number(user.data.github[2] - user.data.github[3])}
+              connected={user.accessTokens.github !== undefined}
+              data={Number(
+                user.data.github ? user.data.github[2] - user.data.github[3] : 0
+              )}
               provableData={Number(
-                user.provableData.github[2] - user.provableData.github[3]
+                user.provableData.github
+                  ? user.provableData.github[2] - user.provableData.github[3]
+                  : 0
               )}
               color="yellow"
               update={() => user.getRep("github")}
@@ -200,10 +210,14 @@ export default observer(() => {
               title={"Github Followers"}
               platform={"github"}
               hasSignedUp={user.hasSignedUp.github}
-              connected={user.accessTokens.github !== null}
-              data={Number(user.data.github[0] - user.data.github[1])}
+              connected={user.accessTokens.github !== undefined}
+              data={Number(
+                user.data.github ? user.data.github[0] - user.data.github[1] : 0
+              )}
               provableData={Number(
-                user.provableData.github[0] - user.provableData.github[1]
+                user.provableData.github
+                  ? user.provableData.github[0] - user.provableData.github[1]
+                  : 0
               )}
               color="red"
               update={async () => await user.getRep("github")}
