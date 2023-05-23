@@ -49,9 +49,11 @@ const _schema = [
   {
     name: "RankingData",
     rows: [
-      ["data", "String"],
+      ["title", "String"],
+      ["data", "Int"],
       ["attesterId", "String"],
       ["transactionHash", "String"],
+      ["epochKey", "String"],
       {
         name: "createdAt",
         type: "Int",

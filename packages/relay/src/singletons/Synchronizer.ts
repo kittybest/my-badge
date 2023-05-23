@@ -54,10 +54,46 @@ export default class AppSynchronizer extends Synchronizer {
     db,
     decodedData,
   }: EventHandlerArgs) {
-    /* need to store the data with epoch key to db */
     const transactionHash = event.transactionHash;
-    console.log(event);
-    console.log(transactionHash);
+    const epochKey = decodedData.epochKey.toString();
+    const data = decodedData.data.map((d) => Number(d));
+    const attesterId = event.address;
+
+    console.log("transactionHash:", transactionHash);
+    console.log("decodedData.data:", data);
+    console.log("decodedData.epochKey:", epochKey);
+    console.log("decodedData.attesterId:", attesterId);
+
+    const findRankingData = await this._db.findOne("RankingData", {
+      where: {
+        epochKey,
+        title: "twitter",
+        attesterId,
+      },
+    });
+
+    if (findRankingData) {
+      db.update("RankingData", {
+        where: {
+          _id: findRankingData._id,
+          epochKey,
+          title: "twitter",
+          attesterId,
+        },
+        update: {
+          data: data[0] - data[1],
+          transactionHash,
+        },
+      });
+    } else {
+      db.create("RankingData", {
+        title: "twitter",
+        data: data[0] - data[1],
+        attesterId,
+        transactionHash,
+        epochKey,
+      });
+    }
   }
 
   async handleSubmitGithubDataProof({
@@ -65,9 +101,75 @@ export default class AppSynchronizer extends Synchronizer {
     db,
     decodedData,
   }: EventHandlerArgs) {
-    /* need to store the data with epoch key to db */
     const transactionHash = event.transactionHash;
-    console.log(event);
-    console.log(transactionHash);
+    const epochKey = decodedData.epochKey.toString();
+    const data = decodedData.data.map((d) => Number(d));
+    const attesterId = event.address;
+
+    console.log("transactionHash:", transactionHash);
+    console.log("decodedData.data:", data);
+    console.log("decodedData.epochKey:", epochKey);
+    console.log("decodedData.attesterId:", attesterId);
+
+    const findStarsData = await this._db.findOne("RankingData", {
+      where: {
+        epochKey,
+        title: "github_stars",
+        attesterId,
+      },
+    });
+    const findFollowersData = await this._db.findOne("RankingData", {
+      where: {
+        epochKey,
+        title: "github_followers",
+        attesterId,
+      },
+    });
+
+    if (findStarsData) {
+      db.update("RankingData", {
+        where: {
+          _id: findStarsData._id,
+          epochKey,
+          title: "github_stars",
+          attesterId,
+        },
+        update: {
+          data: data[2] - data[3],
+          transactionHash,
+        },
+      });
+    } else {
+      db.create("RankingData", {
+        title: "github_stars",
+        data: data[2] - data[3],
+        attesterId,
+        transactionHash,
+        epochKey,
+      });
+    }
+
+    if (findFollowersData) {
+      db.update("RankingData", {
+        where: {
+          _id: findFollowersData._id,
+          epochKey,
+          title: "github_followers",
+          attesterId,
+        },
+        update: {
+          data: data[0] - data[1],
+          transactionHash,
+        },
+      });
+    } else {
+      db.create("RankingData", {
+        title: "github_followers",
+        data: data[0] - data[1],
+        attesterId,
+        transactionHash,
+        epochKey,
+      });
+    }
   }
 }

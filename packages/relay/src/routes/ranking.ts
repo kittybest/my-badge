@@ -44,7 +44,11 @@ export default (app: Express, db: DB, synchronizer: Synchronizer) => {
       console.log("upload ranking data:", publicSignals);
 
       // make data proof
-      const dataProof: DataProof = new DataProof(publicSignals, proof);
+      const dataProof: DataProof = new DataProof(
+        publicSignals,
+        proof,
+        synchronizer.prover
+      );
 
       // check attesterId
       if (dataProof.attesterId.toString() !== BigInt(attesterId).toString()) {
@@ -79,20 +83,15 @@ export default (app: Express, db: DB, synchronizer: Synchronizer) => {
 
       // send data on chain
       let appContract: any;
-      let calldata: any;
-      if (attesterId === TWITTER_ADDRESS) {
+      if (attesterId === TWITTER_ADDRESS)
         appContract = new ethers.Contract(attesterId, UNIREP_TWITTER_ABI);
-        calldata = appContract.interface.encodeFunctionData(
-          "submitTwitterDataProof",
-          [dataProof.publicSignals, dataProof.proof]
-        );
-      } else if (attesterId === GITHUB_ADDRESS) {
+      else if (attesterId === GITHUB_ADDRESS)
         appContract = new ethers.Contract(attesterId, UNIREP_GITHUB_ABI);
-        calldata = appContract.interface.encodeFunctionData(
-          "submitGithubDataProof",
-          [dataProof.publicSignals, dataProof.proof]
-        );
-      }
+
+      const calldata = appContract.interface.encodeFunctionData(
+        "submitDataProof",
+        [dataProof.publicSignals, dataProof.proof]
+      );
 
       if (!calldata) {
         res.status(500).json({ error: "attesterId does not match" });

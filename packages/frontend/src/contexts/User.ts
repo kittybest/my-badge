@@ -302,25 +302,29 @@ class User {
   }
 
   async uploadDataProof(platform: string) {
-    // const { publicSignals, proof } = await this.userStates[
-    //   "twitter"
-    // ].userState.genDataProof({});
-    // const attesterId = ATTESTERS[platform];
-    // /* Call API to calculate and receive reputation data */
-    // const data = await fetch(`${SERVER}/api/ranking`, {
-    //   method: "POST",
-    //   headers: {
-    //     "content-type": "application/json",
-    //   },
-    //   body: JSON.stringify(
-    //     stringifyBigInts({
-    //       publicSignals,
-    //       proof,
-    //       attesterId,
-    //     })
-    //   ),
-    // }).then((r) => r.json());
-    // await provider.waitForTransaction(data.hash);
+    /* Check if UserState is loaded */
+    if (!this.userState) throw new Error("UserState is undefined");
+
+    const attesterId = ATTESTERS[platform];
+    const { publicSignals, proof } = await this.userState.genDataProof({
+      attesterId,
+    });
+
+    /* Call API to calculate and receive reputation data */
+    const data = await fetch(`${SERVER}/api/ranking`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(
+        stringifyBigInts({
+          publicSignals,
+          proof,
+          attesterId,
+        })
+      ),
+    }).then((r) => r.json());
+    await provider.waitForTransaction(data.hash);
   }
 }
 
