@@ -32,7 +32,6 @@ export default class AppSynchronizer extends Synchronizer {
   }
 
   /* override */
-  // if add github contract, it will show that Error: duplicate event name registered "SubmitDataProof" --> how to solve this?
   get contracts() {
     return {
       ...super.contracts,
@@ -48,7 +47,7 @@ export default class AppSynchronizer extends Synchronizer {
   }
 
   /*
-  /* event handlers 
+   * event handlers
    */
   async handleSubmitTwitterDataProof({
     event,

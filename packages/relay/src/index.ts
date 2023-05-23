@@ -18,9 +18,6 @@ async function main() {
   // database
   const db = await SQLiteConnector.create(schema, DB_PATH ?? ":memory:");
 
-  TransactionManager.configure(PRIVATE_KEY, provider, db);
-  await TransactionManager.start();
-
   const synchronizer = new AppSynchronizer(
     db,
     provider,
@@ -28,6 +25,9 @@ async function main() {
     prover
   );
   await synchronizer.start();
+
+  TransactionManager.configure(PRIVATE_KEY, provider, db);
+  await TransactionManager.start();
 
   const app = express();
   const port = process.env.PORT ?? 8000;
