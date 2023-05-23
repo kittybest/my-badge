@@ -217,9 +217,13 @@ class User {
         attesterId: ATTESTERS[platform],
       }),
     }).then((r) => r.json());
-    await provider.waitForTransaction(data.hash);
-    await this.userState.waitForSync();
-    await this.loadReputation(platform);
+    if (data.error) {
+      console.error(data.error);
+    } else {
+      await provider.waitForTransaction(data.hash);
+      await this.userState.waitForSync();
+      await this.loadReputation(platform);
+    }
   }
 
   async getRep(platform: string) {
@@ -324,7 +328,11 @@ class User {
         })
       ),
     }).then((r) => r.json());
-    await provider.waitForTransaction(data.hash);
+    if (data.error) {
+      console.error(data.error);
+    } else {
+      await provider.waitForTransaction(data.hash);
+    }
   }
 }
 

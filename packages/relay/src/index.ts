@@ -26,6 +26,13 @@ async function main() {
   );
   await synchronizer.start();
 
+  // pushing blocks to update block.timestamp on chain while running hardhat in local
+  if (synchronizer.provider.network.chainId === 31337) {
+    // hardhat dev nodes need to have their state refreshed manually
+    // for view only functions
+    setInterval(() => synchronizer.provider.send("evm_mine", []), 12000);
+  }
+
   TransactionManager.configure(PRIVATE_KEY, provider, db);
   await TransactionManager.start();
 

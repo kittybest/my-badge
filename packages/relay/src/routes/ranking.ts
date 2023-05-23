@@ -72,6 +72,7 @@ export default (app: Express, db: DB, synchronizer: Synchronizer) => {
       const epoch = Number(
         await unirepContract.attesterCurrentEpoch(attesterId)
       );
+
       if (Number(dataProof.epoch) !== epoch) {
         res.status(400).json({
           error: `Wrong epoch: should be ${epoch}, but it is ${Number(
@@ -95,6 +96,7 @@ export default (app: Express, db: DB, synchronizer: Synchronizer) => {
 
       if (!calldata) {
         res.status(500).json({ error: "attesterId does not match" });
+        return;
       }
 
       const hash = await TransactionManager.queueTransaction(
