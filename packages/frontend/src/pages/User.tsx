@@ -5,6 +5,7 @@ import { Container, Button, Image, Grid, Message } from "semantic-ui-react";
 import User from "../contexts/User";
 import { SERVER } from "../config";
 import InfoCard from "../components/infoCard";
+import { Title } from "../types/title";
 
 export default observer(() => {
   const [isIdentityRevealed, setIdentityRevealed] = useState(false);
@@ -102,7 +103,7 @@ export default observer(() => {
               <Grid.Row columns={2}>
                 <Grid.Column width={3}>
                   <Image
-                    onClick={() => user.refreshRanking("twitter")}
+                    onClick={() => user.refreshRanking(Title.githubStars)}
                     src={require("../../public/user.jpg")}
                     size="small"
                     circular

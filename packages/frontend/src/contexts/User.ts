@@ -17,6 +17,7 @@ import {
 } from "../config";
 import prover from "./prover";
 import Wait from "../utils/wait";
+import { Title } from "../types/title";
 
 const ATTESTERS: { [key: string]: string } = {
   twitter: TWITTER_ADDRESS,
@@ -32,7 +33,7 @@ class User {
   data: { [key: string]: bigint[] } = {}; // platform: array of data
   provableData: { [key: string]: bigint[] } = {}; // platform: array of data
   hasSignedUp: { [key: string]: boolean } = {};
-  rankings: number[] = [0, 0, 0]; // [twitter, github_stars, github_followers]
+  rankings: { [key: string]: number } = {};
 
   constructor() {
     makeAutoObservable(this);
@@ -340,7 +341,7 @@ class User {
     await provider.waitForTransaction(data.hash);
   }
 
-  async refreshRanking(title: string) {
+  async refreshRanking(title: Title) {
     /* Check if UserState is loaded */
     if (!this.userState) throw new Error("UserState is undefined");
 
@@ -357,20 +358,15 @@ class User {
     console.log("all epoch keys:", epochKeys);
 
     const ret = await fetch(
-      `${SERVER}/api/ranking?epochKeys=${epochKeys.join("_")}`
+      `${SERVER}/api/ranking/${title}?epochKeys=${epochKeys.join("_")}`
     ).then((r) => r.json());
 
     if (ret.error) {
       throw new Error(ret.error.toString());
     }
 
-    ret.rankings.map((r: number, i: number) => {
-      if (r > 0) {
-        this.rankings[i] = r;
-      }
-    });
-
-    console.log("New rankings are:", this.rankings);
+    this.rankings[title] = ret.ranking;
+    console.log("New ranking of title", title, "is", this.rankings[title]);
   }
 }
 

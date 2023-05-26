@@ -5,6 +5,7 @@ import { Prover } from "@unirep/circuits";
 import UNIREP_TWITTER_ABI from "@unirep-app/contracts/abi/UnirepTwitter.json";
 import UNIREP_GITHUB_ABI from "@unirep-app/contracts/abi/UnirepGithub.json";
 import { provider, TWITTER_ADDRESS, GITHUB_ADDRESS } from "../config";
+import { Title } from "../types";
 
 type EventHandlerArgs = {
   event: ethers.Event;
@@ -67,7 +68,7 @@ export default class AppSynchronizer extends Synchronizer {
     const findRankingData = await this._db.findOne("RankingData", {
       where: {
         epochKey,
-        title: "twitter",
+        title: Title.twitter,
         attesterId,
       },
     });
@@ -77,7 +78,7 @@ export default class AppSynchronizer extends Synchronizer {
         where: {
           _id: findRankingData._id,
           epochKey,
-          title: "twitter",
+          title: Title.twitter,
           attesterId,
         },
         update: {
@@ -87,7 +88,7 @@ export default class AppSynchronizer extends Synchronizer {
       });
     } else {
       db.create("RankingData", {
-        title: "twitter",
+        title: Title.twitter,
         data: data[0] - data[1],
         attesterId,
         transactionHash,
@@ -114,14 +115,14 @@ export default class AppSynchronizer extends Synchronizer {
     const findStarsData = await this._db.findOne("RankingData", {
       where: {
         epochKey,
-        title: "github_stars",
+        title: Title.githubStars,
         attesterId,
       },
     });
     const findFollowersData = await this._db.findOne("RankingData", {
       where: {
         epochKey,
-        title: "github_followers",
+        title: Title.githubFollowers,
         attesterId,
       },
     });
@@ -131,7 +132,7 @@ export default class AppSynchronizer extends Synchronizer {
         where: {
           _id: findStarsData._id,
           epochKey,
-          title: "github_stars",
+          title: Title.githubStars,
           attesterId,
         },
         update: {
@@ -141,7 +142,7 @@ export default class AppSynchronizer extends Synchronizer {
       });
     } else {
       db.create("RankingData", {
-        title: "github_stars",
+        title: Title.githubStars,
         data: data[2] - data[3],
         attesterId,
         transactionHash,
@@ -154,7 +155,7 @@ export default class AppSynchronizer extends Synchronizer {
         where: {
           _id: findFollowersData._id,
           epochKey,
-          title: "github_followers",
+          title: Title.githubFollowers,
           attesterId,
         },
         update: {
@@ -164,7 +165,7 @@ export default class AppSynchronizer extends Synchronizer {
       });
     } else {
       db.create("RankingData", {
-        title: "github_followers",
+        title: Title.githubFollowers,
         data: data[0] - data[1],
         attesterId,
         transactionHash,
