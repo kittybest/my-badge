@@ -17,6 +17,28 @@ import UNIREP_TWITTER_ABI from "@unirep-app/contracts/abi/UnirepTwitter.json";
 import UNIREP_GITHUB_ABI from "@unirep-app/contracts/abi/UnirepGithub.json";
 
 export default (app: Express, db: DB, synchronizer: Synchronizer) => {
+  app.get("/api/ranking", async (req, res) => {
+    try {
+      const rankingsTwitter = await getRankingsByTitle(db, Title.twitter);
+      const rankingsGithubStars = await getRankingsByTitle(
+        db,
+        Title.githubStars
+      );
+      const rankingGithubFollowers = await getRankingsByTitle(
+        db,
+        Title.githubFollowers
+      );
+      res.json({
+        [Title.twitter]: rankingsTwitter,
+        [Title.githubStars]: rankingsGithubStars,
+        [Title.githubFollowers]: rankingGithubFollowers,
+      });
+    } catch (error: any) {
+      console.log("get ranking error", error);
+      res.status(500).json({ error });
+    }
+  });
+
   app.get("/api/ranking/:title", async (req, res) => {
     const title = req.params.title;
 

@@ -1,24 +1,45 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { Link } from "react-router-dom";
 import { Button, Container, Segment, Card } from "semantic-ui-react";
+import { Title } from "../types/title";
+import { SERVER } from "../config";
 
 import User from "../contexts/User";
 
 export default observer(() => {
   const user = useContext(User);
 
-  const repData = {
-    twitter: ["elon musk", "donald trump", "kittybest"],
-    github_stars: ["jchance", "vivi432", "madia"],
-    github_followers: ["chiali", "doggy", "yuriko"],
+  const [rankings, setRankings] = useState<{ [key: string]: any[] }>({});
+
+  const refreshRanking = async () => {
+    try {
+      const _rankings = await fetch(`${SERVER}/api/ranking`).then((r) =>
+        r.json()
+      );
+      setRankings(_rankings);
+    } catch (err: any) {
+      console.error(err);
+    }
   };
 
-  const formCardGroup = (data: string[]) => {
+  useEffect(() => {
+    refreshRanking();
+  }, []);
+
+  const formCardGroup = (title: Title) => {
+    const data = rankings[title] ?? [];
+    console.log(data);
+
     return (
       <Card.Group style={{ marginTop: "24px" }}>
-        {data.map((name: string) => (
-          <Card fluid header={name} key={name} />
+        {data.map((d: any) => (
+          <Card
+            fluid
+            header={"0x" + BigInt(d.epochKey).toString(16)}
+            key={d._id}
+            className="my-card"
+          />
         ))}
       </Card.Group>
     );
@@ -46,19 +67,19 @@ export default observer(() => {
             <Button basic color="blue" fluid size="big">
               Twitter Followers
             </Button>
-            {formCardGroup(repData.twitter)}
+            {formCardGroup(Title.twitter)}
           </Segment>
           <Segment color="yellow">
             <Button basic color="yellow" fluid size="big">
               Github Stars
             </Button>
-            {formCardGroup(repData.github_stars)}
+            {formCardGroup(Title.githubStars)}
           </Segment>
           <Segment color="red">
             <Button basic color="red" fluid size="big">
               Github Followers
             </Button>
-            {formCardGroup(repData.github_followers)}
+            {formCardGroup(Title.githubFollowers)}
           </Segment>
         </Segment.Group>
         <div className="margin"></div>
