@@ -12,12 +12,15 @@ import {
   faGithub,
   IconDefinition,
 } from "@fortawesome/free-brands-svg-icons";
+import { Title } from "../types/title";
 
 type Props = {
-  title: string;
+  title: Title;
   platform: string;
   hasSignedUp: boolean;
   connected: boolean;
+  ranking: number;
+  getRanking: () => void;
   data: number;
   provableData: number;
   color: SemanticCOLORS;
@@ -33,6 +36,8 @@ const InfoCard = ({
   platform,
   hasSignedUp,
   connected,
+  ranking,
+  getRanking,
   data,
   provableData,
   color,
@@ -77,24 +82,41 @@ const InfoCard = ({
     setIsUSTing(false);
   };
 
+  const processedTitle = (title: string) => {
+    const words = title.split("_");
+    const formattedWords = words.map(
+      (word) => word.charAt(0).toUpperCase() + word.slice(1)
+    );
+    return formattedWords.join(" ");
+  };
+
   return (
     <Segment color={color}>
       <Grid>
         <Grid.Row stretched>
+          {/* Platform Icon */}
           <Grid.Column width={1}>
             <FontAwesomeIcon icon={icons[platform]} />
           </Grid.Column>
-          <Grid.Column width={4}>
-            <h3>{title}</h3>
+          {/* Platform condition */}
+          <Grid.Column width={3}>
+            <h3>{processedTitle(title)}</h3>
             <p className={connected ? "connected" : "unconnected"}>
               {connected ? "connected" : "unconnected"}
             </p>
           </Grid.Column>
-          <Grid.Column width={7} verticalAlign="middle">
+          {/* Ranking of the Title */}
+          <Grid.Column width={1} verticalAlign="middle">
+            <h2 className="ranking" onClick={getRanking}>
+              {ranking ?? "??"}
+            </h2>
+          </Grid.Column>
+          {/* Data of the Title */}
+          <Grid.Column width={6} verticalAlign="middle">
             {hasSignedUp ? (
               <p>
                 <b>
-                  Rank <i>???</i> with rep <i>{provableData}</i>
+                  rep <i>{provableData}</i>
                 </b>
                 (updated next epoch: {data})
               </p>

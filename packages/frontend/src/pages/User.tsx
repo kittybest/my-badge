@@ -162,10 +162,12 @@ export default observer(() => {
           </Container>
           <Container fluid className="user-body">
             <InfoCard
-              title={"Twitter"}
+              title={Title.twitter}
               platform={"twitter"}
               hasSignedUp={user.hasSignedUp.twitter}
               connected={user.accessTokens.twitter !== undefined}
+              ranking={user.rankings[Title.twitter]}
+              getRanking={() => user.refreshRanking(Title.twitter)}
               data={Number(
                 user.data.twitter
                   ? user.data.twitter[0] - user.data.twitter[1]
@@ -184,10 +186,12 @@ export default observer(() => {
               ust={() => user.stateTransition("twitter")}
             />
             <InfoCard
-              title={"Github Stars"}
+              title={Title.githubStars}
               platform={"github"}
               hasSignedUp={user.hasSignedUp.github}
               connected={user.accessTokens.github !== undefined}
+              ranking={user.rankings[Title.githubStars]}
+              getRanking={() => user.refreshRanking(Title.githubStars)}
               data={Number(
                 user.data.github ? user.data.github[2] - user.data.github[3] : 0
               )}
@@ -204,10 +208,12 @@ export default observer(() => {
               ust={() => user.stateTransition("github")}
             />
             <InfoCard
-              title={"Github Followers"}
+              title={Title.githubFollowers}
               platform={"github"}
               hasSignedUp={user.hasSignedUp.github}
               connected={user.accessTokens.github !== undefined}
+              ranking={user.rankings[Title.githubFollowers]}
+              getRanking={() => user.refreshRanking(Title.githubFollowers)}
               data={Number(
                 user.data.github ? user.data.github[0] - user.data.github[1] : 0
               )}
