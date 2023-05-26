@@ -13,7 +13,7 @@ async function main() {
 
   const [signer] = await ethers.getSigners();
   const unirep = await deployUnirep(signer);
-  const epochLength = 150;
+  const epochLength = 300;
 
   const Verifier = await ethers.getContractFactory("ProveDataVerifier");
   const verifier = await Verifier.deploy();

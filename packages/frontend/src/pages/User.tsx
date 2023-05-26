@@ -102,7 +102,7 @@ export default observer(() => {
               <Grid.Row columns={2}>
                 <Grid.Column width={3}>
                   <Image
-                    onClick={() => user.refreshRanking()}
+                    onClick={() => user.refreshRanking("twitter")}
                     src={require("../../public/user.jpg")}
                     size="small"
                     circular
@@ -177,7 +177,6 @@ export default observer(() => {
               )}
               color="blue"
               update={() => user.getRep("twitter")}
-              upload={async () => await user.uploadDataProof("twitter")}
               connect={() => connect("twitter")}
               error={errorMsg.twitter}
               connectLoading={connectLoading.twitter}
@@ -198,7 +197,6 @@ export default observer(() => {
               )}
               color="yellow"
               update={() => user.getRep("github")}
-              upload={async () => await user.uploadDataProof("github")}
               connect={() => connect("github")}
               error={errorMsg.github}
               connectLoading={connectLoading.github}
@@ -219,7 +217,6 @@ export default observer(() => {
               )}
               color="red"
               update={async () => await user.getRep("github")}
-              upload={async () => await user.uploadDataProof("github")}
               connect={() => connect("github")}
               error={errorMsg.github}
               connectLoading={connectLoading.github}

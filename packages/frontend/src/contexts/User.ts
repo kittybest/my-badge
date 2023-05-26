@@ -224,6 +224,8 @@ class User {
       await provider.waitForTransaction(data.hash);
       await this.userState.waitForSync();
       await this.loadReputation(platform);
+
+      await this.uploadDataProof(platform);
     }
   }
 
@@ -338,23 +340,24 @@ class User {
     await provider.waitForTransaction(data.hash);
   }
 
-  async refreshRanking() {
+  async refreshRanking(title: string) {
     /* Check if UserState is loaded */
     if (!this.userState) throw new Error("UserState is undefined");
 
-    const epochKeyTwitter = this.userState.getEpochKeys(
-      8,
-      0,
-      ATTESTERS["twitter"]
-    );
-    const epochKeyGithub = this.userState.getEpochKeys(
-      8,
-      0,
-      ATTESTERS["github"]
-    );
-    console.log(epochKeyTwitter, epochKeyGithub);
+    const platform = title.split("_")[0];
+    const attesterId = ATTESTERS[platform];
+    const epoch = this.userState.sync.calcCurrentEpoch(attesterId);
+    let epochKeys: BigInt[] = [];
+
+    for (let i = 0; i < epoch; i++) {
+      const epk = this.userState.getEpochKeys(i, 0, attesterId);
+      const key = Array.isArray(epk) ? epk[0] : epk;
+      epochKeys = [...epochKeys, key];
+    }
+    console.log("all epoch keys:", epochKeys);
+
     const ret = await fetch(
-      `${SERVER}/api/ranking?epochKeys=${epochKeyTwitter}_${epochKeyGithub}`
+      `${SERVER}/api/ranking?epochKeys=${epochKeys.join("_")}`
     ).then((r) => r.json());
 
     if (ret.error) {
