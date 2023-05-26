@@ -14,6 +14,14 @@ import {
 } from "@fortawesome/free-brands-svg-icons";
 import { Title } from "../types/title";
 
+const semanticColorHex: { [key: string]: string } = {
+  red: "#db2828",
+  orange: "#f2711c",
+  yellow: "#fbbd08",
+  green: "#21ba45",
+  blue: "#2185d0",
+};
+
 type Props = {
   title: Title;
   platform: string;
@@ -90,6 +98,18 @@ const InfoCard = ({
     return formattedWords.join(" ");
   };
 
+  const calculatedProgressWidth = () => {
+    /* The width of progress: 5% to 80% */
+    let ret: number[] = [5, 5]; // [provableData, data]
+    if (provableData !== 0 && provableData > data)
+      ret = [80, 5 + 75 * (data / provableData)];
+    else if (data !== 0 && data > provableData)
+      ret = [5 + 75 * (provableData / data), 80];
+    else if (data === provableData && data !== 0 && provableData !== 0)
+      ret = [80, 80];
+    return ret;
+  };
+
   return (
     <Segment color={color}>
       <Grid>
@@ -112,18 +132,31 @@ const InfoCard = ({
             </h2>
           </Grid.Column>
           {/* Data of the Title */}
-          <Grid.Column width={6} verticalAlign="middle">
-            {hasSignedUp ? (
-              <p>
-                <b>
-                  rep <i>{provableData}</i>
-                </b>
-                (updated next epoch: {data})
-              </p>
-            ) : (
+          {hasSignedUp ? (
+            <Grid.Column width={7} verticalAlign="middle">
+              <div className="data-info">
+                <div
+                  className="progress"
+                  style={{
+                    width: `${calculatedProgressWidth()[0]}%`,
+                    backgroundColor: `${semanticColorHex[color]}`,
+                  }}
+                ></div>
+                <span>{provableData}</span>
+              </div>
+              <div className="data-info">
+                <div
+                  className="progress"
+                  style={{ width: `${calculatedProgressWidth()[1]}%` }}
+                ></div>
+                <span>{data}</span>
+              </div>
+            </Grid.Column>
+          ) : (
+            <Grid.Column width={7} verticalAlign="middle">
               <p>Not connected</p>
-            )}
-          </Grid.Column>
+            </Grid.Column>
+          )}
           {!hasSignedUp && (
             <Grid.Column width={4}>
               <Button onClick={connect} loading={connectLoading}>
