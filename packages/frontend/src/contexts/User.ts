@@ -1,8 +1,10 @@
 import { createContext } from "react";
 import { ethers } from "ethers";
 import { makeAutoObservable } from "mobx";
-import { ZkIdentity, Strategy, stringifyBigInts } from "@unirep/utils";
-import { UserState, schema } from "@unirep/core";
+import { stringifyBigInts } from "@unirep/utils";
+import { Identity } from "@semaphore-protocol/identity";
+import { schema } from "@unirep/core";
+import { AppUserState } from "@unirep-app/contracts";
 import { MemoryConnector } from "anondb/web";
 import { constructSchema } from "anondb/types";
 import {
@@ -15,17 +17,7 @@ import {
 } from "../config";
 import prover from "./prover";
 import Wait from "../utils/wait";
-import poseidon from "poseidon-lite";
-
-interface AppUserState {
-  userState: UserState;
-  hasSignedUp: boolean;
-  latestTransitionedEpoch: number;
-  data: bigint[];
-  provableData: bigint[];
-  attesterId: string;
-  access_token: string;
-}
+import { Title } from "../types/title";
 
 const ATTESTERS: { [key: string]: string } = {
   twitter: TWITTER_ADDRESS,
@@ -33,11 +25,15 @@ const ATTESTERS: { [key: string]: string } = {
 };
 
 class User {
-  userStates: { [key: string]: AppUserState } = {}; // key: attesterId, value: { userState, currentEpoch, latestTransitionedEpoch, hasSignedUp, data, provableData }
   id: string = "";
   fieldCount: number = -1;
   sumFieldCount: number = -1;
-  hasSignedUp: boolean = false;
+  userState: AppUserState | undefined;
+  accessTokens: { [key: string]: string } = {}; // platform: access_token
+  data: { [key: string]: bigint[] } = {}; // platform: array of data
+  provableData: { [key: string]: bigint[] } = {}; // platform: array of data
+  hasSignedUp: { [key: string]: boolean } = {};
+  rankings: { [key: string]: number } = {};
 
   constructor() {
     makeAutoObservable(this);
@@ -45,102 +41,108 @@ class User {
   }
 
   async load() {
-    const id: string | null = localStorage.getItem("id");
-    const identity = new ZkIdentity(
-      id ? Strategy.SERIALIZED : Strategy.RANDOM,
-      id ?? undefined
-    );
+    const id: string = localStorage.getItem("id") ?? "";
+    const identity = new Identity(id);
     if (!id) {
-      localStorage.setItem("id", identity.serializeIdentity());
+      localStorage.setItem("id", identity.toString());
     }
-    this.id = identity.serializeIdentity();
 
     const db = new MemoryConnector(constructSchema(schema)); // not used in the beta version??
 
-    for (const [platform, attesterId] of Object.entries(ATTESTERS)) {
-      console.log("attester", platform, "with address", attesterId);
-      const userState = new UserState(
-        {
-          db,
-          provider,
-          prover,
-          unirepAddress: UNIREP_ADDRESS,
-          attesterId: BigInt(attesterId),
-          _id: identity,
-        },
-        identity
-      );
-      await userState.sync.start();
+    this.userState = new AppUserState(
+      {
+        db,
+        provider,
+        prover,
+        unirepAddress: UNIREP_ADDRESS,
+        attesterId: [TWITTER_ADDRESS, GITHUB_ADDRESS],
+        _id: identity,
+      },
+      identity
+    );
 
-      if (this.fieldCount < 0) {
-        this.fieldCount = userState.sync.settings.fieldCount;
-      }
-      if (this.sumFieldCount < 0) {
-        this.sumFieldCount = userState.sync.settings.sumFieldCount;
-      }
+    await this.userState.sync.start();
 
-      await userState.waitForSync();
-      const hasSignedUp = await userState.hasSignedUp();
-      const latestTransitionedEpoch = await userState.latestTransitionedEpoch();
-      const data = await userState.getData();
-      const provableData = await userState.getProvableData();
-
-      const access_token =
-        localStorage.getItem(`${platform}_access_token`) ?? "";
-
-      this.userStates[platform] = {
-        userState,
-        hasSignedUp,
-        latestTransitionedEpoch,
-        data,
-        provableData,
-        attesterId,
-        access_token,
-      };
+    if (this.fieldCount < 0) {
+      this.fieldCount = this.userState.sync.settings.fieldCount;
     }
-    this.updateHasSignedUp();
+    if (this.sumFieldCount < 0) {
+      this.sumFieldCount = this.userState.sync.settings.sumFieldCount;
+    }
+
+    await this.userState.waitForSync();
+
+    for (const [platform, attesterId] of Object.entries(ATTESTERS)) {
+      const _accessToken = localStorage.getItem(`${platform}_access_token`);
+      if (_accessToken) this.accessTokens[platform] = _accessToken;
+    }
+
+    await this.updateHasSignedUp();
+    await this.loadReputation();
   }
 
-  async loadReputation(platform: string) {
-    this.userStates[platform].data = await this.userStates[
-      platform
-    ].userState.getData();
-    this.userStates[platform].provableData = await this.userStates[
-      platform
-    ].userState.getProvableData();
+  async loadReputation(_platform?: string) {
+    if (!this.userState) throw new Error("UserState is undefined");
+
+    if (!_platform) {
+      for (const [platform, attesterId] of Object.entries(ATTESTERS)) {
+        this.data[platform] = await this.userState.getData(
+          undefined,
+          attesterId
+        );
+        this.provableData[platform] = await this.userState.getProvableData(
+          attesterId
+        );
+      }
+    } else {
+      this.data[_platform] = await this.userState.getData(
+        undefined,
+        ATTESTERS[_platform]
+      );
+      this.provableData[_platform] = await this.userState.getProvableData(
+        ATTESTERS[_platform]
+      );
+    }
   }
 
   async waitForLoad(platform: string) {
     for (var i = 0; i < 10; i++) {
-      if (this.userStates[platform]) break;
+      if (this.userState) break;
       await Wait(1000);
     }
 
-    if (!this.userStates[platform]) throw new Error("userState is undefined");
+    if (!this.userState) throw new Error("userState is undefined");
   }
 
   async login(id: string) {
     if (!id || id.length === 0) {
       throw new Error("You have not entered identity yet.");
     }
-    const identity = new ZkIdentity(Strategy.SERIALIZED, id);
-    localStorage.setItem("id", identity.serializeIdentity());
+    const identity = new Identity(id);
+    localStorage.setItem("id", identity.toString());
     await this.load();
   }
 
-  updateHasSignedUp() {
-    for (const [platform, us] of Object.entries(this.userStates)) {
-      this.hasSignedUp = this.hasSignedUp || us.hasSignedUp;
+  async updateHasSignedUp() {
+    if (!this.userState) throw new Error("UserState is undefined");
+
+    for (const [platform, attesterId] of Object.entries(ATTESTERS)) {
+      this.hasSignedUp[platform] = await this.userState.hasSignedUp(attesterId);
     }
   }
 
   epochKey(platform: string, nonce: number) {
-    if (!this.userStates[platform] || !this.userStates[platform].userState)
+    if (!this.userState) return "0x";
+
+    const epoch = this.userState.sync.calcCurrentEpoch(ATTESTERS[platform]);
+    const keys = this.userState.getEpochKeys(epoch, nonce, ATTESTERS[platform]);
+    if (Array.isArray(keys) && keys.length > 1) {
+      console.error(
+        "Error: Something is wrong, just wanna get epoch key of certain nonce but got an array."
+      );
       return "0x";
-    const epoch = this.userStates[platform].userState.sync.calcCurrentEpoch();
-    const keys: BigInt | BigInt[] =
-      this.userStates[platform].userState.getEpochKeys(epoch);
-    const key = Array.isArray(keys) ? keys[nonce] : keys;
+    }
+    const key = Array.isArray(keys) ? keys[0] : keys;
     return `0x${key.toString(16)}`;
   }
 
@@ -154,6 +156,9 @@ class User {
     /* Wait for loading userStates */
     await this.waitForLoad(platform);
 
+    /* Check if userState is loaded */
+    if (!this.userState) throw new Error("UserState is undefined");
+
     /* Gen signupProof */
     const unirepContract = new ethers.Contract(
       UNIREP_ADDRESS,
@@ -163,10 +168,9 @@ class User {
     const currentEpoch = Number(
       await unirepContract.attesterCurrentEpoch(attesterId)
     );
-    const signupProof = await this.userStates[
-      platform
-    ].userState.genUserSignUpProof({
+    const signupProof = await this.userState.genUserSignUpProof({
       epoch: currentEpoch,
+      attesterId: ATTESTERS[platform],
     });
 
     /* Sign up to attester */
@@ -187,49 +191,43 @@ class User {
 
     /* Update */
     await provider.waitForTransaction(data.hash);
-    await this.userStates[platform].userState.waitForSync();
-    this.userStates[platform].hasSignedUp = await this.userStates[
-      platform
-    ].userState.hasSignedUp();
-    this.userStates[platform].latestTransitionedEpoch =
-      this.userStates[platform].userState.sync.calcCurrentEpoch();
-    this.updateHasSignedUp();
+    await this.userState.waitForSync();
+    await this.updateHasSignedUp();
 
     /* Store access_token to local storage */
     await this.storeAccessToken(platform, access_token);
   }
 
   async stateTransition(platform: string) {
-    // check if previous data has been sealed
-    const sealed = await this.userStates[platform].userState.sync.isEpochSealed(
-      await this.userStates[platform].userState.latestTransitionedEpoch()
-    );
-    if (!sealed) {
-      throw new Error("From epoch is not yet sealed");
-    }
+    /* Check if UserState is loaded */
+    if (!this.userState) throw new Error("UserState is undefined");
 
     // gen proof
-    await this.userStates[platform].userState.waitForSync();
-    const signupProof = await this.userStates[
-      platform
-    ].userState.genUserStateTransitionProof();
+    await this.userState.waitForSync();
+    const stateTransitionProof =
+      await this.userState.genUserStateTransitionProof({
+        attesterId: ATTESTERS[platform],
+      });
     const data = await fetch(`${SERVER}/api/transition`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        publicSignals: signupProof.publicSignals,
-        proof: signupProof.proof,
+        publicSignals: stateTransitionProof.publicSignals,
+        proof: stateTransitionProof.proof,
         attesterId: ATTESTERS[platform],
       }),
     }).then((r) => r.json());
-    await provider.waitForTransaction(data.hash);
-    await this.userStates[platform].userState.waitForSync();
-    await this.loadReputation(platform);
-    this.userStates[platform].latestTransitionedEpoch = await this.userStates[
-      platform
-    ].userState.latestTransitionedEpoch();
+    if (data.error) {
+      console.error(data.error);
+    } else {
+      await provider.waitForTransaction(data.hash);
+      await this.userState.waitForSync();
+      await this.loadReputation(platform);
+
+      await this.uploadDataProof(platform);
+    }
   }
 
   async getRep(platform: string) {
@@ -238,6 +236,10 @@ class User {
     if (!attesterId) {
       throw new Error("You are not signing up through available web2 service.");
     }
+
+    /* Check if UserState is loaded */
+    if (!this.userState) throw new Error("UserState is undefined");
+
     await this.waitForLoad(platform);
 
     /* Load access_token */
@@ -252,11 +254,10 @@ class User {
     const currentEpoch = Number(
       await unirepContract.attesterCurrentEpoch(attesterId)
     );
-    const epochKeyProof = await this.userStates[
-      platform
-    ].userState.genEpochKeyProof({
+    const epochKeyProof = await this.userState.genEpochKeyProof({
       nonce: 0,
       epoch: currentEpoch,
+      attesterId: ATTESTERS[platform],
     });
 
     /* Call API to calculate and receive reputation data */
@@ -272,23 +273,32 @@ class User {
           access_token,
           attester: platform,
           attesterId,
-          currentData: this.userStates[platform].data,
+          currentData: this.data[platform],
         })
       ),
     }).then((r) => r.json());
     await provider.waitForTransaction(data.hash);
-    await this.userStates[platform].userState.waitForSync();
+    await this.userState.waitForSync();
     await this.loadReputation(platform);
   }
 
   async logout() {
-    for (const [platform, us] of Object.entries(this.userStates)) {
-      await us.userState.sync.stop();
-      await us.userState.sync._db.closeAndWipe();
+    /* Check if UserState is loaded */
+    if (!this.userState) throw new Error("UserState is undefined");
+
+    /* Stop the synchronizer and wipe out the db */
+    this.userState.sync.stop();
+    await this.userState.sync._db.closeAndWipe();
+
+    /* Operations related to localStorage and local variables */
+    for (const [platform, attesterId] of Object.entries(ATTESTERS)) {
       window.localStorage.removeItem(`${platform}_access_token`);
     }
-    this.userStates = {};
-    this.hasSignedUp = false;
+
+    this.userState = undefined;
+    this.hasSignedUp = {};
+    this.data = {};
+    this.provableData = {};
     window.localStorage.removeItem("id"); // for if anyone else wanna sign up and use
   }
 
@@ -296,7 +306,67 @@ class User {
     await this.waitForLoad(platform);
 
     window.localStorage.setItem(`${platform}_access_token`, access_token);
-    this.userStates[platform].access_token = access_token;
+    this.accessTokens[platform] = access_token;
+  }
+
+  async uploadDataProof(platform: string) {
+    /* Check if UserState is loaded */
+    if (!this.userState) throw new Error("UserState is undefined");
+
+    const attesterId = ATTESTERS[platform];
+    const { publicSignals, proof } = await this.userState.genDataProof({
+      attesterId,
+    });
+    const epochKey = parseInt(this.epochKey(platform, 0) ?? "0", 16);
+
+    /* Call API to calculate and receive reputation data */
+    const data = await fetch(`${SERVER}/api/ranking`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(
+        stringifyBigInts({
+          publicSignals,
+          proof,
+          attesterId,
+          epochKey,
+        })
+      ),
+    }).then((r) => r.json());
+    if (data.error) {
+      throw new Error(data.error.toString());
+    }
+
+    await provider.waitForTransaction(data.hash);
+  }
+
+  async refreshRanking(title: Title) {
+    /* Check if UserState is loaded */
+    if (!this.userState) throw new Error("UserState is undefined");
+
+    const platform = title.split("_")[0];
+    const attesterId = ATTESTERS[platform];
+    const epoch = this.userState.sync.calcCurrentEpoch(attesterId);
+    let epochKeys: BigInt[] = [];
+
+    for (let i = 0; i < epoch; i++) {
+      const epk = this.userState.getEpochKeys(i, 0, attesterId);
+      const key = Array.isArray(epk) ? epk[0] : epk;
+      epochKeys = [...epochKeys, key];
+    }
+    console.log("all epoch keys:", epochKeys);
+
+    const ret = await fetch(
+      `${SERVER}/api/ranking/${title}?epochKeys=${epochKeys.join("_")}`
+    ).then((r) => r.json());
+
+    if (ret.error) {
+      throw new Error(ret.error.toString());
+    }
+
+    this.rankings[title] = ret.ranking;
+    console.log("New ranking of title", title, "is", this.rankings[title]);
   }
 }
 

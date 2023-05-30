@@ -1,5 +1,6 @@
 import { expect } from "chai";
-import { ZkIdentity, genEpochKey } from "@unirep/utils";
+import { Identity } from "@semaphore-protocol/identity";
+import { genEpochKey } from "@unirep/utils";
 import { CircuitConfig } from "@unirep/circuits";
 import { DataProof, AppCircuit } from "../src";
 import { genDataCircuitInput, genProofAndVerify, fillZero } from "./utils";
@@ -11,9 +12,9 @@ describe("Prove reputation from attester circuit", function () {
   this.timeout(300000);
 
   it("should prove a reputation", async () => {
-    const id = new ZkIdentity();
+    const id = new Identity();
     const epoch = 20;
-    const nonce = 2;
+    const nonce = 0;
     const attesterId = 219090124810;
     const data = fillZero([], FIELD_COUNT);
     const circuitInputs = genDataCircuitInput({
@@ -43,7 +44,7 @@ describe("Prove reputation from attester circuit", function () {
   });
 
   it("should not reveal nonce", async () => {
-    const id = new ZkIdentity();
+    const id = new Identity();
     const epoch = 1028;
     const attesterId = 10210;
     const nonce = 1;
@@ -73,7 +74,7 @@ describe("Prove reputation from attester circuit", function () {
   });
 
   it("should reveal nonce", async () => {
-    const id = new ZkIdentity();
+    const id = new Identity();
     const epoch = 1028;
     const attesterId = 10210;
     const nonce = 0;
@@ -124,7 +125,7 @@ describe("Prove reputation from attester circuit", function () {
   });
 
   it("should output an epoch key", async () => {
-    const id = new ZkIdentity();
+    const id = new Identity();
     const epoch = 1028;
     const attesterId = 10210;
     const nonce = 0;
@@ -150,12 +151,12 @@ describe("Prove reputation from attester circuit", function () {
     expect(dataProof.revealNonce.toString()).to.equal(revealNonce.toString());
     expect(dataProof.attesterId.toString()).to.equal(attesterId.toString());
     expect(dataProof.epochKey.toString()).to.equal(
-      genEpochKey(id.secretHash, attesterId.toString(), epoch, nonce).toString()
+      genEpochKey(id.secret, attesterId.toString(), epoch, nonce).toString()
     );
   });
 
   it("should fail to prove a nonce that is above max nonce", async () => {
-    const id = new ZkIdentity();
+    const id = new Identity();
     const epoch = 1028;
     const attesterId = 10210;
     const nonce = NUM_EPOCH_KEY_NONCE_PER_EPOCH;
@@ -175,7 +176,7 @@ describe("Prove reputation from attester circuit", function () {
   });
 
   it("should fail to prove an out of range attesterId", async () => {
-    const id = new ZkIdentity();
+    const id = new Identity();
     const epoch = 1028;
     const attesterId = BigInt(2) ** BigInt(160);
     const nonce = 0;
@@ -195,7 +196,7 @@ describe("Prove reputation from attester circuit", function () {
   });
 
   it("should fail to prove an out of range revealNonce", async () => {
-    const id = new ZkIdentity();
+    const id = new Identity();
     const epoch = 1028;
     const attesterId = 10210;
     const nonce = 0;

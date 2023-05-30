@@ -46,6 +46,21 @@ const _schema = [
       ["nonce", "Int"],
     ],
   },
+  {
+    name: "RankingData",
+    rows: [
+      ["title", "String"],
+      ["data", "Int"],
+      ["attesterId", "String"],
+      ["transactionHash", "String"],
+      ["epochKey", "String"],
+      {
+        name: "createdAt",
+        type: "Int",
+        default: () => +new Date(),
+      },
+    ],
+  },
 ];
 
 // export default [...schema, ..._schema]

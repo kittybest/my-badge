@@ -5,6 +5,7 @@ import { Container, Button, Image, Grid, Message } from "semantic-ui-react";
 import User from "../contexts/User";
 import { SERVER } from "../config";
 import InfoCard from "../components/infoCard";
+import { Title } from "../types/title";
 
 export default observer(() => {
   const [isIdentityRevealed, setIdentityRevealed] = useState(false);
@@ -74,7 +75,7 @@ export default observer(() => {
     // authorization through relay
     const currentUrl = new URL(window.location.href);
     const dest = new URL("/user", currentUrl.origin);
-    const isSigningUp: boolean = !user.userStates[platform].hasSignedUp;
+    const isSigningUp: boolean = !user.hasSignedUp[platform];
 
     if (platform === "twitter") {
       const url = new URL("/api/oauth/twitter", SERVER);
@@ -102,6 +103,7 @@ export default observer(() => {
               <Grid.Row columns={2}>
                 <Grid.Column width={3}>
                   <Image
+                    onClick={() => user.refreshRanking(Title.githubStars)}
                     src={require("../../public/user.jpg")}
                     size="small"
                     circular
@@ -160,17 +162,21 @@ export default observer(() => {
           </Container>
           <Container fluid className="user-body">
             <InfoCard
-              title={"Twitter"}
+              title={Title.twitter}
               platform={"twitter"}
-              hasSignedUp={user.userStates.twitter.hasSignedUp}
-              connected={user.userStates.twitter.access_token !== null}
+              hasSignedUp={user.hasSignedUp.twitter}
+              connected={user.accessTokens.twitter !== undefined}
+              ranking={user.rankings[Title.twitter]}
+              getRanking={() => user.refreshRanking(Title.twitter)}
               data={Number(
-                user.userStates.twitter.data[0] -
-                  user.userStates.twitter.data[1]
+                user.data.twitter
+                  ? user.data.twitter[0] - user.data.twitter[1]
+                  : 0
               )}
               provableData={Number(
-                user.userStates.twitter.provableData[0] -
-                  user.userStates.twitter.provableData[1]
+                user.provableData.twitter
+                  ? user.provableData.twitter[0] - user.provableData.twitter[1]
+                  : 0
               )}
               color="blue"
               update={() => user.getRep("twitter")}
@@ -180,16 +186,19 @@ export default observer(() => {
               ust={() => user.stateTransition("twitter")}
             />
             <InfoCard
-              title={"Github Stars"}
+              title={Title.githubStars}
               platform={"github"}
-              hasSignedUp={user.userStates.github.hasSignedUp}
-              connected={user.userStates.github.access_token !== null}
+              hasSignedUp={user.hasSignedUp.github}
+              connected={user.accessTokens.github !== undefined}
+              ranking={user.rankings[Title.githubStars]}
+              getRanking={() => user.refreshRanking(Title.githubStars)}
               data={Number(
-                user.userStates.github.data[2] - user.userStates.github.data[3]
+                user.data.github ? user.data.github[2] - user.data.github[3] : 0
               )}
               provableData={Number(
-                user.userStates.github.provableData[2] -
-                  user.userStates.github.provableData[3]
+                user.provableData.github
+                  ? user.provableData.github[2] - user.provableData.github[3]
+                  : 0
               )}
               color="yellow"
               update={() => user.getRep("github")}
@@ -199,16 +208,19 @@ export default observer(() => {
               ust={() => user.stateTransition("github")}
             />
             <InfoCard
-              title={"Github Followers"}
+              title={Title.githubFollowers}
               platform={"github"}
-              hasSignedUp={user.userStates.github.hasSignedUp}
-              connected={user.userStates.github.access_token !== null}
+              hasSignedUp={user.hasSignedUp.github}
+              connected={user.accessTokens.github !== undefined}
+              ranking={user.rankings[Title.githubFollowers]}
+              getRanking={() => user.refreshRanking(Title.githubFollowers)}
               data={Number(
-                user.userStates.github.data[0] - user.userStates.github.data[1]
+                user.data.github ? user.data.github[0] - user.data.github[1] : 0
               )}
               provableData={Number(
-                user.userStates.github.provableData[0] -
-                  user.userStates.github.provableData[1]
+                user.provableData.github
+                  ? user.provableData.github[0] - user.provableData.github[1]
+                  : 0
               )}
               color="red"
               update={async () => await user.getRep("github")}

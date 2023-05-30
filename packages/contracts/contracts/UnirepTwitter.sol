@@ -16,7 +16,7 @@ interface IVerifier {
     ) external view returns (bool);
 }
 
-contract UnirepApp {
+contract UnirepTwitter {
     /* Constants */
     uint8 public constant FIELD_COUNT = 6;
     uint256 public constant SNARK_SCALAR_FIELD = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
@@ -26,7 +26,7 @@ contract UnirepApp {
     IVerifier immutable dataVerifier;
 
     /* Events */
-    event SubmitDataProof (
+    event SubmitTwitterDataProof (
         uint256 indexed epochKey,
         uint256[FIELD_COUNT] data,
         uint256[8] proof
@@ -39,7 +39,7 @@ contract UnirepApp {
     error InvalidEpochKey();
 
     /* Constructor */
-    constructor(Unirep _unirep, uint256 _epochLength, IVerifier _dataVerifier) {
+    constructor(Unirep _unirep, uint48 _epochLength, IVerifier _dataVerifier) {
         // set unirep address
         unirep = _unirep;
 
@@ -60,7 +60,7 @@ contract UnirepApp {
 
     function submitManyAttestations(
         uint256 epochKey,
-        uint256 targetEpoch,
+        uint48 targetEpoch,
         uint[] calldata fieldIndices,
         uint[] calldata vals
     ) public {
@@ -72,7 +72,7 @@ contract UnirepApp {
 
     function submitAttestation(
         uint256 epochKey,
-        uint256 targetEpoch,
+        uint48 targetEpoch,
         uint256 fieldIndex,
         uint256 val
     ) public {
@@ -129,7 +129,7 @@ contract UnirepApp {
             data[x] = publicSignals[3+x];
         }
 
-        emit SubmitDataProof(
+        emit SubmitTwitterDataProof(
             epochKey,
             data,
             proof

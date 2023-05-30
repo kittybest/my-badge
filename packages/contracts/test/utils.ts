@@ -1,9 +1,12 @@
+import { ethers } from "hardhat";
+import { Identity } from "@semaphore-protocol/identity";
+import { SQLiteConnector } from "anondb/node";
+
 import { Synchronizer } from "@unirep/core";
 import { Prover } from "@unirep/circuits";
 
-import { appProver } from "@unirep-app/circuits";
-// import AppProver from "../../circuits/src/appProver";
-import AppUserState from "../src/userState";
+import { appProver } from "@unirep-app/circuits/provers/appProver";
+import { AppUserState } from "../src/userState";
 
 async function genUnirepState(
   provider,
@@ -25,11 +28,19 @@ async function genUnirepState(
 
 export async function genUserState(
   provider,
-  address,
-  userIdentity,
-  attesterId,
-  _db
+  unirepAddress,
+  userIdentity: Identity,
+  attesterId: BigInt,
+  _db: SQLiteConnector
 ) {
-  const synchronizer = await genUnirepState(provider, address, attesterId, _db);
-  return new AppUserState(synchronizer, userIdentity, attesterId.toString());
+  return new AppUserState(
+    {
+      db: _db,
+      prover: appProver as Prover,
+      unirepAddress,
+      provider,
+      attesterId: [attesterId],
+    },
+    userIdentity
+  );
 }

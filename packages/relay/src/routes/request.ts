@@ -8,7 +8,8 @@ import TransactionManager from "../singletons/TransactionManager";
 import { UNIREP_ADDRESS, provider } from "../config";
 
 import UNIREP_ABI from "@unirep/contracts/artifacts/contracts/Unirep.sol/Unirep.json";
-import UNIREPAPP_ABI from "@unirep-app/contracts/artifacts/contracts/UnirepApp.sol/UnirepApp.json";
+import UNIREP_TWITTER_ABI from "@unirep-app/contracts/abi/UnirepTwitter.json";
+import UNIREP_GITHUB_ABI from "@unirep-app/contracts/abi/UnirepGithub.json";
 
 async function checkTwitterData(access_token: any) {
   try {
@@ -66,6 +67,7 @@ export default (app: Express, db: DB, synchronizer: Synchronizer) => {
       } = req.body;
 
       let reqData = [0];
+      let abi: any;
       if (attester === "twitter") {
         // also affect APP_ADDRESS
         const { followers, error } = await checkTwitterData(access_token); // followers addition, followers subtraction
@@ -81,6 +83,7 @@ export default (app: Express, db: DB, synchronizer: Synchronizer) => {
         } else {
           reqData = [0, -diff];
         }
+        abi = UNIREP_TWITTER_ABI;
       } else if (attester === "github") {
         const { followers, stars, error } = await checkGithubData(access_token); // followers addition, followers subtraction, stars addition, stars subtraction
         if (error) {
@@ -102,6 +105,7 @@ export default (app: Express, db: DB, synchronizer: Synchronizer) => {
           reqData.push(0);
           reqData.push(-diff2);
         }
+        abi = UNIREP_GITHUB_ABI;
       }
       console.log("reqData:", reqData);
 
@@ -140,7 +144,12 @@ export default (app: Express, db: DB, synchronizer: Synchronizer) => {
         return;
       }
 
-      const appContract = new ethers.Contract(attesterId, UNIREPAPP_ABI.abi);
+      if (!abi) {
+        res.status(400).json({ error: "attester does not matches " });
+        return;
+      }
+
+      const appContract = new ethers.Contract(attesterId, abi);
       const keys = Object.keys(reqData);
       let calldata: string = "";
       if (keys.length === 1) {

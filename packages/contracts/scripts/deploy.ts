@@ -2,7 +2,6 @@ import fs from "fs";
 import path from "path";
 import { deployUnirep } from "@unirep/contracts/deploy/index.js";
 import hardhat from "hardhat";
-import UNIREPAPP_ABI from "../abi/UnirepApp.json";
 
 main().catch((err) => {
   console.log(`Uncaught error: ${err}`);
@@ -14,26 +13,38 @@ async function main() {
 
   const [signer] = await ethers.getSigners();
   const unirep = await deployUnirep(signer);
-  const epochLength = 150;
+  const epochLength = 300;
 
-  const App = await ethers.getContractFactory("UnirepApp");
+  const Verifier = await ethers.getContractFactory("ProveDataVerifier");
+  const verifier = await Verifier.deploy();
+  await verifier.deployed();
 
-  const app1 = await App.deploy(unirep.address, epochLength);
-  await app1.deployed();
+  const Twitter = await ethers.getContractFactory("UnirepTwitter");
+  const twitter = await Twitter.deploy(
+    unirep.address,
+    epochLength,
+    verifier.address
+  );
+  await twitter.deployed();
   console.log(
-    `Unirep app 1 with epoch length ${epochLength} deployed to ${app1.address}`
+    `Unirep app Twitter with epoch length ${epochLength} deployed to ${twitter.address}`
   );
 
-  const app2 = await App.deploy(unirep.address, epochLength);
-  await app2.deployed();
+  const Github = await ethers.getContractFactory("UnirepGithub");
+  const github = await Github.deploy(
+    unirep.address,
+    epochLength,
+    verifier.address
+  );
+  await github.deployed();
   console.log(
-    `Unirep app 2 with epoch length ${epochLength} deployed to ${app2.address}`
+    `Unirep app Github with epoch length ${epochLength} deployed to ${github.address}`
   );
 
   const config = `export default {
     UNIREP_ADDRESS: '${unirep.address}',
-    TWITTER_ADDRESS: '${app1.address}',
-    GITHUB_ADDRESS: '${app2.address}',
+    TWITTER_ADDRESS: '${twitter.address}',
+    GITHUB_ADDRESS: '${github.address}',
     ETH_PROVIDER_URL: '${hardhat.network.config.url ?? ""}',
     ${
       Array.isArray(hardhat.network.config.accounts)

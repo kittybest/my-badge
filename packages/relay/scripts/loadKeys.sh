@@ -7,3 +7,5 @@ rm -rf ./build/keys
 
 cp -r ../../node_modules/@unirep/circuits/zksnarkBuild/. ./keys
 cp -r ../../node_modules/@unirep/circuits/zksnarkBuild/. ./build/keys
+cp -r ../circuits/zksnarkBuild/. ./keys
+cp -r ../circuits/zksnarkBuild/. ./build/keys

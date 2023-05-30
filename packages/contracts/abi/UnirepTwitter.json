@@ -1,0 +1,152 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "contract Unirep",
+        "name": "_unirep",
+        "type": "address"
+      },
+      { "internalType": "uint48", "name": "_epochLength", "type": "uint48" },
+      {
+        "internalType": "contract IVerifier",
+        "name": "_dataVerifier",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "epoch", "type": "uint256" }
+    ],
+    "name": "InvalidEpoch",
+    "type": "error"
+  },
+  { "inputs": [], "name": "InvalidEpochKey", "type": "error" },
+  { "inputs": [], "name": "InvalidProof", "type": "error" },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "stateTreeRoot", "type": "uint256" }
+    ],
+    "name": "InvalidStateTreeRoot",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "epochKey",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[6]",
+        "name": "data",
+        "type": "uint256[6]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[8]",
+        "name": "proof",
+        "type": "uint256[8]"
+      }
+    ],
+    "name": "SubmitTwitterDataProof",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "FIELD_COUNT",
+    "outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "SNARK_SCALAR_FIELD",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "control", "type": "uint256" }
+    ],
+    "name": "decodeDataProofControl",
+    "outputs": [
+      { "internalType": "uint256", "name": "attesterId", "type": "uint256" },
+      { "internalType": "uint256", "name": "epoch", "type": "uint256" },
+      { "internalType": "uint256", "name": "epochKey", "type": "uint256" }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "epochKey", "type": "uint256" },
+      { "internalType": "uint48", "name": "targetEpoch", "type": "uint48" },
+      { "internalType": "uint256", "name": "fieldIndex", "type": "uint256" },
+      { "internalType": "uint256", "name": "val", "type": "uint256" }
+    ],
+    "name": "submitAttestation",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[9]",
+        "name": "publicSignals",
+        "type": "uint256[9]"
+      },
+      { "internalType": "uint256[8]", "name": "proof", "type": "uint256[8]" }
+    ],
+    "name": "submitDataProof",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "epochKey", "type": "uint256" },
+      { "internalType": "uint48", "name": "targetEpoch", "type": "uint48" },
+      {
+        "internalType": "uint256[]",
+        "name": "fieldIndices",
+        "type": "uint256[]"
+      },
+      { "internalType": "uint256[]", "name": "vals", "type": "uint256[]" }
+    ],
+    "name": "submitManyAttestations",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "unirep",
+    "outputs": [
+      { "internalType": "contract Unirep", "name": "", "type": "address" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "publicSignals",
+        "type": "uint256[]"
+      },
+      { "internalType": "uint256[8]", "name": "proof", "type": "uint256[8]" }
+    ],
+    "name": "userSignUp",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

@@ -8,6 +8,10 @@ import User from "../contexts/User";
 export default observer(() => {
   const location = useLocation();
   const user = useContext(User);
+  const hasSignedUp = Object.values(user.hasSignedUp).reduce(
+    (acc: boolean, val: boolean) => acc || val,
+    false
+  );
   const navigate = useNavigate();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,21 +41,21 @@ export default observer(() => {
   return (
     <Segment clearing raised>
       <Header floated="right">
-        {location.pathname !== "/join" && !user.hasSignedUp && (
+        {location.pathname !== "/join" && !hasSignedUp && (
           <Link to="/join">
             <Button color="orange" size="large">
               Join
             </Button>
           </Link>
         )}
-        {location.pathname !== "/user" && user.hasSignedUp && (
+        {location.pathname !== "/user" && hasSignedUp && (
           <Link to="/user">
             <Button color="purple" size="large">
               My Page
             </Button>
           </Link>
         )}
-        {user.hasSignedUp && (
+        {hasSignedUp && (
           <Button
             color="orange"
             size="large"
