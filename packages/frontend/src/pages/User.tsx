@@ -63,37 +63,6 @@ export default observer(() => {
     setParams("");
   }, []);
 
-  const connect = async (platform: string) => {
-    if (connectLoading[platform]) return;
-
-    console.log("join through", platform);
-    setErrorMsg({ twitter: "", github: "" });
-    let tmpLoading = { ...connectLoading };
-    tmpLoading[platform] = true;
-    setConnectLoading(tmpLoading);
-
-    // authorization through relay
-    const currentUrl = new URL(window.location.href);
-    const dest = new URL("/user", currentUrl.origin);
-    const isSigningUp: boolean = !user.hasSignedUp[platform];
-
-    if (platform === "twitter") {
-      const url = new URL("/api/oauth/twitter", SERVER);
-      url.searchParams.set("redirectDestination", dest.toString());
-      url.searchParams.set("isSigningUp", isSigningUp.toString());
-      window.location.replace(url.toString());
-    } else if (platform === "github") {
-      const url = new URL("/api/oauth/github", SERVER);
-      url.searchParams.set("redirectDestination", dest.toString());
-      url.searchParams.set("isSigningUp", isSigningUp.toString());
-      window.location.replace(url.toString());
-    } else {
-      let tmpError = { ...errorMsg };
-      tmpError[platform] = "Something weird just happened";
-      setErrorMsg(tmpError);
-    }
-  };
-
   return (
     <>
       {user.hasSignedUp ? (
@@ -164,70 +133,20 @@ export default observer(() => {
             <InfoCard
               title={Title.twitter}
               platform={"twitter"}
-              hasSignedUp={user.hasSignedUp.twitter}
-              connected={user.accessTokens.twitter !== undefined}
-              ranking={user.rankings[Title.twitter]}
-              getRanking={() => user.refreshRanking(Title.twitter)}
-              data={Number(
-                user.data.twitter
-                  ? user.data.twitter[0] - user.data.twitter[1]
-                  : 0
-              )}
-              provableData={Number(
-                user.provableData.twitter
-                  ? user.provableData.twitter[0] - user.provableData.twitter[1]
-                  : 0
-              )}
               color="blue"
-              update={() => user.getRep("twitter")}
-              connect={() => connect("twitter")}
-              error={errorMsg.twitter}
-              connectLoading={connectLoading.twitter}
-              ust={() => user.stateTransition("twitter")}
+              _error={errorMsg.twitter}
             />
             <InfoCard
               title={Title.githubStars}
               platform={"github"}
-              hasSignedUp={user.hasSignedUp.github}
-              connected={user.accessTokens.github !== undefined}
-              ranking={user.rankings[Title.githubStars]}
-              getRanking={() => user.refreshRanking(Title.githubStars)}
-              data={Number(
-                user.data.github ? user.data.github[2] - user.data.github[3] : 0
-              )}
-              provableData={Number(
-                user.provableData.github
-                  ? user.provableData.github[2] - user.provableData.github[3]
-                  : 0
-              )}
               color="yellow"
-              update={() => user.getRep("github")}
-              connect={() => connect("github")}
-              error={errorMsg.github}
-              connectLoading={connectLoading.github}
-              ust={() => user.stateTransition("github")}
+              _error={errorMsg.github}
             />
             <InfoCard
               title={Title.githubFollowers}
               platform={"github"}
-              hasSignedUp={user.hasSignedUp.github}
-              connected={user.accessTokens.github !== undefined}
-              ranking={user.rankings[Title.githubFollowers]}
-              getRanking={() => user.refreshRanking(Title.githubFollowers)}
-              data={Number(
-                user.data.github ? user.data.github[0] - user.data.github[1] : 0
-              )}
-              provableData={Number(
-                user.provableData.github
-                  ? user.provableData.github[0] - user.provableData.github[1]
-                  : 0
-              )}
               color="red"
-              update={async () => await user.getRep("github")}
-              connect={() => connect("github")}
-              error={errorMsg.github}
-              connectLoading={connectLoading.github}
-              ust={() => user.stateTransition("github")}
+              _error={errorMsg.github}
             />
           </Container>
         </>

@@ -29,7 +29,6 @@ export default observer(() => {
 
   const formCardGroup = (title: Title) => {
     const data = rankings[title] ?? [];
-    console.log(data);
 
     return (
       <Card.Group style={{ marginTop: "24px" }}>
