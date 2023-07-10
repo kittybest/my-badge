@@ -46,9 +46,18 @@ const InfoCard = ({ title, platform, color, _error }: Props) => {
   const [connectLoading, setConnectLoading] = useState(false);
   const [remainingTime, setRemainingTime] = useState<number | String>(0);
 
-  const updateTimer = () => {
+  const updateTimer = async () => {
     if (!user.userState) {
       setRemainingTime("Loading...");
+      return;
+    }
+    const latestTransitionedEpoch =
+      await user.userState.latestTransitionedEpoch(ATTESTERS[platform]);
+    const currentEpoch = user.userState.sync.calcCurrentEpoch(
+      ATTESTERS[platform]
+    );
+    if (latestTransitionedEpoch !== currentEpoch) {
+      setRemainingTime("UST");
       return;
     }
     const time = user.userState.sync.calcEpochRemainingTime(
@@ -243,9 +252,7 @@ const InfoCard = ({ title, platform, color, _error }: Props) => {
           {hasSignedUp && (
             <Grid.Column width={2}>
               <Button onClick={onClickUST} loading={isUSTing}>
-                {typeof remainingTime === "number" && remainingTime <= 0
-                  ? "UST"
-                  : remainingTime}
+                {remainingTime}
               </Button>
             </Grid.Column>
           )}
