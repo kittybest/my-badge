@@ -15,7 +15,7 @@ import {
 } from "@fortawesome/free-brands-svg-icons";
 import { SERVER } from "../config";
 import { Title } from "../types/title";
-import User from "../contexts/User";
+import User, { ATTESTERS } from "../contexts/User";
 
 const semanticColorHex: { [key: string]: string } = {
   red: "#db2828",
@@ -44,6 +44,18 @@ const InfoCard = ({ title, platform, color, _error }: Props) => {
   const [isUSTing, setIsUSTing] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [connectLoading, setConnectLoading] = useState(false);
+  const [remainingTime, setRemainingTime] = useState<number | String>(0);
+
+  const updateTimer = () => {
+    if (!user.userState) {
+      setRemainingTime("Loading...");
+      return;
+    }
+    const time = user.userState.sync.calcEpochRemainingTime(
+      ATTESTERS[platform]
+    );
+    setRemainingTime(time);
+  };
 
   const calculateData = (title: Title, platform: string) => {
     let posField: number = 0;
@@ -85,6 +97,10 @@ const InfoCard = ({ title, platform, color, _error }: Props) => {
 
   const onClickUST = async () => {
     if (isUpdating || isUSTing) return;
+    if (typeof remainingTime === "number" && remainingTime > 0) {
+      setErrorMsg("It's not time to do user state transition yet.");
+      return;
+    }
 
     setErrorMsg("");
     setIsUSTing(true);
@@ -149,6 +165,12 @@ const InfoCard = ({ title, platform, color, _error }: Props) => {
   useEffect(() => {
     setErrorMsg(_error);
   }, [_error]);
+
+  useEffect(() => {
+    setInterval(() => {
+      updateTimer();
+    }, 1000);
+  }, []);
 
   return (
     <Segment color={color}>
@@ -221,7 +243,9 @@ const InfoCard = ({ title, platform, color, _error }: Props) => {
           {hasSignedUp && (
             <Grid.Column width={2}>
               <Button onClick={onClickUST} loading={isUSTing}>
-                UST
+                {typeof remainingTime === "number" && remainingTime <= 0
+                  ? "UST"
+                  : remainingTime}
               </Button>
             </Grid.Column>
           )}

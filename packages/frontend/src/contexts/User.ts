@@ -19,7 +19,7 @@ import prover from "./prover";
 import Wait from "../utils/wait";
 import { Title } from "../types/title";
 
-const ATTESTERS: { [key: string]: string } = {
+export const ATTESTERS: { [key: string]: string } = {
   twitter: TWITTER_ADDRESS,
   github: GITHUB_ADDRESS,
 };
