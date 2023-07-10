@@ -220,7 +220,7 @@ class User {
       }),
     }).then((r) => r.json());
     if (data.error) {
-      console.error(data.error);
+      throw new Error(JSON.stringify(data.error));
     } else {
       await provider.waitForTransaction(data.hash);
       await this.userState.waitForSync();

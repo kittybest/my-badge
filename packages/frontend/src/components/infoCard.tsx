@@ -260,7 +260,11 @@ const InfoCard = ({ title, platform, color, _error }: Props) => {
         {errorMsg.length > 0 && (
           <Grid.Row>
             <Grid.Column>
-              <Message error header="Oops!" content={errorMsg} />
+              <Message error>
+                <i className="close icon" onClick={() => setErrorMsg("")}></i>
+                <div className="header">Oops</div>
+                <div className="content">{errorMsg}</div>
+              </Message>
             </Grid.Column>
           </Grid.Row>
         )}
