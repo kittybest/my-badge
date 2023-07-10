@@ -45,14 +45,27 @@ const InfoCard = ({ title, platform, color, _error }: Props) => {
   const [errorMsg, setErrorMsg] = useState("");
   const [connectLoading, setConnectLoading] = useState(false);
 
-  const provableData = Number(
-    user.provableData[platform]
-      ? user.provableData[platform][0] - user.provableData[platform][1]
-      : 0
-  );
-  const data = Number(
-    user.data[platform] ? user.data[platform][0] - user.data[platform][1] : 0
-  );
+  const calculateData = (title: Title, platform: string) => {
+    let posField: number = 0;
+    let negField: number = 1;
+    if (title === Title.githubStars) {
+      posField = 2;
+      negField = 3;
+    }
+    return {
+      provableData: user.provableData[platform]
+        ? Number(
+            user.provableData[platform][posField] -
+              user.provableData[platform][negField]
+          )
+        : 0,
+      data: user.data[platform]
+        ? Number(user.data[platform][posField] - user.data[platform][negField])
+        : 0,
+    };
+  };
+
+  const { provableData, data } = calculateData(title, platform);
   const connected = user.accessTokens[platform] !== undefined;
   const hasSignedUp = user.hasSignedUp[platform];
   const ranking = user.rankings[title];
@@ -110,7 +123,6 @@ const InfoCard = ({ title, platform, color, _error }: Props) => {
   const connect = async () => {
     if (connectLoading) return;
 
-    console.log("join through", platform);
     setErrorMsg("");
     setConnectLoading(true);
 
@@ -118,12 +130,12 @@ const InfoCard = ({ title, platform, color, _error }: Props) => {
     const currentUrl = new URL(window.location.href);
     const dest = new URL("/user", currentUrl.origin);
     const isSigningUp: boolean = !user.hasSignedUp[platform];
+    console.log("current url:", dest);
 
     if (platform === "twitter") {
       const url = new URL("/api/oauth/twitter", SERVER);
       url.searchParams.set("redirectDestination", dest.toString());
       url.searchParams.set("isSigningUp", isSigningUp.toString());
-      window.location.replace(url.toString());
     } else if (platform === "github") {
       const url = new URL("/api/oauth/github", SERVER);
       url.searchParams.set("redirectDestination", dest.toString());
