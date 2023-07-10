@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
+import { observer } from "mobx-react-lite";
 import {
   Button,
   Grid,
@@ -12,7 +13,9 @@ import {
   faGithub,
   IconDefinition,
 } from "@fortawesome/free-brands-svg-icons";
+import { SERVER } from "../config";
 import { Title } from "../types/title";
+import User from "../contexts/User";
 
 const semanticColorHex: { [key: string]: string } = {
   red: "#db2828",
@@ -25,44 +28,34 @@ const semanticColorHex: { [key: string]: string } = {
 type Props = {
   title: Title;
   platform: string;
-  hasSignedUp: boolean;
-  connected: boolean;
-  ranking: number;
-  getRanking: () => void;
-  data: number;
-  provableData: number;
   color: SemanticCOLORS;
-  update: () => void;
-  ust: () => void;
-  connect: () => void;
-  error: string;
-  connectLoading: boolean;
+  _error: string;
 };
 
-const InfoCard = ({
-  title,
-  platform,
-  hasSignedUp,
-  connected,
-  ranking,
-  getRanking,
-  data,
-  provableData,
-  color,
-  update,
-  ust,
-  connect,
-  error,
-  connectLoading,
-}: Props) => {
+const InfoCard = ({ title, platform, color, _error }: Props) => {
   const icons: { [key: string]: IconDefinition } = {
     twitter: faTwitter,
     github: faGithub,
   };
 
+  const user = useContext(User);
+
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUSTing, setIsUSTing] = useState(false);
-  const [errorMsg, setErrorMsg] = useState(error);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [connectLoading, setConnectLoading] = useState(false);
+
+  const provableData = Number(
+    user.provableData[platform]
+      ? user.provableData[platform][0] - user.provableData[platform][1]
+      : 0
+  );
+  const data = Number(
+    user.data[platform] ? user.data[platform][0] - user.data[platform][1] : 0
+  );
+  const connected = user.accessTokens[platform] !== undefined;
+  const hasSignedUp = user.hasSignedUp[platform];
+  const ranking = user.rankings[title];
 
   const onClickUpdate = async () => {
     if (isUpdating || isUSTing) return;
@@ -70,7 +63,7 @@ const InfoCard = ({
     setErrorMsg("");
     setIsUpdating(true);
     try {
-      await update();
+      await user.getRep(platform);
     } catch (e: any) {
       setErrorMsg(e.toString());
     }
@@ -83,7 +76,7 @@ const InfoCard = ({
     setErrorMsg("");
     setIsUSTing(true);
     try {
-      await ust();
+      await user.stateTransition(platform);
     } catch (e: any) {
       setErrorMsg(e.toString());
     }
@@ -109,6 +102,41 @@ const InfoCard = ({
       ret = [80, 80];
     return ret;
   };
+
+  const getRanking = () => {
+    user.refreshRanking(title);
+  };
+
+  const connect = async () => {
+    if (connectLoading) return;
+
+    console.log("join through", platform);
+    setErrorMsg("");
+    setConnectLoading(true);
+
+    // authorization through relay
+    const currentUrl = new URL(window.location.href);
+    const dest = new URL("/user", currentUrl.origin);
+    const isSigningUp: boolean = !user.hasSignedUp[platform];
+
+    if (platform === "twitter") {
+      const url = new URL("/api/oauth/twitter", SERVER);
+      url.searchParams.set("redirectDestination", dest.toString());
+      url.searchParams.set("isSigningUp", isSigningUp.toString());
+      window.location.replace(url.toString());
+    } else if (platform === "github") {
+      const url = new URL("/api/oauth/github", SERVER);
+      url.searchParams.set("redirectDestination", dest.toString());
+      url.searchParams.set("isSigningUp", isSigningUp.toString());
+      window.location.replace(url.toString());
+    } else {
+      setErrorMsg("Something weird just happened");
+    }
+  };
+
+  useEffect(() => {
+    setErrorMsg(_error);
+  }, [_error]);
 
   return (
     <Segment color={color}>
@@ -198,4 +226,4 @@ const InfoCard = ({
   );
 };
 
-export default InfoCard;
+export default observer(InfoCard);
