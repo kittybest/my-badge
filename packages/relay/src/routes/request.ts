@@ -12,6 +12,7 @@ import UNIREP_TWITTER_ABI from "@unirep-app/contracts/abi/UnirepTwitter.json";
 import UNIREP_GITHUB_ABI from "@unirep-app/contracts/abi/UnirepGithub.json";
 
 async function checkTwitterData(access_token: any) {
+  console.log("twitter token:", access_token);
   try {
     const user: any = await fetch(
       "https://api.twitter.com/2/users/me?user.fields=public_metrics",
