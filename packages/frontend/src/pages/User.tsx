@@ -48,7 +48,7 @@ export default observer(() => {
     const signupError: string | null = params.get("signupError");
     const isSigningUp: string | null = params.get("isSigningUp");
     if (!platform) {
-      console.error("No platform returns");
+      console.log("No platform returns");
     } else if (platform && access_token) {
       if (isSigningUp && parseInt(isSigningUp)) {
         signup(platform, access_token);
