@@ -44,7 +44,6 @@ async function checkGithubData(access_token: any) {
     }).then((r) => r.json());
     let stars: number = 0;
     myRepos.map((repo: any) => {
-      console.log("starred repo:", repo.name);
       stars += repo.stargazers_count;
     });
 

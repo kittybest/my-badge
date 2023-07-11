@@ -63,6 +63,7 @@ export default observer(() => {
       const url = new URL("/api/oauth/twitter", SERVER);
       url.searchParams.set("redirectDestination", dest.toString());
       url.searchParams.set("isSigningUp", isSigningUp.toString());
+      window.location.replace(url.toString());
     } else if (platform === "github") {
       const url = new URL("/api/oauth/github", SERVER);
       url.searchParams.set("redirectDestination", dest.toString());

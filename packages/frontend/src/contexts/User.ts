@@ -231,6 +231,7 @@ class User {
   }
 
   async getRep(platform: string) {
+    console.log("getting rep for ", platform);
     /* Check attesterId and userState */
     const attesterId = ATTESTERS[platform];
     if (!attesterId) {
