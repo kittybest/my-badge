@@ -37,13 +37,14 @@ async function checkGithubData(access_token: any) {
       },
     }).then((r) => r.json());
 
-    const starred: any = await fetch("https://api.github.com/user/starred", {
+    const myRepos: any = await fetch("https://api.github.com/user/repos", {
       headers: {
         authorization: `Bearer ${access_token}`,
       },
     }).then((r) => r.json());
     let stars: number = 0;
-    starred.map((repo: any) => {
+    myRepos.map((repo: any) => {
+      console.log("starred repo:", repo.name);
       stars += repo.stargazers_count;
     });
 

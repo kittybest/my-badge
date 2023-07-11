@@ -155,7 +155,6 @@ const InfoCard = ({ title, platform, color, _error }: Props) => {
     const currentUrl = new URL(window.location.href);
     const dest = new URL("/user", currentUrl.origin);
     const isSigningUp: boolean = !user.hasSignedUp[platform];
-    console.log("current url:", dest);
 
     if (platform === "twitter") {
       const url = new URL("/api/oauth/twitter", SERVER);
