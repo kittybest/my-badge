@@ -186,7 +186,8 @@ class User {
       }),
     }).then((r) => r.json());
     if (data.error) {
-      throw new Error(JSON.stringify(data.error));
+      const e = JSON.stringify(data.error);
+      throw new Error(e);
     }
 
     /* Update */
@@ -220,7 +221,10 @@ class User {
       }),
     }).then((r) => r.json());
     if (data.error) {
-      throw new Error(JSON.stringify(data.error));
+      const e = JSON.stringify(data.error);
+      if (e.indexOf("0x53d3ff53") !== -1)
+        throw new Error("Epoch does not match, please try again later.");
+      else throw new Error(e);
     } else {
       await provider.waitForTransaction(data.hash);
       await this.userState.waitForSync();
