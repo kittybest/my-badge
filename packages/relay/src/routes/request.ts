@@ -12,6 +12,7 @@ import UNIREP_TWITTER_ABI from "@unirep-app/contracts/abi/UnirepTwitter.json";
 import UNIREP_GITHUB_ABI from "@unirep-app/contracts/abi/UnirepGithub.json";
 
 async function checkTwitterData(access_token: any) {
+  console.log("twitter token:", access_token);
   try {
     const user: any = await fetch(
       "https://api.twitter.com/2/users/me?user.fields=public_metrics",
@@ -44,7 +45,6 @@ async function checkGithubData(access_token: any) {
     }).then((r) => r.json());
     let stars: number = 0;
     myRepos.map((repo: any) => {
-      console.log("starred repo:", repo.name);
       stars += repo.stargazers_count;
     });
 

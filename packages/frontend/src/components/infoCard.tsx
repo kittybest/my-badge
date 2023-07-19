@@ -29,10 +29,19 @@ type Props = {
   title: Title;
   platform: string;
   color: SemanticCOLORS;
+  connect: () => void;
   _error: string;
+  connectLoading: boolean;
 };
 
-const InfoCard = ({ title, platform, color, _error }: Props) => {
+const InfoCard = ({
+  title,
+  platform,
+  color,
+  connect,
+  _error,
+  connectLoading,
+}: Props) => {
   const icons: { [key: string]: IconDefinition } = {
     twitter: faTwitter,
     github: faGithub,
@@ -43,7 +52,6 @@ const InfoCard = ({ title, platform, color, _error }: Props) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUSTing, setIsUSTing] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [connectLoading, setConnectLoading] = useState(false);
   const [remainingTime, setRemainingTime] = useState<number | String>(0);
 
   const updateTimer = async () => {
@@ -143,31 +151,6 @@ const InfoCard = ({ title, platform, color, _error }: Props) => {
 
   const getRanking = () => {
     user.refreshRanking(title);
-  };
-
-  const connect = async () => {
-    if (connectLoading) return;
-
-    setErrorMsg("");
-    setConnectLoading(true);
-
-    // authorization through relay
-    const currentUrl = new URL(window.location.href);
-    const dest = new URL("/user", currentUrl.origin);
-    const isSigningUp: boolean = !user.hasSignedUp[platform];
-
-    if (platform === "twitter") {
-      const url = new URL("/api/oauth/twitter", SERVER);
-      url.searchParams.set("redirectDestination", dest.toString());
-      url.searchParams.set("isSigningUp", isSigningUp.toString());
-    } else if (platform === "github") {
-      const url = new URL("/api/oauth/github", SERVER);
-      url.searchParams.set("redirectDestination", dest.toString());
-      url.searchParams.set("isSigningUp", isSigningUp.toString());
-      window.location.replace(url.toString());
-    } else {
-      setErrorMsg("Something weird just happened");
-    }
   };
 
   useEffect(() => {

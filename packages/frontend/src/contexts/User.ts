@@ -186,7 +186,8 @@ class User {
       }),
     }).then((r) => r.json());
     if (data.error) {
-      throw new Error(JSON.stringify(data.error));
+      const e = JSON.stringify(data.error);
+      throw new Error(e);
     }
 
     /* Update */
@@ -220,12 +221,14 @@ class User {
       }),
     }).then((r) => r.json());
     if (data.error) {
-      throw new Error(JSON.stringify(data.error));
+      const e = JSON.stringify(data.error);
+      if (e.indexOf("0x53d3ff53") !== -1)
+        throw new Error("Epoch does not match, please try again later.");
+      else throw new Error(e);
     } else {
       await provider.waitForTransaction(data.hash);
       await this.userState.waitForSync();
       await this.loadReputation(platform);
-
       await this.uploadDataProof(platform);
     }
   }
@@ -246,19 +249,7 @@ class User {
     const access_token = localStorage.getItem(`${platform}_access_token`);
 
     /* Gen epochKeyProof */
-    const unirepContract = new ethers.Contract(
-      UNIREP_ADDRESS,
-      UNIREP_ABI,
-      provider
-    );
-    const currentEpoch = Number(
-      await unirepContract.attesterCurrentEpoch(attesterId)
-    );
-    const epochKeyProof = await this.userState.genEpochKeyProof({
-      nonce: 0,
-      epoch: currentEpoch,
-      attesterId: ATTESTERS[platform],
-    });
+    const epochKeyProof = await this.userState.genEpochKeyProof({ attesterId });
 
     /* Call API to calculate and receive reputation data */
     const data = await fetch(`${SERVER}/api/request`, {

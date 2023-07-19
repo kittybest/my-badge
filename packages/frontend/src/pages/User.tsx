@@ -40,6 +40,40 @@ export default observer(() => {
       tmpLoading[platform] = false;
       setConnectLoading(tmpLoading);
     }
+    tmpLoading[platform] = false;
+    setConnectLoading(tmpLoading);
+  };
+
+  const connect = async (platform: string) => {
+    if (connectLoading[platform]) return;
+
+    let tmpError = { ...errorMsg };
+    tmpError[platform] = "";
+    setErrorMsg(tmpError);
+    let tmpLoading = { ...connectLoading };
+    tmpLoading[platform] = true;
+    setConnectLoading(tmpLoading);
+
+    // authorization through relay
+    const currentUrl = new URL(window.location.href);
+    const dest = new URL("/user", currentUrl.origin);
+    const isSigningUp: boolean = !user.hasSignedUp[platform];
+
+    if (platform === "twitter") {
+      const url = new URL("/api/oauth/twitter", SERVER);
+      url.searchParams.set("redirectDestination", dest.toString());
+      url.searchParams.set("isSigningUp", isSigningUp.toString());
+      window.location.replace(url.toString());
+    } else if (platform === "github") {
+      const url = new URL("/api/oauth/github", SERVER);
+      url.searchParams.set("redirectDestination", dest.toString());
+      url.searchParams.set("isSigningUp", isSigningUp.toString());
+      window.location.replace(url.toString());
+    } else {
+      tmpError = { ...errorMsg };
+      tmpError[platform] = "Something weird just happened";
+      setErrorMsg(tmpError);
+    }
   };
 
   useEffect(() => {
@@ -134,19 +168,25 @@ export default observer(() => {
               title={Title.twitter}
               platform={"twitter"}
               color="blue"
+              connect={() => connect("twitter")}
               _error={errorMsg.twitter}
+              connectLoading={connectLoading.twitter}
             />
             <InfoCard
               title={Title.githubStars}
               platform={"github"}
               color="yellow"
+              connect={() => connect("github")}
               _error={errorMsg.github}
+              connectLoading={connectLoading.github}
             />
             <InfoCard
               title={Title.githubFollowers}
               platform={"github"}
               color="red"
+              connect={() => connect("github")}
               _error={errorMsg.github}
+              connectLoading={connectLoading.github}
             />
           </Container>
         </>
