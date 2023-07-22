@@ -1,6 +1,8 @@
 import "@typechain/hardhat";
 import "@nomiclabs/hardhat-ethers";
 import "@nomicfoundation/hardhat-chai-matchers";
+import { config } from "dotenv";
+config();
 
 export default {
   defaultNetwork: "local",
@@ -14,6 +16,10 @@ export default {
       accounts: [
         "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
       ],
+    },
+    sepolia: {
+      url: process.env.ETH_PROVIDER,
+      accounts: [`0x${process.env.PRIVATE_KEY}`],
     },
   },
   solidity: {
