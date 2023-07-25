@@ -13,6 +13,7 @@
     "abi": "ts-node scripts/abi",
     "hardhat": "hardhat",
     "deploy": "hardhat run scripts/deploy.ts",
+    "deploySepolia": "hardhat run scripts/deploy.ts --network sepolia",
     "test": "hardhat test test/UnirepApp.test.ts --network hardhat"
   },
   "bugs": {

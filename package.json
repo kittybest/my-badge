@@ -10,6 +10,7 @@
   "scripts": {
     "install": "lerna bootstrap",
     "postinstall": "sh scripts/installUnirep.sh",
+    "build": "lerna run build",
     "contracts": "yarn workspace @unirep-app/contracts run",
     "frontend": "yarn workspace @unirep-app/frontend run",
     "relay": "yarn workspace @unirep-app/relay run",
