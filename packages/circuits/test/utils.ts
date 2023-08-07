@@ -4,6 +4,7 @@ import { Identity } from "@semaphore-protocol/identity";
 import { CircuitConfig } from "@unirep/circuits";
 import { AppCircuit } from "../src";
 import { appProver } from "../provers/appProver";
+import { poseidon1 } from "poseidon-lite";
 
 const { STATE_TREE_DEPTH, SUM_FIELD_COUNT, FIELD_COUNT } =
   CircuitConfig.default;
@@ -15,16 +16,14 @@ export const fillZero = (data: number[], length: number) => {
 export const randomData = () => [
   ...Array(SUM_FIELD_COUNT)
     .fill(0)
-    .map(() => utils.hash1([Math.floor(Math.random() * 199191919)])),
+    .map(() => poseidon1([Math.floor(Math.random() * 199191919)])),
   ...Array(FIELD_COUNT - SUM_FIELD_COUNT)
     .fill(0)
-    .map((_, i) => {
-      if (i % 2 === SUM_FIELD_COUNT % 2) {
-        return utils.hash1([Math.floor(Math.random() * 128289928892)]);
-      } else {
-        return BigInt(Math.floor(Math.random() * 2 ** 10));
-      }
-    }),
+    .map(
+      () =>
+        poseidon1([Math.floor(Math.random() * 199191919)]) %
+        BigInt(2) ** BigInt(253)
+    ),
 ];
 
 const genEpochKeyCircuitInput = (config: {

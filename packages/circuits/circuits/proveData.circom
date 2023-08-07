@@ -34,9 +34,10 @@ template ProveData(STATE_TREE_DEPTH, NUM_EPOCH_KEY_NONCE_PER_EPOCH, SUM_FIELD_CO
     /**
      * control:
      * 8 bits nonce
-     * 64 bits epoch
+     * 48 bits epoch
      * 160 bits attester_id
      * 1 bit reveal_nonce
+     * reveal_nonce 1 | attester_id 160 | epoch 48 | nonce 8
      **/
     
     /* Make sure reveal_nonce is 0 or 1 */

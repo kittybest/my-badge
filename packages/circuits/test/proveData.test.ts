@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { Identity } from "@semaphore-protocol/identity";
-import { genEpochKey } from "@unirep/utils";
+import { genEpochKey, F } from "@unirep/utils";
 import { CircuitConfig } from "@unirep/circuits";
 import { DataProof, AppCircuit } from "../src";
 import { genDataCircuitInput, genProofAndVerify, fillZero } from "./utils";
