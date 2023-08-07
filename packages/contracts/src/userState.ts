@@ -4,8 +4,8 @@ import { stringifyBigInts } from "@unirep/utils";
 
 export class AppUserState extends UserState {
   /* Constructor */
-  constructor(config, id) {
-    super(config, id);
+  constructor(config) {
+    super(config); // prover & id are necessary
   }
 
   /* Generate DataProof
@@ -35,15 +35,11 @@ export class AppUserState extends UserState {
       attester_id: options.attesterId,
       reveal_nonce: options.revealNonce ?? 0,
     };
-    const results = await this.sync.prover.genProofAndPublicSignals(
+    const results = await this.prover.genProofAndPublicSignals(
       AppCircuit.proveData,
       stringifyBigInts(circuitInputs)
     );
 
-    return new DataProof(
-      results.publicSignals,
-      results.proof,
-      this.sync.prover
-    );
+    return new DataProof(results.publicSignals, results.proof, this.prover);
   }
 }

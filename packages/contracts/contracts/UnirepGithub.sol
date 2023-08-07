@@ -106,10 +106,13 @@ contract UnirepGithub {
 
         // decode publicSignals
         uint256 revealNonce;
-        uint256 attesterId;
-        uint256 epoch;
+        uint160 attesterId;
+        uint48 epoch;
         uint256 nonce;
-        (revealNonce, attesterId, epoch, nonce) = unirep.decodeEpochKeyControl(publicSignals[2]);
+        revealNonce = (publicSignals[2] >> 216) & 1;
+        attesterId = uint160((publicSignals[2] >> 56) & ((1 << 160) - 1));
+        epoch = uint48((publicSignals[2] >> 8) & ((1 << 48) - 1));
+        nonce = publicSignals[2] & ((1 << 8) - 1);
 
         // check the root does exists
         uint256 stateTreeRoot = publicSignals[1];

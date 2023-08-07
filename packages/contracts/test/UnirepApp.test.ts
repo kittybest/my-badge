@@ -61,16 +61,20 @@ describe("Unirep App", function () {
     const userState = await genUserState(id, app);
 
     const nonce = 0;
-    const { publicSignals, proof, epochKey, epoch } =
-      await userState.genEpochKeyProof({ nonce });
-    await unirep
-      .verifyEpochKeyProof(publicSignals, proof)
-      .then((t: any) => t.wait());
+    // const { publicSignals, proof, epochKey, epoch } =
+    //   await userState.genEpochKeyProof({ nonce });
+    const epochKeyProof = await userState.genEpochKeyProof({ nonce });
+    await epochKeyProof.verify();
 
     const field = 0;
     const val = 10;
     await app
-      .submitAttestation(epochKey, epoch, field, val)
+      .submitAttestation(
+        epochKeyProof.epochKey,
+        epochKeyProof.epoch,
+        field,
+        val
+      )
       .then((t) => t.wait());
     userState.sync.stop();
   });

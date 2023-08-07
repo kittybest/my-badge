@@ -18,7 +18,6 @@ async function genUnirepState(
     unirepAddress,
     provider,
     attesterId: BigInt(unirepSocialAddress),
-    prover: appProver as Prover,
   });
   unirep.pollRate = 150;
   await unirep.start();
@@ -33,14 +32,12 @@ export async function genUserState(
   attesterId: BigInt,
   _db: SQLiteConnector
 ) {
-  return new AppUserState(
-    {
-      db: _db,
-      prover: appProver as Prover,
-      unirepAddress,
-      provider,
-      attesterId: [attesterId],
-    },
-    userIdentity
-  );
+  return new AppUserState({
+    db: _db,
+    prover: appProver as Prover,
+    unirepAddress,
+    provider,
+    attesterId: [attesterId],
+    id: userIdentity,
+  });
 }
