@@ -3,7 +3,7 @@ import { Express } from "express";
 import { DB } from "anondb/node";
 import { Synchronizer } from "@unirep/core";
 import fetch from "node-fetch";
-import { EpochKeyProof } from "@unirep/circuits";
+import { EpochKeyProof, Prover } from "@unirep/circuits";
 import TransactionManager from "../singletons/TransactionManager";
 import { UNIREP_ADDRESS, provider } from "../config";
 
@@ -55,7 +55,12 @@ async function checkGithubData(access_token: any) {
   }
 }
 
-export default (app: Express, db: DB, synchronizer: Synchronizer) => {
+export default (
+  app: Express,
+  db: DB,
+  synchronizer: Synchronizer,
+  prover: Prover
+) => {
   app.post("/api/request", async (req, res) => {
     try {
       const {
@@ -113,7 +118,7 @@ export default (app: Express, db: DB, synchronizer: Synchronizer) => {
       const epochKeyProof: EpochKeyProof = new EpochKeyProof(
         publicSignals,
         proof,
-        synchronizer.prover
+        prover
       );
 
       if (

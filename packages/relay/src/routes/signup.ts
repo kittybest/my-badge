@@ -1,4 +1,4 @@
-import { SignupProof } from "@unirep/circuits";
+import { SignupProof, Prover } from "@unirep/circuits";
 import { ethers } from "ethers";
 import { Express } from "express";
 import { DB } from "anondb/node";
@@ -14,14 +14,19 @@ import UNIREP_ABI from "@unirep/contracts/artifacts/contracts/Unirep.sol/Unirep.
 import UNIREP_TWITTER_ABI from "@unirep-app/contracts/abi/UnirepTwitter.json";
 import UNIREP_GITHUB_ABI from "@unirep-app/contracts/abi/UnirepGithub.json";
 
-export default (app: Express, db: DB, synchronizer: Synchronizer) => {
+export default (
+  app: Express,
+  db: DB,
+  synchronizer: Synchronizer,
+  prover: Prover
+) => {
   app.post("/api/signup", async (req, res) => {
     try {
       const { publicSignals, proof, attesterId } = req.body;
       const signupProof: SignupProof = new SignupProof(
         publicSignals,
         proof,
-        synchronizer.prover
+        prover
       );
       if (signupProof.attesterId.toString() !== BigInt(attesterId).toString()) {
         res.status(400).json({ error: "Attester ID does not match." });

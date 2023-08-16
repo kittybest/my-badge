@@ -18,12 +18,7 @@ async function main() {
   // database
   const db = await SQLiteConnector.create(schema, DB_PATH ?? ":memory:");
 
-  const synchronizer = new AppSynchronizer(
-    db,
-    provider,
-    UNIREP_ADDRESS,
-    prover
-  );
+  const synchronizer = new AppSynchronizer(db, provider, UNIREP_ADDRESS);
   await synchronizer.start();
 
   // pushing blocks to update block.timestamp on chain while running hardhat in local
@@ -53,6 +48,6 @@ async function main() {
   const routes = await fs.promises.readdir(routeDir);
   for (const routeFile of routes) {
     const { default: route } = await import(path.join(routeDir, routeFile));
-    route(app, synchronizer.db, synchronizer);
+    route(app, synchronizer.db, synchronizer, prover);
   }
 }

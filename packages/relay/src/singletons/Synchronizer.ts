@@ -31,8 +31,7 @@ export default class AppSynchronizer extends Synchronizer {
   constructor(
     db: DB,
     provider: ethers.providers.Provider,
-    unirepAddress: string,
-    prover: Prover
+    unirepAddress: string
   ) {
     super({ db, provider, unirepAddress });
   }

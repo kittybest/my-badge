@@ -1,6 +1,7 @@
 import { Express } from "express";
 import { ethers } from "ethers";
 import { DB } from "anondb/node";
+import { Prover } from "@unirep/circuits";
 import { Synchronizer } from "@unirep/core";
 import { DataProof } from "@unirep-app/circuits";
 import {
@@ -16,7 +17,12 @@ import UNIREP_ABI from "@unirep/contracts/artifacts/contracts/Unirep.sol/Unirep.
 import UNIREP_TWITTER_ABI from "@unirep-app/contracts/abi/UnirepTwitter.json";
 import UNIREP_GITHUB_ABI from "@unirep-app/contracts/abi/UnirepGithub.json";
 
-export default (app: Express, db: DB, synchronizer: Synchronizer) => {
+export default (
+  app: Express,
+  db: DB,
+  synchronizer: Synchronizer,
+  prover: Prover
+) => {
   app.get("/api/ranking", async (req, res) => {
     try {
       const rankingsTwitter = await getRankingsByTitle(db, Title.twitter);
@@ -75,11 +81,7 @@ export default (app: Express, db: DB, synchronizer: Synchronizer) => {
       const { publicSignals, proof, attesterId, epochKey } = req.body;
 
       // make data proof
-      const dataProof: DataProof = new DataProof(
-        publicSignals,
-        proof,
-        synchronizer.prover
-      );
+      const dataProof: DataProof = new DataProof(publicSignals, proof, prover);
 
       // check attesterId
       if (dataProof.attesterId.toString() !== BigInt(attesterId).toString()) {
