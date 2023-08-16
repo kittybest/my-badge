@@ -4,6 +4,6 @@
     "outDir": "./build",
     "lib": ["ES2021.String"]
   },
-  "include": ["./src", "./deploy", "./typechain"],
+  "include": ["./src", "./deploy", "./typechain", "./test"],
   "files": ["./hardhat.config.ts"]
 }

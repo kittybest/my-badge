@@ -18,19 +18,15 @@ async function main() {
   // database
   const db = await SQLiteConnector.create(schema, DB_PATH ?? ":memory:");
 
-  const synchronizer = new AppSynchronizer(
-    db,
-    provider,
-    UNIREP_ADDRESS,
-    prover
-  );
+  const synchronizer = new AppSynchronizer(db, provider, UNIREP_ADDRESS);
   await synchronizer.start();
 
   // pushing blocks to update block.timestamp on chain while running hardhat in local
-  if (synchronizer.provider.network.chainId === 31337) {
+  const network = await synchronizer.provider.getNetwork();
+  if (network.chainId === 31337) {
     // hardhat dev nodes need to have their state refreshed manually
     // for view only functions
-    setInterval(() => synchronizer.provider.send("evm_mine", []), 12000);
+    setInterval(() => synchronizer.provider.emit("evm_mine", []), 12000);
   }
 
   TransactionManager.configure(PRIVATE_KEY, provider, db);
@@ -52,6 +48,6 @@ async function main() {
   const routes = await fs.promises.readdir(routeDir);
   for (const routeFile of routes) {
     const { default: route } = await import(path.join(routeDir, routeFile));
-    route(app, synchronizer._db, synchronizer);
+    route(app, synchronizer.db, synchronizer, prover);
   }
 }

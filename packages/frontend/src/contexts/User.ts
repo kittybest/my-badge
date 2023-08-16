@@ -49,17 +49,14 @@ class User {
 
     const db = new MemoryConnector(constructSchema(schema)); // not used in the beta version??
 
-    this.userState = new AppUserState(
-      {
-        db,
-        provider,
-        prover,
-        unirepAddress: UNIREP_ADDRESS,
-        attesterId: [TWITTER_ADDRESS, GITHUB_ADDRESS],
-        _id: identity,
-      },
-      identity
-    );
+    this.userState = new AppUserState({
+      db,
+      provider,
+      prover,
+      unirepAddress: UNIREP_ADDRESS,
+      attesterId: [TWITTER_ADDRESS, GITHUB_ADDRESS],
+      id: identity,
+    });
 
     await this.userState.sync.start();
 
@@ -86,26 +83,64 @@ class User {
 
     if (!_platform) {
       for (const [platform, attesterId] of Object.entries(ATTESTERS)) {
-        this.data[platform] = await this.userState.getData(
-          undefined,
-          attesterId
-        );
-        this.provableData[platform] = await this.userState.getProvableData(
-          attesterId
-        );
+        if (this.hasSignedUp[platform]) {
+          this.data[platform] = await this.userState.getData(
+            undefined,
+            attesterId
+          );
+          this.provableData[platform] = await this.userState.getProvableData(
+            attesterId
+          );
+        } else {
+          this.data[platform] = [
+            BigInt(0),
+            BigInt(0),
+            BigInt(0),
+            BigInt(0),
+            BigInt(0),
+            BigInt(0),
+          ];
+          this.provableData[platform] = [
+            BigInt(0),
+            BigInt(0),
+            BigInt(0),
+            BigInt(0),
+            BigInt(0),
+            BigInt(0),
+          ];
+        }
       }
     } else {
-      this.data[_platform] = await this.userState.getData(
-        undefined,
-        ATTESTERS[_platform]
-      );
-      this.provableData[_platform] = await this.userState.getProvableData(
-        ATTESTERS[_platform]
-      );
+      if (this.hasSignedUp[_platform]) {
+        this.data[_platform] = await this.userState.getData(
+          undefined,
+          ATTESTERS[_platform]
+        );
+        this.provableData[_platform] = await this.userState.getProvableData(
+          ATTESTERS[_platform]
+        );
+      } else {
+        this.data[_platform] = [
+          BigInt(0),
+          BigInt(0),
+          BigInt(0),
+          BigInt(0),
+          BigInt(0),
+          BigInt(0),
+        ];
+        this.provableData[_platform] = [
+          BigInt(0),
+          BigInt(0),
+          BigInt(0),
+          BigInt(0),
+          BigInt(0),
+          BigInt(0),
+        ];
+      }
     }
   }
 
-  async waitForLoad(platform: string) {
+  async waitForLoad() {
     for (var i = 0; i < 10; i++) {
       if (this.userState) break;
       await Wait(1000);
@@ -154,7 +189,7 @@ class User {
     }
 
     /* Wait for loading userStates */
-    await this.waitForLoad(platform);
+    await this.waitForLoad();
 
     /* Check if userState is loaded */
     if (!this.userState) throw new Error("UserState is undefined");
@@ -179,15 +214,17 @@ class User {
       headers: {
         "content-type": "application/json",
       },
-      body: JSON.stringify({
-        publicSignals: signupProof.publicSignals,
-        proof: signupProof.proof,
-        attesterId,
-      }),
+      body: JSON.stringify(
+        stringifyBigInts({
+          publicSignals: signupProof.publicSignals,
+          proof: signupProof.proof,
+          attesterId,
+        })
+      ),
     }).then((r) => r.json());
     if (data.error) {
       const e = JSON.stringify(data.error);
-      throw new Error(e);
+      throw new Error("There is something wrong: " + e);
     }
 
     /* Update */
@@ -214,11 +251,13 @@ class User {
       headers: {
         "content-type": "application/json",
       },
-      body: JSON.stringify({
-        publicSignals: stateTransitionProof.publicSignals,
-        proof: stateTransitionProof.proof,
-        attesterId: ATTESTERS[platform],
-      }),
+      body: JSON.stringify(
+        stringifyBigInts({
+          publicSignals: stateTransitionProof.publicSignals,
+          proof: stateTransitionProof.proof,
+          attesterId: ATTESTERS[platform],
+        })
+      ),
     }).then((r) => r.json());
     if (data.error) {
       const e = JSON.stringify(data.error);
@@ -243,7 +282,7 @@ class User {
     /* Check if UserState is loaded */
     if (!this.userState) throw new Error("UserState is undefined");
 
-    await this.waitForLoad(platform);
+    await this.waitForLoad();
 
     /* Load access_token */
     const access_token = localStorage.getItem(`${platform}_access_token`);
@@ -279,7 +318,7 @@ class User {
 
     /* Stop the synchronizer and wipe out the db */
     this.userState.sync.stop();
-    await this.userState.sync._db.closeAndWipe();
+    await this.userState.sync.db.closeAndWipe();
 
     /* Operations related to localStorage and local variables */
     for (const [platform, attesterId] of Object.entries(ATTESTERS)) {
@@ -294,7 +333,7 @@ class User {
   }
 
   async storeAccessToken(platform: string, access_token: string) {
-    await this.waitForLoad(platform);
+    await this.waitForLoad();
 
     window.localStorage.setItem(`${platform}_access_token`, access_token);
     this.accessTokens[platform] = access_token;

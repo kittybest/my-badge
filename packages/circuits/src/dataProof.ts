@@ -28,21 +28,21 @@ export class DataProof extends BaseProof {
    * @param prover The prover that can verify the public signals and the proof
    */
   constructor(
-    _publicSignals: BigNumberish[],
-    _proof: SnarkProof,
+    _publicSignals: (bigint | string)[],
+    _proof: SnarkProof | (bigint | string)[],
     prover?: Prover
   ) {
     super(_publicSignals, _proof, prover);
     this.epochKey = _publicSignals[this.idx.epochKey];
     this.stateTreeRoot = _publicSignals[this.idx.stateTreeRoot];
     this.control = _publicSignals[this.idx.control].toString();
-    this.revealNonce = (BigInt(this.control) >> BigInt(232)) & BigInt(1);
+    this.revealNonce = (BigInt(this.control) >> BigInt(216)) & BigInt(1);
     this.attesterId =
-      (BigInt(this.control) >> BigInt(72)) &
+      (BigInt(this.control) >> BigInt(56)) &
       ((BigInt(1) << BigInt(160)) - BigInt(1));
     this.epoch =
       (BigInt(this.control) >> BigInt(8)) &
-      ((BigInt(1) << BigInt(64)) - BigInt(1));
+      ((BigInt(1) << BigInt(48)) - BigInt(1));
     this.nonce = BigInt(this.control) & ((BigInt(1) << BigInt(8)) - BigInt(1));
     for (let i = 0; i < CircuitConfig.default.FIELD_COUNT; i++) {
       this.data.push(_publicSignals[this.idx.data + i]);
@@ -52,8 +52,8 @@ export class DataProof extends BaseProof {
 
   static buildControl({ attesterId, epoch, nonce, revealNonce }: any) {
     let control = BigInt(0);
-    control += BigInt(revealNonce ?? 0) << BigInt(232);
-    control += BigInt(attesterId) << BigInt(72);
+    control += BigInt(revealNonce ?? 0) << BigInt(216);
+    control += BigInt(attesterId) << BigInt(56);
     control += BigInt(epoch) << BigInt(8);
     control += BigInt(nonce) * BigInt(revealNonce ?? 0);
 

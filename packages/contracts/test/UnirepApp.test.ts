@@ -61,16 +61,20 @@ describe("Unirep App", function () {
     const userState = await genUserState(id, app);
 
     const nonce = 0;
-    const { publicSignals, proof, epochKey, epoch } =
-      await userState.genEpochKeyProof({ nonce });
-    await unirep
-      .verifyEpochKeyProof(publicSignals, proof)
-      .then((t: any) => t.wait());
+    // const { publicSignals, proof, epochKey, epoch } =
+    //   await userState.genEpochKeyProof({ nonce });
+    const epochKeyProof = await userState.genEpochKeyProof({ nonce });
+    await epochKeyProof.verify();
 
     const field = 0;
     const val = 10;
     await app
-      .submitAttestation(epochKey, epoch, field, val)
+      .submitAttestation(
+        epochKeyProof.epochKey,
+        epochKeyProof.epoch,
+        field,
+        val
+      )
       .then((t) => t.wait());
     userState.sync.stop();
   });
@@ -93,10 +97,14 @@ describe("Unirep App", function () {
 
   it("proof data", async function () {
     const userState = await genUserState(id, app);
-    const { publicSignals, proof } = await userState.genDataProof({
+    const dataProof = await userState.genDataProof({
       attesterId: app.address,
     });
-    await app.submitDataProof(publicSignals, proof).then((t) => t.wait());
+    await dataProof.verify();
+
+    await app
+      .submitDataProof(dataProof.publicSignals, dataProof.proof)
+      .then((t) => t.wait());
     userState.sync.stop();
   });
 });
