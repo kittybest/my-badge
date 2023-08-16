@@ -59,19 +59,21 @@ const InfoCard = ({
       setRemainingTime("Loading...");
       return;
     }
-    const latestTransitionedEpoch =
-      await user.userState.latestTransitionedEpoch(ATTESTERS[platform]);
-    const currentEpoch = user.userState.sync.calcCurrentEpoch(
-      ATTESTERS[platform]
-    );
-    if (latestTransitionedEpoch !== currentEpoch) {
-      setRemainingTime("UST");
-      return;
+    if (user.hasSignedUp[platform]) {
+      const latestTransitionedEpoch =
+        await user.userState.latestTransitionedEpoch(ATTESTERS[platform]);
+      const currentEpoch = user.userState.sync.calcCurrentEpoch(
+        ATTESTERS[platform]
+      );
+      if (latestTransitionedEpoch !== currentEpoch) {
+        setRemainingTime("UST");
+        return;
+      }
+      const time = user.userState.sync.calcEpochRemainingTime(
+        ATTESTERS[platform]
+      );
+      setRemainingTime(time);
     }
-    const time = user.userState.sync.calcEpochRemainingTime(
-      ATTESTERS[platform]
-    );
-    setRemainingTime(time);
   };
 
   const calculateData = (title: Title, platform: string) => {

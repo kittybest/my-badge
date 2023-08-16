@@ -97,10 +97,14 @@ describe("Unirep App", function () {
 
   it("proof data", async function () {
     const userState = await genUserState(id, app);
-    const { publicSignals, proof } = await userState.genDataProof({
+    const dataProof = await userState.genDataProof({
       attesterId: app.address,
     });
-    await app.submitDataProof(publicSignals, proof).then((t) => t.wait());
+    await dataProof.verify();
+
+    await app
+      .submitDataProof(dataProof.publicSignals, dataProof.proof)
+      .then((t) => t.wait());
     userState.sync.stop();
   });
 });
