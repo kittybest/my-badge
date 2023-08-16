@@ -28,8 +28,13 @@ const githubContract = new ethers.Contract(
 export default class AppSynchronizer extends Synchronizer {
   appContracts: ethers.Contract[] = [];
 
-  constructor(db: DB, provider, unirepAddress: string, prover: Prover) {
-    super({ db, provider, unirepAddress, prover });
+  constructor(
+    db: DB,
+    provider: ethers.providers.Provider,
+    unirepAddress: string,
+    prover: Prover
+  ) {
+    super({ db, provider, unirepAddress });
   }
 
   /* override */
@@ -65,7 +70,7 @@ export default class AppSynchronizer extends Synchronizer {
     console.log("decodedData.epochKey:", epochKey);
     console.log("decodedData.attesterId:", attesterId);
 
-    const findRankingData = await this._db.findOne("RankingData", {
+    const findRankingData = await this.db.findOne("RankingData", {
       where: {
         epochKey,
         title: Title.twitter,
@@ -112,14 +117,14 @@ export default class AppSynchronizer extends Synchronizer {
     console.log("decodedData.epochKey:", epochKey);
     console.log("decodedData.attesterId:", attesterId);
 
-    const findStarsData = await this._db.findOne("RankingData", {
+    const findStarsData = await this.db.findOne("RankingData", {
       where: {
         epochKey,
         title: Title.githubStars,
         attesterId,
       },
     });
-    const findFollowersData = await this._db.findOne("RankingData", {
+    const findFollowersData = await this.db.findOne("RankingData", {
       where: {
         epochKey,
         title: Title.githubFollowers,

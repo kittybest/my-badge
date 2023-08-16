@@ -49,17 +49,14 @@ class User {
 
     const db = new MemoryConnector(constructSchema(schema)); // not used in the beta version??
 
-    this.userState = new AppUserState(
-      {
-        db,
-        provider,
-        prover,
-        unirepAddress: UNIREP_ADDRESS,
-        attesterId: [TWITTER_ADDRESS, GITHUB_ADDRESS],
-        _id: identity,
-      },
-      identity
-    );
+    this.userState = new AppUserState({
+      db,
+      provider,
+      prover,
+      unirepAddress: UNIREP_ADDRESS,
+      attesterId: [TWITTER_ADDRESS, GITHUB_ADDRESS],
+      id: identity,
+    });
 
     await this.userState.sync.start();
 
@@ -279,7 +276,7 @@ class User {
 
     /* Stop the synchronizer and wipe out the db */
     this.userState.sync.stop();
-    await this.userState.sync._db.closeAndWipe();
+    await this.userState.sync.db.closeAndWipe();
 
     /* Operations related to localStorage and local variables */
     for (const [platform, attesterId] of Object.entries(ATTESTERS)) {
