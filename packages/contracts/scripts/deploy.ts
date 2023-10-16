@@ -2,6 +2,8 @@ import fs from "fs";
 import path from "path";
 import { deployUnirep } from "@unirep/contracts/deploy/index.js";
 import hardhat from "hardhat";
+import { config } from "dotenv";
+config();
 
 main().catch((err) => {
   console.log(`Uncaught error: ${err}`);
@@ -11,17 +13,33 @@ main().catch((err) => {
 async function main() {
   const { ethers } = hardhat;
 
-  const [signer] = await ethers.getSigners();
-  const unirep = await deployUnirep(signer);
-  const epochLength = 300;
+  const network = await ethers.provider.getNetwork();
 
+  const [signer] = await ethers.getSigners();
+  const epochLength = 300;
+  let unirepAddress: string | undefined;
+
+  if (network.name === "sepolia" && process.env.UNIREP_ADDRESS) {
+    unirepAddress = process.env.UNIREP_ADDRESS;
+  }
+
+  // deploy Unirep contract
+  if (!unirepAddress) {
+    const unirep = await deployUnirep(signer);
+    unirepAddress = unirep.address;
+  }
+
+  console.log("unirep address:", unirepAddress);
+
+  // deploy Verifier
   const Verifier = await ethers.getContractFactory("ProveDataVerifier");
   const verifier = await Verifier.deploy();
   await verifier.deployed();
 
+  // deploy Twitter
   const Twitter = await ethers.getContractFactory("UnirepTwitter");
   const twitter = await Twitter.deploy(
-    unirep.address,
+    unirepAddress,
     epochLength,
     verifier.address
   );
@@ -32,7 +50,7 @@ async function main() {
 
   const Github = await ethers.getContractFactory("UnirepGithub");
   const github = await Github.deploy(
-    unirep.address,
+    unirepAddress,
     epochLength,
     verifier.address
   );
@@ -42,7 +60,7 @@ async function main() {
   );
 
   const config = `export default {
-    UNIREP_ADDRESS: '${unirep.address}',
+    UNIREP_ADDRESS: '${unirepAddress}',
     TWITTER_ADDRESS: '${twitter.address}',
     GITHUB_ADDRESS: '${github.address}',
     ETH_PROVIDER_URL: '${hardhat.network.config.url ?? ""}',
