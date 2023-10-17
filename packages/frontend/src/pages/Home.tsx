@@ -45,6 +45,21 @@ export default observer(() => {
 
   return (
     <>
+      <div className="relative" style={{ height: "40vh" }}>
+        <img
+          className="w-full h-full object-fit absolute -z-50"
+          src={require("../../public/banner.png")}
+        />
+        <div className="h-full flex flex-col justify-center items-center">
+          {!user.signedUp && (
+            <Link to="/join">
+              <button className="btn btn-primary btn-lg btn-wide">
+                Join Us
+              </button>
+            </Link>
+          )}
+        </div>
+      </div>
       {/* <div
         className="banner"
         style={{

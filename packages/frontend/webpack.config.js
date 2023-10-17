@@ -25,7 +25,7 @@ module.exports = (env) => ({
   // Enable sourcemaps for debugging webpack's output.
   // devtool: "source-map",
   resolve: {
-    extensions: ["*", ".js", ".jsx", ".json", ".scss", ".ts", ".tsx"],
+    extensions: [".*", ".js", ".jsx", ".json", ".ts", ".tsx"],
     fallback: {
       path: require.resolve("path-browserify"),
       crypto: require.resolve("crypto-browserify"),

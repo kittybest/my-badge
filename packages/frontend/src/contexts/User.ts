@@ -398,6 +398,13 @@ class User {
     this.rankings[title] = ret.ranking;
     console.log("New ranking of title", title, "is", this.rankings[title]);
   }
+
+  get signedUp() {
+    return Object.values(this.hasSignedUp).reduce(
+      (acc, cur) => acc || cur,
+      false
+    );
+  }
 }
 
 export default createContext(new User());
