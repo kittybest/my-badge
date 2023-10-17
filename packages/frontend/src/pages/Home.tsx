@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { Link } from "react-router-dom";
-import { Button, Container, Segment, Card } from "semantic-ui-react";
 import { Title } from "../types/title";
 import { SERVER } from "../config";
 
@@ -30,23 +29,23 @@ export default observer(() => {
   const formCardGroup = (title: Title) => {
     const data = rankings[title] ?? [];
 
-    return (
-      <Card.Group style={{ marginTop: "24px" }}>
-        {data.map((d: any) => (
-          <Card
-            fluid
-            header={"0x" + BigInt(d.epochKey).toString(16)}
-            key={d._id}
-            className="my-card"
-          />
-        ))}
-      </Card.Group>
-    );
+    // return (
+    //   <Card.Group style={{ marginTop: "24px" }}>
+    //     {data.map((d: any) => (
+    //       <Card
+    //         fluid
+    //         header={"0x" + BigInt(d.epochKey).toString(16)}
+    //         key={d._id}
+    //         className="my-card"
+    //       />
+    //     ))}
+    //   </Card.Group>
+    // );
   };
 
   return (
     <>
-      <div
+      {/* <div
         className="banner"
         style={{
           backgroundImage: `url(${require("../../public/banner.jpg")})`,
@@ -82,7 +81,7 @@ export default observer(() => {
           </Segment>
         </Segment.Group>
         <div className="margin"></div>
-      </Container>
+      </Container> */}
     </>
   );
 });

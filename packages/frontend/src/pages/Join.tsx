@@ -1,14 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { observer } from "mobx-react-lite";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import {
-  Button,
-  Divider,
-  Loader,
-  Message,
-  TextArea,
-  Form,
-} from "semantic-ui-react";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTwitter, faGithub } from "@fortawesome/free-brands-svg-icons";
 import { SERVER } from "../config";
@@ -93,7 +86,7 @@ export default observer(() => {
 
   return (
     <>
-      {isLoading ? (
+      {/* {isLoading ? (
         <div className="join-container">
           <Loader active inline="centered" size="huge" />
           <Link to="/help">Any question?</Link>
@@ -136,7 +129,7 @@ export default observer(() => {
           </Button>
           <Link to="/help">Any question?</Link>
         </div>
-      )}
+      )} */}
     </>
   );
 });
