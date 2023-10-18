@@ -5,6 +5,7 @@ import { Title } from "../types/title";
 import { SERVER } from "../config";
 
 import User from "../contexts/User";
+import RankingChart from "../components/rankingChart";
 
 export default observer(() => {
   const user = useContext(User);
@@ -44,13 +45,14 @@ export default observer(() => {
   };
 
   return (
-    <>
+    <div>
       <div className="relative" style={{ height: "40vh" }}>
         <img
           className="w-full h-full object-fit absolute -z-50"
           src={require("../../public/banner.png")}
         />
         <div className="h-full flex flex-col justify-center items-center">
+          <h2>My Badge: Your Web3 Identity</h2>
           {!user.signedUp && (
             <Link to="/join">
               <button className="btn btn-primary btn-lg btn-wide">
@@ -60,6 +62,12 @@ export default observer(() => {
           )}
         </div>
       </div>
+      <div className="flex flex-col gap-4 items-center py-8">
+        {Object.keys(rankings).map((p) => (
+          <RankingChart platform={p} ranking={rankings[p]} />
+        ))}
+      </div>
+
       {/* <div
         className="banner"
         style={{
@@ -97,6 +105,6 @@ export default observer(() => {
         </Segment.Group>
         <div className="margin"></div>
       </Container> */}
-    </>
+    </div>
   );
 });
