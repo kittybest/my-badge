@@ -2,7 +2,11 @@
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      backgroundImage: {
+        card: "linear-gradient(135.45deg, rgba(254, 228, 203, 1), rgba(219, 242, 242, 1))",
+      },
+    },
   },
   plugins: [require("daisyui")],
   daisyui: {

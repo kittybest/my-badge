@@ -26,7 +26,7 @@ const RankingChart = ({ platform, ranking }: Props) => {
       <div className="w-12 border-r-2 border-white flex justify-center items-center text-xl">
         <FontAwesomeIcon icon={icons[platform.split("_")[0]]} />
       </div>
-      <div className="w-full p-4 flex overflow-scroll">
+      <div className="w-full p-4 flex overflow-scroll gap-8">
         {ranking.map((d, i) => (
           <RankingCard
             epochKey={d.epochKey}
