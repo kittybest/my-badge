@@ -45,6 +45,9 @@ class User {
     const identity = new Identity(id);
     if (!id) {
       localStorage.setItem("id", identity.toString());
+      this.id = identity.toString();
+    } else {
+      this.id = id;
     }
 
     const db = new MemoryConnector(constructSchema(schema)); // not used in the beta version??

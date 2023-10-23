@@ -33,6 +33,7 @@ const RankingChart = ({ platform, ranking }: Props) => {
             data={d.data}
             txHash={d.transactionHash}
             rank={i + 1}
+            key={i}
           />
         ))}
       </div>
