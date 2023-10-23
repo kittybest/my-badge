@@ -24,6 +24,17 @@ export default observer(() => {
     }
   };
 
+  const downloadId = () => {
+    const element = document.createElement("a");
+    const file = new Blob([user.id], {
+      type: "text/plain",
+    });
+    element.href = URL.createObjectURL(file);
+    element.download = "my-badge-id.txt";
+    document.body.appendChild(element);
+    element.click();
+  };
+
   useEffect(() => {
     refreshRanking();
   }, []);
@@ -54,10 +65,17 @@ export default observer(() => {
                   value={user.epochKey(TWITTER_ADDRESS, 0)}
                 />
               </div>
-              <label className="swap swap-flip">
+              <label className="swap swap-flip cursor-pointer">
                 <input type="checkbox" />
                 <div className="swap-on">{user.id}</div>
-                <div className="swap-off">Reveal My Id</div>
+                <div
+                  className="swap-off text-center rounded-lg btn-secondary p-10"
+                  onClick={downloadId}
+                >
+                  Reveal and Download
+                  <br />
+                  My Id
+                </div>
               </label>
             </div>
           </div>
