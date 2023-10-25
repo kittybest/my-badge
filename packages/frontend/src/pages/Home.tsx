@@ -3,10 +3,10 @@ import { observer } from "mobx-react-lite";
 import { Link } from "react-router-dom";
 import Jdenticon from "react-jdenticon";
 
-import { Title } from "../types/title";
 import { SERVER, TWITTER_ADDRESS } from "../config";
 import User from "../contexts/User";
 import RankingChart from "../components/rankingChart";
+import MyInfoCard from "../components/myInfoCard";
 
 export default observer(() => {
   const user = useContext(User);
@@ -57,7 +57,7 @@ export default observer(() => {
           </div>
         )}
         {user.signedUp && (
-          <div className="h-full flex items-center p-8">
+          <div className="h-full flex items-center p-8 gap-8">
             <div className="h-full flex flex-col w-72 break-all items-center gap-2">
               <div className="bg-white">
                 <Jdenticon
@@ -77,6 +77,10 @@ export default observer(() => {
                   My Id
                 </div>
               </label>
+            </div>
+            <div className="flex gap-4">
+              <MyInfoCard platform="twitter" />
+              <MyInfoCard platform="github" />
             </div>
           </div>
         )}
