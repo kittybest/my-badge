@@ -25,7 +25,9 @@ export default observer(() => {
       await user.getRep(platform);
       return navigate("/user");
     } catch (e: any) {
-      setErrorMsg(e.toString());
+      if (e.toString().includes("0x53d3ff53"))
+        setErrorMsg("Epoch does not match. Please try again later.");
+      else setErrorMsg(e.toString());
       setIsLoading(false);
     }
   };
@@ -86,50 +88,67 @@ export default observer(() => {
 
   return (
     <>
-      {/* {isLoading ? (
-        <div className="join-container">
-          <Loader active inline="centered" size="huge" />
-          <Link to="/help">Any question?</Link>
+      {isLoading ? (
+        <div className="w-full h-screen flex flex-col justify-center items-center gap-8">
+          <div className="loading loading-spinner loading-lg"></div>
+          <Link to="/help" target="_blank">
+            Any question?
+          </Link>
         </div>
       ) : (
-        <div className="join-container">
-          {errorMsg.length > 0 && (
-            <Message error header="Oops!" content={errorMsg} />
-          )}
-          <Button
-            basic
-            color="blue"
-            size="huge"
-            onClick={() => join("twitter")}
-          >
-            <FontAwesomeIcon icon={faTwitter} />
-            <span>Join with Twitter</span>
-          </Button>
-          <Button
-            basic
-            color="black"
-            size="huge"
-            onClick={() => join("github")}
-          >
-            <FontAwesomeIcon icon={faGithub} />
-            <span>Join with Github</span>
-          </Button>
-
-          <Divider horizontal>Already has account?</Divider>
-
-          <Form>
-            <TextArea
-              placeholder="Please enter your private key."
-              style={{ width: "300px" }}
-              onChange={onIdInputChange}
-            />
-          </Form>
-          <Button basic size="large" onClick={login}>
-            Log in
-          </Button>
-          <Link to="/help">Any question?</Link>
+        <div className="w-full h-screen flex flex-col justify-center p-4">
+          <div className="flex flex-col w-full border-opacity-50 gap-4">
+            <div className="grid place-items-center gap-8">
+              {errorMsg.length > 0 && (
+                <div className="alert alert-error max-w-lg break-words">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="stroke-current shrink-0 h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+              <button
+                className="button btn-lg btn-wide rounded-lg btn-info"
+                onClick={() => join("twitter")}
+              >
+                <FontAwesomeIcon icon={faTwitter} />
+                <span className="ml-1">Join with Twitter</span>
+              </button>
+              <button
+                className="button btn-lg btn-wide rounded-lg btn-secondary"
+                onClick={() => join("github")}
+              >
+                <FontAwesomeIcon icon={faGithub} />
+                <span className="ml-1">Join with Github</span>
+              </button>
+            </div>
+            <div className="divider">Already has account?</div>
+            <div className="grid place-items-center gap-4">
+              <textarea
+                placeholder="Please enter your private key."
+                className="textarea textarea-bordered w-72"
+                onChange={onIdInputChange}
+              />
+              <button className="button btn-primary btn-md btn-wide rounded-lg">
+                Log In
+              </button>
+              <Link to="/help" className="text-sm underline">
+                Any question?
+              </Link>
+            </div>
+          </div>
         </div>
-      )} */}
+      )}
     </>
   );
 });

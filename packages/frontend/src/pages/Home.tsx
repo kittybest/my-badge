@@ -86,8 +86,8 @@ export default observer(() => {
         )}
       </div>
       <div className="flex flex-col gap-4 items-center py-8">
-        {Object.keys(rankings).map((p) => (
-          <RankingChart platform={p} ranking={rankings[p]} />
+        {Object.keys(rankings).map((p, i) => (
+          <RankingChart platform={p} ranking={rankings[p]} key={i} />
         ))}
       </div>
     </div>
