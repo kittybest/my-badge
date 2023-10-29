@@ -16,7 +16,7 @@ const RankingCard = ({ epochKey, data, txHash, rank }: Props) => {
         <Jdenticon size="180" value={epochKey} />
       </figure>
       <div className="card-body p-4">
-        <h2 className="card-title">Score: {data}</h2>
+        <h1 className="card-title">Score: {data}</h1>
         <div className="card-actions justify-evenly">
           <button className="btn btn-secondary">Verify</button>
           <button className="btn btn-primary">
