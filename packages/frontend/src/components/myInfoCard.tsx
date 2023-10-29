@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -9,6 +10,7 @@ import {
 
 import User, { ATTESTERS } from "../contexts/User";
 import { Title } from "../types/title";
+import { SERVER } from "../config";
 
 type Props = {
   platform: string;
@@ -16,8 +18,11 @@ type Props = {
 
 const MyInfoCard = ({ platform }: Props) => {
   const user = useContext(User);
+  const [params, setParams] = useSearchParams();
+
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUSTing, setIsUSTing] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [remainingTime, setRemainingTime] = useState<number | String>(0);
 
@@ -87,6 +92,43 @@ const MyInfoCard = ({ platform }: Props) => {
     setIsUSTing(false);
   };
 
+  const connect = async () => {
+    if (isConnecting || isUSTing || isUpdating) return;
+
+    setIsConnecting(true);
+
+    // authorization through relay
+    const currentUrl = new URL(window.location.href);
+    const dest = new URL("/", currentUrl.origin);
+    const isSigningUp: boolean = !user.hasSignedUp[platform];
+
+    if (platform === "twitter") {
+      const url = new URL("/api/oauth/twitter", SERVER);
+      url.searchParams.set("redirectDestination", dest.toString());
+      url.searchParams.set("isSigningUp", isSigningUp.toString());
+      window.location.replace(url.toString());
+    } else if (platform === "github") {
+      const url = new URL("/api/oauth/github", SERVER);
+      url.searchParams.set("redirectDestination", dest.toString());
+      url.searchParams.set("isSigningUp", isSigningUp.toString());
+      window.location.replace(url.toString());
+    } else {
+      setErrorMsg("Failed to connect, something weird just happened");
+    }
+  };
+
+  const signup = async (platform: string, access_token: string) => {
+    setIsConnecting(true);
+    try {
+      await user.signup(platform, access_token);
+      await user.getRep(platform);
+    } catch (e: any) {
+      setErrorMsg(e.toString());
+      setIsConnecting(false);
+    }
+    setIsConnecting(false);
+  };
+
   useEffect(() => {
     user.refreshRanking(
       platform === "twitter" ? Title.twitter : Title.githubStars
@@ -99,15 +141,63 @@ const MyInfoCard = ({ platform }: Props) => {
     }, 1000);
   }, []);
 
+  useEffect(() => {
+    const _platform: string | null = params.get("platform");
+    const access_token: string | null = params.get("access_token");
+    const signupError: string | null = params.get("signupError");
+    const isSigningUp: string | null = params.get("isSigningUp");
+    if (!_platform) {
+      console.log("No platform returns");
+    } else if (_platform !== platform) {
+      console.log("none of my business.");
+    } else if (access_token) {
+      if (isSigningUp && parseInt(isSigningUp)) {
+        signup(platform, access_token);
+      } else {
+        user.storeAccessToken(platform, access_token);
+      }
+    } else if (signupError) {
+      setErrorMsg(signupError);
+    }
+    setParams("");
+  }, []);
+
   return (
     <div className="w-72 h-72 shadow-xl bg-card rounded-lg flex flex-col gap-2">
+      {errorMsg && (
+        <div
+          className="alert alert-error max-w-lg break-words fixed top-10 left-40 cursor-pointer"
+          onClick={() => setErrorMsg("")}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="stroke-current shrink-0 h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span>{errorMsg}</span>
+        </div>
+      )}
       <div className="bg-white basis-1/12 p-1 text-center text-2xl rounded-t-lg">
         <FontAwesomeIcon icon={icons[platform]} />
       </div>
       {/* connect button */}
       {!connected && (
         <div className="basis-11/12 flex justify-center items-center">
-          <button className="btn btn-primary btn-lg btn-wide">Connect</button>
+          <button className="btn btn-primary btn-lg btn-wide" onClick={connect}>
+            {isConnecting ? (
+              <span className="loading loading-spinner loading-md"></span>
+            ) : (
+              "Connect"
+            )}
+          </button>
         </div>
       )}
 
