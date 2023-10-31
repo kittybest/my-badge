@@ -1,6 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ErrorProvider } from "./contexts/Error";
 
 import Layout from "./layout/Layout";
 import Home from "./pages/Home";
@@ -10,15 +11,17 @@ import "./main.css";
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="join" element={<Join />} />
-          <Route path="help" element={<Help />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <ErrorProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="join" element={<Join />} />
+            <Route path="help" element={<Help />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </ErrorProvider>
   );
 }
 
