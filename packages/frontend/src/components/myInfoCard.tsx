@@ -51,6 +51,7 @@ const MyInfoCard = ({ platform }: Props) => {
   const ranking =
     user.rankings[platform === "twitter" ? "twitter" : "github_stars"];
   const connected = user.accessTokens[platform] !== undefined;
+  const hasSignedUp = user.hasSignedUp[platform];
   const { provableData, data } = calculateData(platform);
 
   const updateTimer = async () => {
@@ -58,7 +59,7 @@ const MyInfoCard = ({ platform }: Props) => {
       setRemainingTime("Loading...");
       return;
     }
-    if (user.hasSignedUp[platform]) {
+    if (hasSignedUp) {
       const latestTransitionedEpoch =
         await user.userState.latestTransitionedEpoch(ATTESTERS[platform]);
       const currentEpoch = user.userState.sync.calcCurrentEpoch(
@@ -189,7 +190,7 @@ const MyInfoCard = ({ platform }: Props) => {
         <FontAwesomeIcon icon={icons[platform]} />
       </div>
       {/* connect button */}
-      {!connected && (
+      {!hasSignedUp && (
         <div className="basis-11/12 flex justify-center items-center">
           <button className="btn btn-primary btn-lg btn-wide" onClick={connect}>
             {isConnecting ? (
@@ -202,7 +203,7 @@ const MyInfoCard = ({ platform }: Props) => {
       )}
 
       {/* user status */}
-      {connected && (
+      {hasSignedUp && (
         <div className="basis-5/12 flex p-2 justify-around items-center">
           <div className="avatar">
             <div
@@ -242,12 +243,16 @@ const MyInfoCard = ({ platform }: Props) => {
       )}
 
       {/* main action buttons */}
-      {connected && (
-        <div className="basis-3/12 p-2 flex justify-around items-center"></div>
+      {hasSignedUp && (
+        <div className="basis-3/12 p-2 flex justify-around items-center">
+          <button className="btn"></button>
+          <button className="btn"></button>
+          <button className="btn"></button>
+        </div>
       )}
 
       {/* UST button */}
-      {connected && (
+      {hasSignedUp && (
         <div className="basis-3/12 p-2">
           <div className="text-center">
             <button
