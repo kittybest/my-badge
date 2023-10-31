@@ -2,11 +2,15 @@ import React, { useState, useContext, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { faTwitter, faGithub } from "@fortawesome/free-brands-svg-icons";
+
 import {
-  faTwitter,
-  faGithub,
-  IconDefinition,
-} from "@fortawesome/free-brands-svg-icons";
+  faCheck,
+  faDownload,
+  faBan,
+  faRotate,
+} from "@fortawesome/free-solid-svg-icons";
 
 import User, { ATTESTERS } from "../contexts/User";
 import { Title } from "../types/title";
@@ -26,7 +30,7 @@ const MyInfoCard = ({ platform }: Props) => {
   const [errorMsg, setErrorMsg] = useState("");
   const [remainingTime, setRemainingTime] = useState<number | String>(0);
 
-  const icons: { [key: string]: IconDefinition } = {
+  const icons: { [key: string]: IconProp } = {
     twitter: faTwitter,
     github: faGithub,
   };
@@ -245,9 +249,25 @@ const MyInfoCard = ({ platform }: Props) => {
       {/* main action buttons */}
       {hasSignedUp && (
         <div className="basis-3/12 p-2 flex justify-around items-center">
-          <button className="btn"></button>
-          <button className="btn"></button>
-          <button className="btn"></button>
+          {connected ? (
+            <button className="btn btn-success">
+              <FontAwesomeIcon icon={faCheck as IconProp} size="lg" />
+            </button>
+          ) : (
+            <button className="btn btn-neutral">
+              <FontAwesomeIcon
+                icon={faBan as IconProp}
+                size="lg"
+                color="white"
+              />
+            </button>
+          )}
+          <button className="btn btn-warning">
+            <FontAwesomeIcon icon={faRotate as IconProp} size="lg" />
+          </button>
+          <button className="btn btn-info">
+            <FontAwesomeIcon icon={faDownload as IconProp} size="lg" />
+          </button>
         </div>
       )}
 
