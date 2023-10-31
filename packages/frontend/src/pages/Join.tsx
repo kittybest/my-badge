@@ -23,7 +23,7 @@ export default observer(() => {
     try {
       await user.signup(platform, access_token);
       await user.getRep(platform);
-      return navigate("/user");
+      return navigate("/");
     } catch (e: any) {
       if (e.toString().includes("0x53d3ff53"))
         setErrorMsg("Epoch does not match. Please try again later.");
@@ -76,7 +76,7 @@ export default observer(() => {
   const login = async () => {
     try {
       await user.login(idInput);
-      return navigate("/user");
+      return navigate("/");
     } catch (e: any) {
       setErrorMsg(e.toString());
     }
