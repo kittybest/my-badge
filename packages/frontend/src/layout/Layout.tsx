@@ -11,6 +11,7 @@ const Layout = () => {
       <Header />
       <Outlet />
       <Footer />
+      <ErrorModal />
     </>
   );
 };
