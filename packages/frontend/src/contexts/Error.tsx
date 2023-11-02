@@ -19,7 +19,7 @@ interface ErrorContent {
   closeError: () => void;
 }
 
-const defaultError = { type: ErrorType.None, message: "test error" };
+const defaultError = { type: ErrorType.None, message: "" };
 
 interface ErrorProviderProps {
   children: ReactNode;
@@ -34,7 +34,7 @@ const ErrorContext = createContext<ErrorContent>({
 
 export const ErrorProvider: React.FC<ErrorProviderProps> = ({ children }) => {
   const [error, setError] = useState<MyError>(defaultError);
-  const [showError, setShowError] = useState<boolean>(true);
+  const [showError, setShowError] = useState<boolean>(false);
 
   const errorHandler = (e: string) => {
     if (e.length <= 0) return;

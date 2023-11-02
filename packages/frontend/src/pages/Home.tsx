@@ -5,11 +5,13 @@ import Jdenticon from "react-jdenticon";
 
 import { SERVER, TWITTER_ADDRESS } from "../config";
 import User from "../contexts/User";
+import { useError } from "../contexts/Error";
 import RankingChart from "../components/rankingChart";
 import MyInfoCard from "../components/myInfoCard";
 
 export default observer(() => {
   const user = useContext(User);
+  const Error = useError();
 
   const [rankings, setRankings] = useState<{ [key: string]: any[] }>({});
 
@@ -20,7 +22,7 @@ export default observer(() => {
       );
       setRankings(_rankings);
     } catch (err: any) {
-      console.error(err);
+      Error.errorHandler(err.toString());
     }
   };
 
