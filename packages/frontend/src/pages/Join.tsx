@@ -6,28 +6,26 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTwitter, faGithub } from "@fortawesome/free-brands-svg-icons";
 import { SERVER } from "../config";
 import User from "../contexts/User";
+import { useError } from "../contexts/Error";
 
 export default observer(() => {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
 
   const user = useContext(User);
+  const Error = useError();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
   const [idInput, setIdInput] = useState("");
 
   const signup = async (platform: string, access_token: string) => {
-    setErrorMsg("");
     setIsLoading(true);
     try {
       await user.signup(platform, access_token);
       await user.getRep(platform);
       return navigate("/");
     } catch (e: any) {
-      if (e.toString().includes("0x53d3ff53"))
-        setErrorMsg("Epoch does not match. Please try again later.");
-      else setErrorMsg(e.toString());
+      Error.errorHandler(e.toString());
       setIsLoading(false);
     }
   };
@@ -44,7 +42,7 @@ export default observer(() => {
         user.storeAccessToken(platform, access_token);
       }
     } else if (signupError) {
-      setErrorMsg(
+      Error.errorHandler(
         `Sign up through ${platform?.toUpperCase()} error: ${signupError}`
       );
     }
@@ -78,7 +76,7 @@ export default observer(() => {
       await user.login(idInput);
       return navigate("/");
     } catch (e: any) {
-      setErrorMsg(e.toString());
+      Error.errorHandler(e.toString());
     }
   };
 
@@ -99,24 +97,6 @@ export default observer(() => {
         <div className="w-full h-screen flex flex-col justify-center p-4">
           <div className="flex flex-col w-full border-opacity-50 gap-4">
             <div className="grid place-items-center gap-8">
-              {errorMsg.length > 0 && (
-                <div className="alert alert-error max-w-lg break-words">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="stroke-current shrink-0 h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span>{errorMsg}</span>
-                </div>
-              )}
               <button
                 className="button btn-lg btn-wide rounded-lg btn-info"
                 onClick={() => join("twitter")}
