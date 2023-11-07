@@ -1,38 +1,31 @@
 import { useEffect, useState, useContext } from "react";
 import { observer } from "mobx-react-lite";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import {
-  Button,
-  Divider,
-  Loader,
-  Message,
-  TextArea,
-  Form,
-} from "semantic-ui-react";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTwitter, faGithub } from "@fortawesome/free-brands-svg-icons";
 import { SERVER } from "../config";
 import User from "../contexts/User";
+import { useError } from "../contexts/Error";
 
 export default observer(() => {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
 
   const user = useContext(User);
+  const Error = useError();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
   const [idInput, setIdInput] = useState("");
 
   const signup = async (platform: string, access_token: string) => {
-    setErrorMsg("");
     setIsLoading(true);
     try {
       await user.signup(platform, access_token);
       await user.getRep(platform);
-      return navigate("/user");
+      return navigate("/");
     } catch (e: any) {
-      setErrorMsg(e.toString());
+      Error.errorHandler(e.toString());
       setIsLoading(false);
     }
   };
@@ -49,7 +42,7 @@ export default observer(() => {
         user.storeAccessToken(platform, access_token);
       }
     } else if (signupError) {
-      setErrorMsg(
+      Error.errorHandler(
         `Sign up through ${platform?.toUpperCase()} error: ${signupError}`
       );
     }
@@ -81,9 +74,9 @@ export default observer(() => {
   const login = async () => {
     try {
       await user.login(idInput);
-      return navigate("/user");
+      return navigate("/");
     } catch (e: any) {
-      setErrorMsg(e.toString());
+      Error.errorHandler(e.toString());
     }
   };
 
@@ -94,47 +87,46 @@ export default observer(() => {
   return (
     <>
       {isLoading ? (
-        <div className="join-container">
-          <Loader active inline="centered" size="huge" />
-          <Link to="/help">Any question?</Link>
+        <div className="w-full h-screen flex flex-col justify-center items-center gap-8">
+          <div className="loading loading-spinner loading-lg"></div>
+          <Link to="/help" target="_blank">
+            Any question?
+          </Link>
         </div>
       ) : (
-        <div className="join-container">
-          {errorMsg.length > 0 && (
-            <Message error header="Oops!" content={errorMsg} />
-          )}
-          <Button
-            basic
-            color="blue"
-            size="huge"
-            onClick={() => join("twitter")}
-          >
-            <FontAwesomeIcon icon={faTwitter} />
-            <span>Join with Twitter</span>
-          </Button>
-          <Button
-            basic
-            color="black"
-            size="huge"
-            onClick={() => join("github")}
-          >
-            <FontAwesomeIcon icon={faGithub} />
-            <span>Join with Github</span>
-          </Button>
-
-          <Divider horizontal>Already has account?</Divider>
-
-          <Form>
-            <TextArea
-              placeholder="Please enter your private key."
-              style={{ width: "300px" }}
-              onChange={onIdInputChange}
-            />
-          </Form>
-          <Button basic size="large" onClick={login}>
-            Log in
-          </Button>
-          <Link to="/help">Any question?</Link>
+        <div className="w-full h-screen flex flex-col justify-center p-4">
+          <div className="flex flex-col w-full border-opacity-50 gap-4">
+            <div className="grid place-items-center gap-8">
+              <button
+                className="button btn-lg btn-wide rounded-lg btn-info"
+                onClick={() => join("twitter")}
+              >
+                <FontAwesomeIcon icon={faTwitter} />
+                <span className="ml-1">Join with Twitter</span>
+              </button>
+              <button
+                className="button btn-lg btn-wide rounded-lg btn-secondary"
+                onClick={() => join("github")}
+              >
+                <FontAwesomeIcon icon={faGithub} />
+                <span className="ml-1">Join with Github</span>
+              </button>
+            </div>
+            <div className="divider">Already has account?</div>
+            <div className="grid place-items-center gap-4">
+              <textarea
+                placeholder="Please enter your private key."
+                className="textarea textarea-bordered w-72"
+                onChange={onIdInputChange}
+              />
+              <button className="button btn-primary btn-md btn-wide rounded-lg">
+                Log In
+              </button>
+              <Link to="/help" className="text-sm underline">
+                Any question?
+              </Link>
+            </div>
+          </div>
         </div>
       )}
     </>

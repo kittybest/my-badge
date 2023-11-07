@@ -1,12 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import {
-  Button,
-  Grid,
-  Segment,
-  Message,
-  SemanticCOLORS,
-} from "semantic-ui-react";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTwitter,
@@ -17,18 +11,17 @@ import { SERVER } from "../config";
 import { Title } from "../types/title";
 import User, { ATTESTERS } from "../contexts/User";
 
-const semanticColorHex: { [key: string]: string } = {
-  red: "#db2828",
-  orange: "#f2711c",
-  yellow: "#fbbd08",
-  green: "#21ba45",
-  blue: "#2185d0",
-};
+// const semanticColorHex: { [key: string]: string } = {
+//   red: "#db2828",
+//   orange: "#f2711c",
+//   yellow: "#fbbd08",
+//   green: "#21ba45",
+//   blue: "#2185d0",
+// };
 
 type Props = {
   title: Title;
   platform: string;
-  color: SemanticCOLORS;
   connect: () => void;
   _error: string;
   connectLoading: boolean;
@@ -37,7 +30,6 @@ type Props = {
 const InfoCard = ({
   title,
   platform,
-  color,
   connect,
   _error,
   connectLoading,
@@ -166,94 +158,95 @@ const InfoCard = ({
   }, []);
 
   return (
-    <Segment color={color}>
-      <Grid>
-        <Grid.Row stretched>
-          {/* Platform Icon */}
-          <Grid.Column width={1}>
-            <FontAwesomeIcon icon={icons[platform]} />
-          </Grid.Column>
-          {/* Platform condition */}
-          <Grid.Column width={3}>
-            <h3>{processedTitle(title)}</h3>
-            <p className={connected ? "connected" : "unconnected"}>
-              {connected ? "connected" : "unconnected"}
-            </p>
-          </Grid.Column>
-          {/* Ranking of the Title */}
-          <Grid.Column width={1} verticalAlign="middle">
-            <h2 className="ranking" onClick={getRanking}>
-              {ranking ?? "??"}
-            </h2>
-          </Grid.Column>
-          {/* Data of the Title */}
-          {hasSignedUp ? (
-            <Grid.Column width={7} verticalAlign="middle">
-              <div className="data-info">
-                <div
-                  className="progress"
-                  style={{
-                    width: `${calculatedProgressWidth()[0]}%`,
-                    backgroundColor: `${semanticColorHex[color]}`,
-                  }}
-                ></div>
-                <span>{provableData}</span>
-              </div>
-              <div className="data-info">
-                <div
-                  className="progress"
-                  style={{ width: `${calculatedProgressWidth()[1]}%` }}
-                ></div>
-                <span>{data}</span>
-              </div>
-            </Grid.Column>
-          ) : (
-            <Grid.Column width={7} verticalAlign="middle">
-              <p>Not connected</p>
-            </Grid.Column>
-          )}
-          {!hasSignedUp && (
-            <Grid.Column width={4}>
-              <Button onClick={connect} loading={connectLoading}>
-                Connect!
-              </Button>
-            </Grid.Column>
-          )}
-          {hasSignedUp && !connected && (
-            <Grid.Column width={2}>
-              <Button onClick={connect} loading={connectLoading}>
-                Connect!
-              </Button>
-            </Grid.Column>
-          )}
-          {hasSignedUp && connected && (
-            <Grid.Column width={2}>
-              <Button onClick={onClickUpdate} loading={isUpdating}>
-                Update
-              </Button>
-            </Grid.Column>
-          )}
-          {hasSignedUp && (
-            <Grid.Column width={2}>
-              <Button onClick={onClickUST} loading={isUSTing}>
-                {remainingTime}
-              </Button>
-            </Grid.Column>
-          )}
-        </Grid.Row>
-        {errorMsg.length > 0 && (
-          <Grid.Row>
-            <Grid.Column>
-              <Message error>
-                <i className="close icon" onClick={() => setErrorMsg("")}></i>
-                <div className="header">Oops</div>
-                <div className="content">{errorMsg}</div>
-              </Message>
-            </Grid.Column>
-          </Grid.Row>
-        )}
-      </Grid>
-    </Segment>
+    <></>
+    // <Segment color={color}>
+    //   <Grid>
+    //     <Grid.Row stretched>
+    //       {/* Platform Icon */}
+    //       <Grid.Column width={1}>
+    //         <FontAwesomeIcon icon={icons[platform]} />
+    //       </Grid.Column>
+    //       {/* Platform condition */}
+    //       <Grid.Column width={3}>
+    //         <h3>{processedTitle(title)}</h3>
+    //         <p className={connected ? "connected" : "unconnected"}>
+    //           {connected ? "connected" : "unconnected"}
+    //         </p>
+    //       </Grid.Column>
+    //       {/* Ranking of the Title */}
+    //       <Grid.Column width={1} verticalAlign="middle">
+    //         <h2 className="ranking" onClick={getRanking}>
+    //           {ranking ?? "??"}
+    //         </h2>
+    //       </Grid.Column>
+    //       {/* Data of the Title */}
+    //       {hasSignedUp ? (
+    //         <Grid.Column width={7} verticalAlign="middle">
+    //           <div className="data-info">
+    //             <div
+    //               className="progress"
+    //               style={{
+    //                 width: `${calculatedProgressWidth()[0]}%`,
+    //                 backgroundColor: `${semanticColorHex[color]}`,
+    //               }}
+    //             ></div>
+    //             <span>{provableData}</span>
+    //           </div>
+    //           <div className="data-info">
+    //             <div
+    //               className="progress"
+    //               style={{ width: `${calculatedProgressWidth()[1]}%` }}
+    //             ></div>
+    //             <span>{data}</span>
+    //           </div>
+    //         </Grid.Column>
+    //       ) : (
+    //         <Grid.Column width={7} verticalAlign="middle">
+    //           <p>Not connected</p>
+    //         </Grid.Column>
+    //       )}
+    //       {!hasSignedUp && (
+    //         <Grid.Column width={4}>
+    //           <Button onClick={connect} loading={connectLoading}>
+    //             Connect!
+    //           </Button>
+    //         </Grid.Column>
+    //       )}
+    //       {hasSignedUp && !connected && (
+    //         <Grid.Column width={2}>
+    //           <Button onClick={connect} loading={connectLoading}>
+    //             Connect!
+    //           </Button>
+    //         </Grid.Column>
+    //       )}
+    //       {hasSignedUp && connected && (
+    //         <Grid.Column width={2}>
+    //           <Button onClick={onClickUpdate} loading={isUpdating}>
+    //             Update
+    //           </Button>
+    //         </Grid.Column>
+    //       )}
+    //       {hasSignedUp && (
+    //         <Grid.Column width={2}>
+    //           <Button onClick={onClickUST} loading={isUSTing}>
+    //             {remainingTime}
+    //           </Button>
+    //         </Grid.Column>
+    //       )}
+    //     </Grid.Row>
+    //     {errorMsg.length > 0 && (
+    //       <Grid.Row>
+    //         <Grid.Column>
+    //           <Message error>
+    //             <i className="close icon" onClick={() => setErrorMsg("")}></i>
+    //             <div className="header">Oops</div>
+    //             <div className="content">{errorMsg}</div>
+    //           </Message>
+    //         </Grid.Column>
+    //       </Grid.Row>
+    //     )}
+    //   </Grid>
+    // </Segment>
   );
 };
 

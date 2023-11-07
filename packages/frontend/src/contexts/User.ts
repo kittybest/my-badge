@@ -45,6 +45,9 @@ class User {
     const identity = new Identity(id);
     if (!id) {
       localStorage.setItem("id", identity.toString());
+      this.id = identity.toString();
+    } else {
+      this.id = id;
     }
 
     const db = new MemoryConnector(constructSchema(schema)); // not used in the beta version??
@@ -397,6 +400,13 @@ class User {
 
     this.rankings[title] = ret.ranking;
     console.log("New ranking of title", title, "is", this.rankings[title]);
+  }
+
+  get signedUp() {
+    return Object.values(this.hasSignedUp).reduce(
+      (acc, cur) => acc || cur,
+      false
+    );
   }
 }
 

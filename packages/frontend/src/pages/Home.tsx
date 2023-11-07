@@ -1,14 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { Link } from "react-router-dom";
-import { Button, Container, Segment, Card } from "semantic-ui-react";
-import { Title } from "../types/title";
-import { SERVER } from "../config";
+import Jdenticon from "react-jdenticon";
 
+import { SERVER, TWITTER_ADDRESS } from "../config";
 import User from "../contexts/User";
+import { useError } from "../contexts/Error";
+import RankingChart from "../components/rankingChart";
+import MyInfoCard from "../components/myInfoCard";
 
 export default observer(() => {
   const user = useContext(User);
+  const Error = useError();
 
   const [rankings, setRankings] = useState<{ [key: string]: any[] }>({});
 
@@ -19,70 +22,76 @@ export default observer(() => {
       );
       setRankings(_rankings);
     } catch (err: any) {
-      console.error(err);
+      Error.errorHandler(err.toString());
     }
+  };
+
+  const downloadId = () => {
+    const element = document.createElement("a");
+    const file = new Blob([user.id], {
+      type: "text/plain",
+    });
+    element.href = URL.createObjectURL(file);
+    element.download = "my-badge-id.txt";
+    document.body.appendChild(element);
+    element.click();
   };
 
   useEffect(() => {
     refreshRanking();
   }, []);
 
-  const formCardGroup = (title: Title) => {
-    const data = rankings[title] ?? [];
-
-    return (
-      <Card.Group style={{ marginTop: "24px" }}>
-        {data.map((d: any) => (
-          <Card
-            fluid
-            header={"0x" + BigInt(d.epochKey).toString(16)}
-            key={d._id}
-            className="my-card"
-          />
-        ))}
-      </Card.Group>
-    );
-  };
-
   return (
-    <>
-      <div
-        className="banner"
-        style={{
-          backgroundImage: `url(${require("../../public/banner.jpg")})`,
-        }}
-      >
-        {!user.hasSignedUp && (
-          <Link to="/join">
-            <Button className="join-button" color="orange" size="massive">
-              Join Us!
-            </Button>
-          </Link>
+    <div>
+      <div className="relative" style={{ height: "40vh" }}>
+        <img
+          className="w-full h-full object-fit absolute -z-50"
+          src={require("../../public/banner.png")}
+        />
+        {!user.signedUp && (
+          <div className="h-full flex flex-col justify-center items-center">
+            <h2>My Badge: Your Web3 Identity</h2>
+            <Link to="/join">
+              <button className="btn btn-primary btn-lg btn-wide">
+                Join Us
+              </button>
+            </Link>
+          </div>
+        )}
+        {user.signedUp && (
+          <div className="h-full flex items-center p-8 gap-8">
+            <div className="h-full flex flex-col w-72 break-all items-center gap-2">
+              <div className="bg-white">
+                <Jdenticon
+                  size="120"
+                  value={user.epochKey(TWITTER_ADDRESS, 0)}
+                />
+              </div>
+              <label className="swap swap-flip cursor-pointer">
+                <input type="checkbox" />
+                <div className="swap-on">{user.id}</div>
+                <div
+                  className="swap-off text-center rounded-lg btn-secondary p-10"
+                  onClick={downloadId}
+                >
+                  Reveal and Download
+                  <br />
+                  My Id
+                </div>
+              </label>
+            </div>
+            <div className="flex gap-4">
+              <MyInfoCard platform="twitter" />
+              <MyInfoCard platform="github" />
+            </div>
+          </div>
         )}
       </div>
-      <Container>
-        <Segment.Group horizontal>
-          <Segment color="blue">
-            <Button basic color="blue" fluid size="big">
-              Twitter Followers
-            </Button>
-            {formCardGroup(Title.twitter)}
-          </Segment>
-          <Segment color="yellow">
-            <Button basic color="yellow" fluid size="big">
-              Github Stars
-            </Button>
-            {formCardGroup(Title.githubStars)}
-          </Segment>
-          <Segment color="red">
-            <Button basic color="red" fluid size="big">
-              Github Followers
-            </Button>
-            {formCardGroup(Title.githubFollowers)}
-          </Segment>
-        </Segment.Group>
-        <div className="margin"></div>
-      </Container>
-    </>
+      <div className="flex flex-col gap-4 items-center py-8">
+        {Object.keys(rankings).map((p, i) => (
+          <RankingChart platform={p} ranking={rankings[p]} key={i} />
+        ))}
+      </div>
+    </div>
   );
 });

@@ -25,7 +25,7 @@ module.exports = (env) => ({
   // Enable sourcemaps for debugging webpack's output.
   // devtool: "source-map",
   resolve: {
-    extensions: ["*", ".js", ".jsx", ".json", ".scss", ".ts", ".tsx"],
+    extensions: [".*", ".js", ".jsx", ".json", ".ts", ".tsx"],
     fallback: {
       path: require.resolve("path-browserify"),
       crypto: require.resolve("crypto-browserify"),
@@ -76,16 +76,6 @@ module.exports = (env) => ({
         ],
       },
       {
-        test: /\.s[ac]ss$/i,
-        use: [
-          MiniCssExtractPlugin.loader,
-          // Translates CSS into CommonJS
-          "css-loader",
-          // Compiles Sass to CSS
-          "sass-loader",
-        ],
-      },
-      {
         test: /\.(css)$/,
         // exclude: /node_modules/,
         use: [
@@ -93,6 +83,7 @@ module.exports = (env) => ({
             loader: MiniCssExtractPlugin.loader,
           },
           "css-loader",
+          "postcss-loader",
         ],
       },
     ],
