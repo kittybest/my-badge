@@ -1,4 +1,4 @@
-pragma circom 2.0.0;
+pragma circom 2.1.0;
 
 /*
     Prove:
@@ -19,7 +19,7 @@ template ProveData(STATE_TREE_DEPTH, NUM_EPOCH_KEY_NONCE_PER_EPOCH, SUM_FIELD_CO
     // Global state tree leaf: Identity & user state root
     signal input identity_secret;
     // Global state tree
-    signal input state_tree_indexes[STATE_TREE_DEPTH];
+    signal input state_tree_indices[STATE_TREE_DEPTH];
     signal input state_tree_elements[STATE_TREE_DEPTH];
     signal output state_tree_root;
     // Attestation by the attester
@@ -29,6 +29,7 @@ template ProveData(STATE_TREE_DEPTH, NUM_EPOCH_KEY_NONCE_PER_EPOCH, SUM_FIELD_CO
     signal input epoch;
     signal input nonce;
     signal input reveal_nonce;
+    signal input chain_id;
 
     signal output control;
     /**
@@ -55,8 +56,9 @@ template ProveData(STATE_TREE_DEPTH, NUM_EPOCH_KEY_NONCE_PER_EPOCH, SUM_FIELD_CO
     epoch_key_prover.epoch <== epoch;
     epoch_key_prover.nonce <== nonce;
     epoch_key_prover.sig_data <== 0;
+    epoch_key_prover.chain_id <== chain_id;
     for (var i = 0; i < STATE_TREE_DEPTH; i++) {
-        epoch_key_prover.state_tree_indexes[i] <== state_tree_indexes[i];
+        epoch_key_prover.state_tree_indices[i] <== state_tree_indices[i];
         epoch_key_prover.state_tree_elements[i] <== state_tree_elements[i];
     }
     for (var i = 0; i < FIELD_COUNT; i++) {
