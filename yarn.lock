@@ -2703,19 +2703,6 @@ ajv@^8.0.0, ajv@^8.9.0:
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
 
-anondb@^0.0.16:
-  version "0.0.16"
-  resolved "https://registry.yarnpkg.com/anondb/-/anondb-0.0.16.tgz#057bcc5d58676f3cc0983f99656f03641df3367b"
-  integrity sha512-F5vu1HzXcEHARhIe6bJhaIss40aqz4Ht4PnQx/4T2r0ZRmne7YbzGLjMimgV+MtA4QHk9jhe4pM8MdUmt0zYag==
-  dependencies:
-    async-lock "^1.2.11"
-    idb "^6.0.0"
-    nanoid "^3.1.30"
-    pg "^8.5.1"
-    sql.js "^1.5.0"
-    sqlite "^4.0.19"
-    sqlite3 "^5.0.2"
-
 anondb@^0.0.21:
   version "0.0.21"
   resolved "https://registry.yarnpkg.com/anondb/-/anondb-0.0.21.tgz#6885dd4e535102c2f537ca171038b3c5f1c5faa3"

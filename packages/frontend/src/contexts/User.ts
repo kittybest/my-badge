@@ -347,8 +347,10 @@ class User {
     if (!this.userState) throw new Error("UserState is undefined");
 
     const attesterId = ATTESTERS[platform];
+    const chainId = this.userState.chainId;
     const { publicSignals, proof } = await this.userState.genDataProof({
       attesterId,
+      chainId,
     });
     const epochKey = parseInt(this.epochKey(platform, 0) ?? "0", 16);
 
