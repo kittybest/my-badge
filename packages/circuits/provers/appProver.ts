@@ -25,7 +25,9 @@ export const appProver = {
       buildPath,
       `${circuitName}.wasm`
     );
+
     const zkeyPath = path.join(__dirname, buildPath, `${circuitName}.zkey`);
+
     const { proof, publicSignals } = await snarkjs.groth16.fullProve(
       inputs,
       circuitWasmPath,

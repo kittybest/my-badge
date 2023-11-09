@@ -17,13 +17,17 @@ describe("Prove reputation from attester circuit", function () {
     const nonce = 0;
     const attesterId = 219090124810;
     const data = fillZero([], FIELD_COUNT);
+    const chainId = 31337;
+
     const circuitInputs = genDataCircuitInput({
       id,
       epoch,
       nonce,
       attesterId,
       _data: data,
+      chainId,
     });
+
     const { isValid, publicSignals, proof } = await genProofAndVerify(
       AppCircuit.proveData,
       circuitInputs
@@ -31,7 +35,7 @@ describe("Prove reputation from attester circuit", function () {
     expect(isValid).to.be.true;
     // check control outputs
     expect(publicSignals[2].toString()).to.equal(
-      DataProof.buildControl({ epoch, nonce, attesterId }).toString()
+      DataProof.buildControl({ epoch, nonce, attesterId, chainId }).toString()
     );
     const dataProof = new DataProof(publicSignals, proof);
     expect(dataProof.epoch.toString()).to.equal(epoch.toString());
@@ -49,12 +53,14 @@ describe("Prove reputation from attester circuit", function () {
     const attesterId = 10210;
     const nonce = 1;
     const data = fillZero([], FIELD_COUNT);
+    const chainId = 31337;
     const circuitInputs = genDataCircuitInput({
       id,
       epoch,
       nonce,
       attesterId,
       _data: data,
+      chainId,
     });
     const { isValid, proof, publicSignals } = await genProofAndVerify(
       AppCircuit.proveData,
@@ -63,7 +69,7 @@ describe("Prove reputation from attester circuit", function () {
     expect(isValid).to.be.true;
     // check control outputs
     expect(publicSignals[2].toString()).to.equal(
-      DataProof.buildControl({ epoch, nonce, attesterId }).toString()
+      DataProof.buildControl({ epoch, nonce, attesterId, chainId }).toString()
     );
 
     const dataProof = new DataProof(publicSignals, proof);
@@ -80,6 +86,7 @@ describe("Prove reputation from attester circuit", function () {
     const nonce = 0;
     const revealNonce = 1;
     const data = fillZero([], FIELD_COUNT);
+    const chainId = 31337;
     const circuitInputs = genDataCircuitInput({
       id,
       epoch,
@@ -87,6 +94,7 @@ describe("Prove reputation from attester circuit", function () {
       attesterId,
       _data: data,
       revealNonce,
+      chainId,
     });
     const { isValid, proof, publicSignals } = await genProofAndVerify(
       AppCircuit.proveData,
@@ -101,6 +109,7 @@ describe("Prove reputation from attester circuit", function () {
         nonce,
         attesterId,
         revealNonce,
+        chainId,
       }).toString(),
       "actual control not as expected"
     );
@@ -131,6 +140,8 @@ describe("Prove reputation from attester circuit", function () {
     const nonce = 0;
     const revealNonce = 1;
     const data = fillZero([], FIELD_COUNT);
+    const chainId = 31337;
+
     const circuitInputs = genDataCircuitInput({
       id,
       epoch,
@@ -138,6 +149,7 @@ describe("Prove reputation from attester circuit", function () {
       attesterId,
       _data: data,
       revealNonce,
+      chainId,
     });
     const { isValid, proof, publicSignals } = await genProofAndVerify(
       AppCircuit.proveData,
@@ -151,7 +163,13 @@ describe("Prove reputation from attester circuit", function () {
     expect(dataProof.revealNonce.toString()).to.equal(revealNonce.toString());
     expect(dataProof.attesterId.toString()).to.equal(attesterId.toString());
     expect(dataProof.epochKey.toString()).to.equal(
-      genEpochKey(id.secret, attesterId.toString(), epoch, nonce).toString()
+      genEpochKey(
+        id.secret,
+        attesterId.toString(),
+        epoch,
+        nonce,
+        chainId
+      ).toString()
     );
   });
 
@@ -161,12 +179,15 @@ describe("Prove reputation from attester circuit", function () {
     const attesterId = 10210;
     const nonce = NUM_EPOCH_KEY_NONCE_PER_EPOCH;
     const data = fillZero([], FIELD_COUNT);
+    const chainId = 31337;
+
     const circuitInputs = genDataCircuitInput({
       id,
       epoch,
       nonce,
       attesterId,
       _data: data,
+      chainId,
     });
     await new Promise<void>((rs, rj) => {
       genProofAndVerify(AppCircuit.proveData, circuitInputs)
@@ -181,12 +202,15 @@ describe("Prove reputation from attester circuit", function () {
     const attesterId = BigInt(2) ** BigInt(160);
     const nonce = 0;
     const data = fillZero([], FIELD_COUNT);
+    const chainId = 31337;
+
     const circuitInputs = genDataCircuitInput({
       id,
       epoch,
       nonce,
       attesterId,
       _data: data,
+      chainId,
     });
     await new Promise<void>((rs, rj) => {
       genProofAndVerify(AppCircuit.proveData, circuitInputs)
@@ -202,6 +226,8 @@ describe("Prove reputation from attester circuit", function () {
     const nonce = 0;
     const revealNonce = 2;
     const data = fillZero([], FIELD_COUNT);
+    const chainId = 31337;
+
     const circuitInputs = genDataCircuitInput({
       id,
       epoch,
@@ -209,6 +235,7 @@ describe("Prove reputation from attester circuit", function () {
       attesterId,
       _data: data,
       revealNonce,
+      chainId,
     });
     await new Promise<void>((rs, rj) => {
       genProofAndVerify(AppCircuit.proveData, circuitInputs)
