@@ -19,7 +19,7 @@ async function genUserState(id, app) {
     db
   );
 
-  await userState.sync.start();
+  await userState.start();
   await userState.waitForSync();
   return userState;
 }
@@ -97,8 +97,10 @@ describe("Unirep App", function () {
 
   it("proof data", async function () {
     const userState = await genUserState(id, app);
+    const chainId = await unirep.chainid();
     const dataProof = await userState.genDataProof({
       attesterId: app.address,
+      chainId,
     });
     await dataProof.verify();
 
