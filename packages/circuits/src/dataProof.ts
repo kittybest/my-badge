@@ -50,8 +50,9 @@ export class DataProof extends BaseProof {
     (this as any).circuit = AppCircuit.proveData;
   }
 
-  static buildControl({ attesterId, epoch, nonce, revealNonce }: any) {
+  static buildControl({ attesterId, epoch, nonce, revealNonce, chainId }: any) {
     let control = BigInt(0);
+    control += BigInt(chainId ?? 0) << BigInt(217);
     control += BigInt(revealNonce ?? 0) << BigInt(216);
     control += BigInt(attesterId) << BigInt(56);
     control += BigInt(epoch) << BigInt(8);

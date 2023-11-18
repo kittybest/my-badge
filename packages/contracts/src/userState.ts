@@ -27,13 +27,14 @@ export class AppUserState extends UserState {
     const stateTreeProof = tree.createProof(leafIndex);
     const circuitInputs = {
       identity_secret: this.id.secret,
-      state_tree_indexes: stateTreeProof.pathIndices,
+      state_tree_indices: stateTreeProof.pathIndices,
       state_tree_elements: stateTreeProof.siblings,
       data,
       epoch,
       nonce: options.nonce ?? 0,
       attester_id: options.attesterId,
       reveal_nonce: options.revealNonce ?? 0,
+      chain_id: options.chainId ?? 31337,
     };
     const results = await this.prover.genProofAndPublicSignals(
       AppCircuit.proveData,

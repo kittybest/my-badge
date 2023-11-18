@@ -76,13 +76,15 @@ const genDataCircuitInput = (config: {
   attesterId: number | bigint;
   _data: (bigint | number)[];
   revealNonce?: number;
+  chainId: number;
 }) => {
-  const { id, epoch, nonce, attesterId, _data, revealNonce } = Object.assign(
-    {
-      _data: [],
-    },
-    config
-  );
+  const { id, epoch, nonce, attesterId, _data, revealNonce, chainId } =
+    Object.assign(
+      {
+        _data: [],
+      },
+      config
+    );
 
   const data = fillZero(_data, FIELD_COUNT);
   // Global state tree
@@ -91,20 +93,22 @@ const genDataCircuitInput = (config: {
     id.secret,
     BigInt(attesterId),
     epoch,
-    data as any
+    data as any,
+    chainId
   );
   stateTree.insert(hashedLeaf);
   const stateTreeProof = stateTree.createProof(0); // if there is only one GST leaf, the index is 0
 
   const circuitInputs = {
     identity_secret: id.secret,
-    state_tree_indexes: stateTreeProof.pathIndices,
+    state_tree_indices: stateTreeProof.pathIndices,
     state_tree_elements: stateTreeProof.siblings,
     data,
     attester_id: attesterId,
     epoch,
     nonce,
     reveal_nonce: revealNonce ?? 0,
+    chain_id: chainId,
   };
   return utils.stringifyBigInts(circuitInputs);
 };
