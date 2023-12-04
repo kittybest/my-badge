@@ -143,10 +143,6 @@ const InfoCard = ({
     return ret;
   };
 
-  const getRanking = () => {
-    user.refreshRanking(title);
-  };
-
   useEffect(() => {
     setErrorMsg(_error);
   }, [_error]);

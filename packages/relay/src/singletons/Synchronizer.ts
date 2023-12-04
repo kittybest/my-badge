@@ -1,7 +1,6 @@
 import { ethers } from "ethers";
 import { TransactionDB, DB } from "anondb";
 import { Synchronizer } from "@unirep/core";
-import { Prover } from "@unirep/circuits";
 import UNIREP_TWITTER_ABI from "@unirep-app/contracts/abi/UnirepTwitter.json";
 import UNIREP_GITHUB_ABI from "@unirep-app/contracts/abi/UnirepGithub.json";
 import { provider, TWITTER_ADDRESS, GITHUB_ADDRESS } from "../config";

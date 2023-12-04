@@ -67,7 +67,7 @@ export default (
             break;
           }
         }
-        if (!flag) res.status(400).json({ error: "No related ranking." });
+        if (!flag) res.json({});
       }
     } catch (error: any) {
       console.log("get", title, "ranking error", error);
@@ -86,6 +86,14 @@ export default (
       // check attesterId
       if (dataProof.attesterId.toString() !== BigInt(attesterId).toString()) {
         res.status(400).json({ error: "Attester Id does not match." });
+        return;
+      }
+
+      // check epochKey
+      if (dataProof.epochKey.toString() !== BigInt(epochKey).toString()) {
+        console.log("epk in dataproof:", dataProof.epochKey.toString());
+        console.log("epk passed by frontend:", BigInt(epochKey).toString());
+        res.status(400).json({ error: "EpochKey does not match." });
         return;
       }
 

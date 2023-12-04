@@ -390,7 +390,6 @@ class User {
       const key = Array.isArray(epk) ? epk[0] : epk;
       epochKeys = [...epochKeys, key];
     }
-    console.log("all epoch keys:", epochKeys);
 
     const ret = await fetch(
       `${SERVER}/api/ranking/${title}?epochKeys=${epochKeys.join("_")}`
@@ -401,7 +400,6 @@ class User {
     }
 
     this.rankings[title] = ret.ranking;
-    console.log("New ranking of title", title, "is", this.rankings[title]);
   }
 
   get signedUp() {
