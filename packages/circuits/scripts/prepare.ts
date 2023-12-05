@@ -24,7 +24,7 @@ fs.copyFileSync(
 
 try {
   fs.unlinkSync(
-    path.join(__dirname, "../dist/zksnarkBuild/powersOfTau28_hez_final_17.ptau")
+    path.join(__dirname, "../dist/zksnarkBuild/powersOfTau28_hez_final_18.ptau")
   );
 } catch (_) {}
 
