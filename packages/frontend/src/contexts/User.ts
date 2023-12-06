@@ -18,6 +18,7 @@ import {
 import prover from "./prover";
 import Wait from "../utils/wait";
 import { Title } from "../types/title";
+import { genEpochKey } from "@unirep/utils";
 
 export const ATTESTERS: { [key: string]: string } = {
   twitter: TWITTER_ADDRESS,
@@ -181,6 +182,18 @@ class User {
       return "0x";
     }
     const key = Array.isArray(keys) ? keys[0] : keys;
+
+    if (ATTESTERS[platform]) {
+      const identity = new Identity(this.id);
+      const epkTmp = genEpochKey(
+        identity.secret,
+        ATTESTERS[platform],
+        epoch,
+        nonce,
+        this.userState.chainId
+      ).toString();
+      console.log(epkTmp);
+    }
     return `0x${key.toString(16)}`;
   }
 
@@ -353,6 +366,7 @@ class User {
       chainId,
     });
     const epochKey = parseInt(this.epochKey(platform, 0) ?? "0", 16);
+    console.log("epochKey:", epochKey);
 
     /* Call API to calculate and receive reputation data */
     const data = await fetch(`${SERVER}/api/ranking`, {
