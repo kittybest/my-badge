@@ -54,7 +54,7 @@ describe("Unirep App", function () {
     // generate
     const { publicSignals, proof } = await userState.genUserSignUpProof();
     await app.userSignUp(publicSignals, proof).then((t) => t.wait());
-    userState.sync.stop();
+    userState.stop();
   });
 
   it("submit attestations", async () => {
@@ -76,7 +76,7 @@ describe("Unirep App", function () {
         val
       )
       .then((t) => t.wait());
-    userState.sync.stop();
+    userState.stop();
   });
 
   it("user state transition", async () => {
@@ -92,7 +92,7 @@ describe("Unirep App", function () {
     await unirep
       .userStateTransition(publicSignals, proof)
       .then((t) => t.wait());
-    userState.sync.stop();
+    userState.stop();
   });
 
   it("proof data", async function () {
@@ -107,6 +107,6 @@ describe("Unirep App", function () {
     await app
       .submitDataProof(dataProof.publicSignals, dataProof.proof)
       .then((t) => t.wait());
-    userState.sync.stop();
+    userState.stop();
   });
 });

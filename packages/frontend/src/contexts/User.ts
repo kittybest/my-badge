@@ -62,7 +62,7 @@ class User {
       id: identity,
     });
 
-    await this.userState.sync.start();
+    await this.userState.start();
 
     if (this.fieldCount < 0) {
       this.fieldCount = this.userState.sync.settings.fieldCount;
@@ -333,7 +333,7 @@ class User {
     if (!this.userState) throw new Error("UserState is undefined");
 
     /* Stop the synchronizer and wipe out the db */
-    this.userState.sync.stop();
+    this.userState.stop();
     await this.userState.sync.db.closeAndWipe();
 
     /* Operations related to localStorage and local variables */
