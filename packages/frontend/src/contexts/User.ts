@@ -183,18 +183,7 @@ class User {
     }
     const key = Array.isArray(keys) ? keys[0] : keys;
 
-    if (ATTESTERS[platform]) {
-      const identity = new Identity(this.id);
-      const epkTmp = genEpochKey(
-        identity.secret,
-        ATTESTERS[platform],
-        epoch,
-        nonce,
-        this.userState.chainId
-      ).toString();
-      console.log(epkTmp);
-    }
-    return `0x${key.toString(16)}`;
+    return key;
   }
 
   async signup(platform: string, access_token: string) {
@@ -365,8 +354,7 @@ class User {
       attesterId,
       chainId,
     });
-    const epochKey = parseInt(this.epochKey(platform, 0) ?? "0", 16);
-    console.log("epochKey:", epochKey);
+    const epochKey = this.epochKey(platform, 0);
 
     /* Call API to calculate and receive reputation data */
     const data = await fetch(`${SERVER}/api/ranking`, {
@@ -399,7 +387,7 @@ class User {
     const epoch = this.userState.sync.calcCurrentEpoch(attesterId);
     let epochKeys: BigInt[] = [];
 
-    for (let i = 0; i < epoch; i++) {
+    for (let i = 0; i <= epoch; i++) {
       const epk = this.userState.getEpochKeys(i, 0, attesterId);
       const key = Array.isArray(epk) ? epk[0] : epk;
       epochKeys = [...epochKeys, key];

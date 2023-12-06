@@ -64,7 +64,7 @@ export default observer(() => {
               <div className="bg-white">
                 <Jdenticon
                   size="120"
-                  value={user.epochKey(TWITTER_ADDRESS, 0)}
+                  value={user.epochKey(TWITTER_ADDRESS, 0).toString()}
                 />
               </div>
               <label className="swap swap-flip cursor-pointer">

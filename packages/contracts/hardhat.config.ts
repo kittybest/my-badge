@@ -9,6 +9,10 @@ export default {
   networks: {
     hardhat: {
       blockGasLimit: 12000000,
+      mining: {
+        auto: true,
+        interval: 1000,
+      },
     },
     local: {
       url: "http://127.0.0.1:8545",
